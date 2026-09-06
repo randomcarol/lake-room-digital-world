@@ -3,7 +3,7 @@ set -euo pipefail
 
 KEY="${ROOM_SSH_KEY:-$HOME/Downloads/sshkey_carol.pem}"
 HOST="${ROOM_SSH_HOST:-ubuntu@101.33.230.97}"
-SOURCE_DIR="/Users/dengzhilei/Documents/Codex/2026-08-15/wo-xi/outputs/room-preview"
+SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)/room-preview"
 ARCHIVE="/tmp/room-preview-deploy.tar.gz"
 REMOTE_DIR="/var/www/room-preview"
 

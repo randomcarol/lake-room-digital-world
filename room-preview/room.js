@@ -34,24 +34,8 @@ window.RoomBuilder = (function(){
   function deep(o){ return JSON.parse(JSON.stringify(o)); }
 
   function loadLayout(){
-    var base = deep(DEFAULT_LAYOUT);
-    try {
-      var saved = JSON.parse(localStorage.getItem('roomLayout.v2') || 'null');
-      if (saved && saved.version === ROOM_LAYOUT_VERSION && saved.room && saved.items){
-        base.room = saved.room;
-        for (var k in saved.items) if (base.items[k]) base.items[k] = saved.items[k];
-        if (saved.wallItems){
-          for (var wk in saved.wallItems) if (base.wallItems[wk]) base.wallItems[wk] = saved.wallItems[wk];
-        }
-      }
-    } catch(e){}
-    return base;
+    return deep(DEFAULT_LAYOUT); // Public layout comes from the published source, never visitor storage.
   }
-  function saveLayout(layout){
-    layout.version = ROOM_LAYOUT_VERSION;
-    localStorage.setItem('roomLayout.v2', JSON.stringify(layout));
-  }
-
   function build(container, layout, opts){
     opts = opts || {};
     var ASSET_VERSION = '20260823-4';
@@ -69,6 +53,8 @@ window.RoomBuilder = (function(){
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
@@ -78,22 +64,21 @@ window.RoomBuilder = (function(){
     var tp = opts.target || [3.4, 1.0, 2.3];
     controls.target.set(tp[0], tp[1], tp[2]);
     controls.enableDamping = true; controls.dampingFactor = 0.07;
-    controls.minDistance = 0.4;  controls.maxDistance = opts.maxDistance || 6.5;
-    controls.minPolarAngle = 0.05; controls.maxPolarAngle = Math.PI * 0.62;
+    controls.minDistance = 7; controls.maxDistance = opts.maxDistance || 16;
+    controls.enablePan = false;
+    controls.minAzimuthAngle = 0.20; controls.maxAzimuthAngle = 1.12;
+    controls.minPolarAngle = 0.78; controls.maxPolarAngle = 1.32;
     controls.update();
 
-    var PAD = 0.12;
-    function clampView(){
-      camera.position.x = Math.min(Math.max(camera.position.x, PAD), RW-PAD);
-      camera.position.y = Math.min(Math.max(camera.position.y, PAD), RH-0.05);
-      camera.position.z = Math.min(Math.max(camera.position.z, PAD), RD-PAD);
-      controls.target.x = Math.min(Math.max(controls.target.x, 0.05), RW-0.05);
-      controls.target.y = Math.min(Math.max(controls.target.y, 0.05), RH-0.05);
-      controls.target.z = Math.min(Math.max(controls.target.z, 0.05), RD-0.05);
-    }
-
     function onResize(){
+      var previousNarrow = camera.aspect < .8;
       camera.aspect = container.clientWidth/container.clientHeight;
+      var narrow = camera.aspect < .8;
+      controls.maxDistance = narrow ? 32 : 20;
+      if(controls.enabled && narrow !== previousNarrow){
+        var offset = camera.position.clone().sub(controls.target).multiplyScalar(narrow ? 1.5 : 1/1.5);
+        camera.position.copy(controls.target).add(offset);
+      }
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
     }
@@ -160,7 +145,7 @@ window.RoomBuilder = (function(){
     }
 
     // ---------- 灯光 ----------
-    scene.add(new THREE.HemisphereLight(0xfff4e2, 0x8a7258, 0.5));
+    var hemisphere = new THREE.HemisphereLight(0xfff4e2, 0x8a7258, 0.7); scene.add(hemisphere);
     var sun = new THREE.DirectionalLight(0xffe2b8, 1.5);
     sun.position.set(RW*0.45, 4.5, -3.5);
     sun.target.position.set(RW*0.65, 0, RD*0.6);
@@ -196,7 +181,8 @@ window.RoomBuilder = (function(){
     // ---------- 墙体(西/东/北三面 + 去掉天花与南墙,视野更开阔) ----------
     var wallMat = mat(0xf3e8d8, 0.95);
     box(scene, 0.08, RH, RD, wallMat, -0.04, RH/2, RD/2);
-    box(scene, 0.08, RH, RD, wallMat, RW+0.04, RH/2, RD/2);
+    // Open east elevation: a slim architectural beam keeps the room connected to the garden.
+    box(scene, 0.10, 0.14, RD, wallMat, RW, RH, RD/2);
     box(scene, RW, SILL_H, 0.08, wallMat, RW/2, SILL_H/2, -0.04);
     box(scene, RW, RH-WIN_TOP, 0.08, wallMat, RW/2, (RH+WIN_TOP)/2, -0.04);
     var baseMat = mat(0xe2d3bd, 0.9);
@@ -222,31 +208,7 @@ window.RoomBuilder = (function(){
     glass.position.set(RW/2, (SILL_H+WIN_TOP)/2, -0.02);
     scene.add(glass);
 
-    // ---------- 窗外:天空幕布 + 建模树(带树叶,会摆动) ----------
-    var skyTex = canvasTex(512, 256, function(c, w, h){
-      var g = c.createLinearGradient(0, 0, 0, h);
-      g.addColorStop(0, '#a8cee6'); g.addColorStop(0.6, '#d8e8da'); g.addColorStop(1, '#eef0dc');
-      c.fillStyle = g; c.fillRect(0, 0, w, h);
-      var glow = c.createRadialGradient(w*0.3, h*0.25, 8, w*0.3, h*0.25, w*0.45);
-      glow.addColorStop(0, 'rgba(255,246,220,.9)'); glow.addColorStop(1, 'rgba(255,246,220,0)');
-      c.fillStyle = glow; c.fillRect(0, 0, w, h);
-    });
-    var sky = new THREE.Mesh(new THREE.PlaneGeometry(RW + 5, RH + 4), new THREE.MeshBasicMaterial({ map: skyTex }));
-    sky.position.set(RW/2, RH * 0.62, -0.95);
-    scene.add(sky);
-    // 远景:实拍树冠虚化背景(由参考图生成)
-    tryTexture('textures/tree-backdrop.jpg', function(t){
-      // 裁掉截图左侧残留的窗框边，避免窗外画面露出原窗边。
-      t.repeat.set(0.74, 1);
-      t.offset.set(0.2, 0);
-      var bd = new THREE.Mesh(
-        new THREE.PlaneGeometry(RW + 0.9, (WIN_TOP - SILL_H) + 1.15),
-        new THREE.MeshBasicMaterial({ map: t })
-      );
-      bd.position.set(RW/2, (SILL_H + WIN_TOP) / 2 + 0.18, -0.2);
-      scene.add(bd);
-    });
-
+    var environment = OutdoorEnvironment.create(scene, {sun: sun, fill: fill, hemisphere: hemisphere, renderer: renderer});
     // ---------- 树影斑驳(白底乘算:只加暗斑,不再染绿半间屋) ----------
     var dappleTex = canvasTex(512, 512, function(c, w, h){
       c.fillStyle = '#ffffff'; c.fillRect(0, 0, w, h);
@@ -343,18 +305,10 @@ window.RoomBuilder = (function(){
     mapMesh.rotation.y = Math.PI/2;
     mapMesh.receiveShadow = true;
     mapGroup.add(mapMesh);
-    tryTexture('textures/world-map.jpg', function(t){
-      mapMat.map = t; mapMat.needsUpdate = true;
-    });
+
     box(mapGroup, 0.03, 1.33, 2.28, mat(0x8a6a48, 0.6), -0.025, 0, 0);
     var mapHit = hitPlane(mapGroup, 2.5, 1.55, 0.08, 0, 0, Math.PI/2, 'map');
     var pinColors = [0xc1593f, 0xd9a441, 0x5b7fa6, 0xb53f52, 0x4f9e94];
-    [[0.55,1.7],[0.95,1.78],[1.35,1.5],[1.75,1.68],[2.05,1.55]].forEach(function(p, i){
-      var pin = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 8), mat(pinColors[i % 5], 0.4));
-      pin.position.set(0.03, p[1] - 1.65, p[0] - 1.25);
-      pin.castShadow = true;
-      mapGroup.add(pin);
-    });
     markAction(mapGroup, 'map');
 
     // ---------- 西墙:照片墙(仿 Zhihui:整齐网格排列的拍立得,微微倾斜) ----------
@@ -398,6 +352,7 @@ window.RoomBuilder = (function(){
     markAction(photoWallGroup, 'photoWall');
 
     // ================= GLTF 模型加载 =================
+    THREE.Cache.enabled = true;
     var failed = [];
     var gltfLoader = new THREE.GLTFLoader();
     if (THREE.DRACOLoader){
@@ -406,9 +361,13 @@ window.RoomBuilder = (function(){
       gltfLoader.setDRACOLoader(draco);
     }
     var vinylDisc = null;
+    var notebookCover = null;
+    var notebookOpen = 0;
+    var notebookFocused = false;
 
     function placeModel(parent, urls, opt){
       if (!Array.isArray(urls)) urls = [urls];
+      if (!urls.length) { if (opt.fail) opt.fail(); return; }
       var url = urls[0];
       gltfLoader.load(url, function(g){
         var obj = g.scene;
@@ -432,6 +391,7 @@ window.RoomBuilder = (function(){
         if (opt.ry) wrap.rotation.y = opt.ry;
         parent.add(wrap);
         if (opt.done) opt.done(obj);
+        renderer.shadowMap.needsUpdate = true;
       }, undefined, function(){
         if (urls.length > 1) placeModel(parent, urls.slice(1), opt);
         else if (opt.fail) opt.fail();
@@ -471,7 +431,7 @@ window.RoomBuilder = (function(){
     // 台灯(加大):灯头朝向显示器/键盘(局部 -z 方向)
     placeModel(deskG, 'models/desk_lamp_arm_01/model.gltf', { h: 0.62, x: -0.75, y: dh, z: -0.2, ry: Math.PI });
     // 打开的活页本(显示器右下方,原水杯位);glTF 未就绪时用程序化本子占位
-    placeModel(deskG, 'models/binder_notebook/model.gltf', { w: 0.32, x: 0.4, y: dh, z: 0.25, ry: -0.3, done: function(obj){
+    placeModel(deskG, [], { w: 0.32, x: 0.4, y: dh, z: 0.25, ry: -0.3, done: function(obj){
       markAction(obj, 'notebook');
     }, fail: function(){
       var nb = new THREE.Group(); nb.position.set(0.4, dh, 0.25); nb.rotation.y = -0.3;
@@ -484,6 +444,9 @@ window.RoomBuilder = (function(){
       for (var ri = 0; ri < 6; ri++){
         cyl(nb, 0.008, 0.008, 0.02, metalLight, 0, 0.012, -0.085 + ri * 0.034, 8).rotation.x = Math.PI/2;
       }
+      notebookCover = new THREE.Group(); notebookCover.position.y = .018;
+      box(notebookCover, .15, .006, .22, cover, -.075, 0, 0);
+      nb.add(notebookCover);
       markAction(nb, 'notebook');
       deskG.add(nb);
     }});
@@ -527,7 +490,7 @@ window.RoomBuilder = (function(){
     rowG.position.y = SILL_TOP;
     rowG.userData.action = 'books';
     var booksHit = hitBox(rowG, 4.6, 0.72, 0.56, 0, 0.28, 0, 'books');
-    placeModel(rowG, ['models/decorative_book_set_01/model.glb', 'models/decorative_book_set_01/model.gltf'], {
+    placeModel(rowG, [], {
       w: 4.0, x: 0, z: 0, ry: 0, done: function(obj){
         markAction(obj, 'books');
       }, fail: function(){
@@ -567,21 +530,30 @@ window.RoomBuilder = (function(){
 
     // ---------- 动画循环 ----------
     var clock = new THREE.Clock();
+    var updates = new Set();
+    var musicPlaying = false;
     var alive = true;
     (function tick(){
       if (!alive) return;
       requestAnimationFrame(tick);
       var dt = clock.getDelta();
       var t = clock.elapsedTime;
-      if (vinylDisc) vinylDisc.rotation.y += dt * 1.5;
+      if (vinylDisc && musicPlaying) vinylDisc.rotation.y += dt * 1.5;
+      environment.update(dt, t);
+      notebookOpen += ((notebookFocused ? 1 : 0)-notebookOpen)*(1-Math.exp(-dt*3));
+      if(notebookCover) notebookCover.rotation.z = -Math.PI*(1-notebookOpen);
+      updates.forEach(function(update){ update(Math.min(dt, 0.25), t); });
       dappleTex.offset.x = Math.sin(t * 0.12) * 0.02;
       dappleTex.offset.y = Math.cos(t * 0.09) * 0.015;
-      if (opts.clamp !== false) clampView();
-      controls.update();
+      if (controls.enabled) controls.update();
       renderer.render(scene, camera);
     })();
 
     return {
+      environment: environment,
+      onFrame: function(fn){ updates.add(fn); return function(){ updates.delete(fn); }; },
+      focusNotebook: function(value){ notebookFocused=value; },
+      setMusicPlaying: function(value){ musicPlaying = value; },
       scene: scene, camera: camera, renderer: renderer, controls: controls,
       items: items, layout: layout, photoMeshes: photoMeshes, photoGroups: photoGroups,
       itemKinds: itemKinds, mapMesh: mapMesh, mapGroup: mapGroup, mapTex: mapTex,
@@ -597,6 +569,17 @@ window.RoomBuilder = (function(){
       dispose: function(){
         alive = false;
         removeEventListener('resize', onResize);
+        updates.clear();
+        controls.dispose();
+        if (draco) draco.dispose();
+        var disposed = new Set();
+        scene.traverse(function(o){
+          if(o.geometry && !disposed.has(o.geometry)){disposed.add(o.geometry);o.geometry.dispose();}
+          (Array.isArray(o.material)?o.material:[o.material]).filter(Boolean).forEach(function(m){
+            if(disposed.has(m))return; disposed.add(m);
+            Object.keys(m).forEach(function(k){if(m[k] && m[k].isTexture && !disposed.has(m[k])){disposed.add(m[k]);m[k].dispose();}}); m.dispose();
+          });
+        });
         renderer.dispose();
         if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
@@ -608,7 +591,6 @@ window.RoomBuilder = (function(){
     ITEM_NAMES: ITEM_NAMES,
     SILL_TOP: SILL_H + 0.035,
     loadLayout: loadLayout,
-    saveLayout: saveLayout,
     deep: deep,
     build: build
   };

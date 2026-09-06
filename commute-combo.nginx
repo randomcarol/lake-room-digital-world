@@ -10,6 +10,9 @@ server {
     location ^~ /room/ {
         alias /var/www/room-preview/;
         index index.html;
+        # Static public source: reject all write methods at the server boundary.
+        limit_except GET HEAD { deny all; }
+        add_header X-Content-Type-Options nosniff always;
     }
 
     location / {

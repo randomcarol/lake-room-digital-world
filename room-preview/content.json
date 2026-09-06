@@ -4,20 +4,75 @@
     "title": "北京大学 · 本科在读",
     "email": "hello@example.com",
     "bio": "在这里写一段个人简介:你是谁、在学什么、对什么感兴趣。改 content.json 里 resume 这一段就能更新这块屏幕。",
-    "skills": ["英语教育", "写作", "研究", "摄影"],
+    "skills": [
+      "英语教育",
+      "写作",
+      "研究",
+      "摄影"
+    ],
     "links": [
-      { "label": "GitHub", "url": "" },
-      { "label": "小红书", "url": "" },
-      { "label": "邮箱", "url": "mailto:hello@example.com" }
-    ]
+      {
+        "label": "GitHub",
+        "url": ""
+      },
+      {
+        "label": "小红书",
+        "url": ""
+      },
+      {
+        "label": "邮箱",
+        "url": "mailto:hello@example.com"
+      }
+    ],
+    "pdf": "assets/resume/resume.pdf",
+    "available": false
   },
   "books": [
-    { "title": "示例书 1", "author": "作者名", "color": "#c1593f", "link": "https://book.douban.com/" },
-    { "title": "示例书 2", "author": "作者名", "color": "#d9a441", "link": "https://book.douban.com/" },
-    { "title": "示例书 3", "author": "作者名", "color": "#5b7fa6", "link": "https://book.douban.com/" },
-    { "title": "示例书 4", "author": "作者名", "color": "#4f9e94", "link": "https://book.douban.com/" },
-    { "title": "示例书 5", "author": "作者名", "color": "#b53f52", "link": "https://book.douban.com/" },
-    { "title": "示例书 6", "author": "作者名", "color": "#8a6ea8", "link": "https://book.douban.com/" }
+    {
+      "title": "示例书 1",
+      "author": "作者名",
+      "color": "#c1593f",
+      "link": "https://book.douban.com/"
+    },
+    {
+      "title": "示例书 2",
+      "author": "作者名",
+      "color": "#d9a441",
+      "link": "https://book.douban.com/"
+    },
+    {
+      "title": "示例书 3",
+      "author": "作者名",
+      "color": "#5b7fa6",
+      "link": "https://book.douban.com/"
+    },
+    {
+      "title": "示例书 4",
+      "author": "作者名",
+      "color": "#4f9e94",
+      "link": "https://book.douban.com/"
+    },
+    {
+      "title": "示例书 5",
+      "author": "作者名",
+      "color": "#b53f52",
+      "link": "https://book.douban.com/"
+    },
+    {
+      "title": "示例书 6",
+      "author": "作者名",
+      "color": "#8a6ea8",
+      "link": "https://book.douban.com/"
+    }
   ],
-  "music": { "playlistId": "" }
+  "music": {
+    "playlistId": ""
+  },
+  "notebookPages": [],
+  "tracks": [],
+  "travelPins": [],
+  "photos": [],
+  "map": {
+    "image": ""
+  }
 }
