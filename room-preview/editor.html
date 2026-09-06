@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>布局编辑器 · 我的房间</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#e8dcc8;font-family:-apple-system,"PingFang SC",sans-serif;}
+  #scene{position:fixed;inset:0;}
+  .chip{position:fixed;left:16px;top:16px;background:rgba(43,36,30,.72);color:#f5ead9;padding:8px 14px;border-radius:999px;font-size:13px;z-index:2;}
+  .chip a{color:#ffd9a0;text-decoration:none;margin-left:8px;}
+  .hint{position:fixed;left:16px;bottom:16px;background:rgba(43,36,30,.55);color:#f5ead9;padding:6px 12px;border-radius:8px;font-size:12px;z-index:2;}
+  #panel{position:fixed;right:16px;top:16px;width:250px;background:rgba(250,246,238,.96);border-radius:12px;padding:14px 16px;z-index:3;box-shadow:0 4px 20px rgba(60,45,30,.25);font-size:13px;color:#4a3d31;}
+  #panel h3{margin:0 0 8px;font-size:14px;}
+  #panel select{width:100%;padding:8px 10px;border:1px solid #d8c9b4;border-radius:8px;font-size:12px;background:#fffdf9;color:#4a3d31;}
+  #panel .row{display:flex;align-items:center;margin:6px 0;gap:6px;}
+  #panel label{width:56px;flex:none;color:#7a6a58;}
+  #panel input[type=number]{width:64px;padding:3px 6px;border:1px solid #d8c9b4;border-radius:6px;font-size:12px;}
+  #panel input[type=range]{flex:1;}
+  #panel .btns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+  #panel button{flex:1;min-width:70px;padding:6px 4px;border:none;border-radius:8px;background:#b56a45;color:#fff;font-size:12px;cursor:pointer;}
+  #panel button.ghost{background:#e2d3bd;color:#4a3d31;}
+  #panel .sec{border-top:1px solid #e2d3bd;margin-top:10px;padding-top:8px;}
+  .warn{position:fixed;right:16px;bottom:16px;background:rgba(159,58,44,.85);color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;z-index:2;display:none;max-width:320px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="chip">布局编辑器 <a href="./index.html">返回预览 →</a></div>
+<div class="hint">点击家具选中 · 拖动搬家 · 右侧微调 · 保存后预览页自动生效</div>
+<div class="warn" id="warn"></div>
+<div id="panel">
+  <h3 id="pname">未选中(点击家具)</h3>
+  <div class="row" style="display:block;margin-bottom:10px;">
+    <select id="picker">
+      <option value="">快速选择物件…</option>
+    </select>
+  </div>
+  <div class="row"><label id="l1">位置 A</label><input type="range" id="px" min="0.2" max="7.8" step="0.05"><input type="number" id="pxn" step="0.05"></div>
+  <div class="row"><label id="l2">位置 B</label><input type="range" id="pz" min="0.2" max="6.5" step="0.05"><input type="number" id="pzn" step="0.05"></div>
+  <div class="row"><label id="lr">朝向</label><input type="range" id="pr" min="-180" max="180" step="5"><input type="number" id="prn" step="5"></div>
+  <div class="row"><label>大小</label><input type="range" id="ps" min="0.5" max="1.8" step="0.05"><input type="number" id="psn" step="0.05"></div>
+  <div class="sec">
+    <div class="row"><label>房间宽</label><input type="number" id="rw" step="0.1" style="width:70px"> m</div>
+    <div class="row"><label>房间深</label><input type="number" id="rd" step="0.1" style="width:70px"> m</div>
+    <div class="row"><label>房间高</label><input type="number" id="rh" step="0.1" style="width:70px"> m</div>
+    <div class="btns"><button class="ghost" id="applyRoom">应用房间尺寸</button></div>
+  </div>
+  <div class="btns">
+    <button id="save">保存并应用</button>
+    <button class="ghost" id="export">导出 JSON</button>
+    <button class="ghost" id="reset">重置默认</button>
+  </div>
+</div>
+<script src="./three.min.js"></script>
+<script src="./OrbitControls.js"></script>
+<script src="./libs/GLTFLoader.js"></script>
+<script src="./libs/DRACOLoader.js"></script>
+<script src="./room.js?v=20260823-4"></script>
+<script>
+(function(){
+  var layout = RoomBuilder.loadLayout();
+  var app, selected = null, dragState = null;
+  var raycaster = new THREE.Raycaster();
+  var pointer = new THREE.Vector2();
+  var floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  var selectionHelper = null;
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  function buildAll(){
+    if (app) app.dispose();
+    app = RoomBuilder.build($('scene'), layout, {
+      fov: 62,
+      camPos: [5.4, 2.5, 6.2],
+      target: [3.6, 0.6, 2.4],
+      maxDistance: 8,
+      onWarn: function(){
+        var w = $('warn');
+        w.style.display = 'block';
+        w.textContent = '模型加载失败:请用「打开房间预览.command」启动后再访问 /editor.html。';
+      }
+    });
+    selectionHelper = new THREE.BoxHelper(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1)), 0xc1593f);
+    selectionHelper.visible = false;
+    app.scene.add(selectionHelper);
+    syncRoomInputs();
+  }
+
+  function syncRoomInputs(){
+    $('rw').value = layout.room.w.toFixed(1);
+    $('rd').value = layout.room.d.toFixed(1);
+    $('rh').value = layout.room.h.toFixed(1);
+  }
+
+  function syncRanges(){
+    var wall = selected && getKind(selected) === 'wall';
+    if (wall){
+      $('px').min = '0.2';
+      $('px').max = Math.max(0.2, layout.room.d - 0.2).toFixed(2);
+      $('pz').min = '0.4';
+      $('pz').max = Math.max(0.4, layout.room.h - 0.4).toFixed(2);
+      $('ps').min = '0.5';
+      $('ps').max = '2.6';
+    } else {
+      $('px').min = '0.2';
+      $('px').max = Math.max(0.2, layout.room.w - 0.2).toFixed(2);
+      $('pz').min = '0.2';
+      $('pz').max = Math.max(0.2, layout.room.d - 0.2).toFixed(2);
+      $('ps').min = '0.5';
+      $('ps').max = '1.8';
+    }
+  }
+
+  function populatePicker(){
+    var picker = $('picker');
+    var current = picker.value;
+    picker.innerHTML = '<option value="">快速选择物件…</option>';
+    Object.keys(RoomBuilder.ITEM_NAMES).forEach(function(id){
+      var opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = RoomBuilder.ITEM_NAMES[id];
+      picker.appendChild(opt);
+    });
+    picker.value = selected || current || '';
+  }
+
+  function getEntry(id){
+    return layout.items[id] || (layout.wallItems && layout.wallItems[id]) || null;
+  }
+  function getKind(id){
+    return (app && app.itemKinds && app.itemKinds[id]) || (layout.wallItems && layout.wallItems[id] ? 'wall' : 'floor');
+  }
+  function syncLabels(){
+    var wall = selected && getKind(selected) === 'wall';
+    $('l1').textContent = wall ? '位置 Z' : '位置 X';
+    $('l2').textContent = wall ? '位置 Y' : '位置 Z';
+    $('lr').textContent = wall ? '朝向(固定)' : '朝向';
+    $('pr').disabled = wall;
+    $('prn').disabled = wall;
+    syncRanges();
+  }
+
+  function syncPanel(){
+    var has = !!selected;
+    ['px','pz','pr','ps','pxn','pzn','prn','psn'].forEach(function(id){ $(id).disabled = !has; });
+    if (!has){ $('pname').textContent = '未选中(点击家具)'; syncLabels(); return; }
+    var it = getEntry(selected);
+    if (!it){ $('pname').textContent = '未选中(点击家具)'; syncLabels(); return; }
+    $('pname').textContent = RoomBuilder.ITEM_NAMES[selected] || selected;
+    if (getKind(selected) === 'wall'){
+      $('px').value = $('pxn').value = (it.z || 0).toFixed(2);
+      $('pz').value = $('pzn').value = (it.y || 0).toFixed(2);
+      $('pr').value = $('prn').value = 0;
+      $('ps').value = $('psn').value = (it.s || 1).toFixed(2);
+    } else {
+      $('px').value = $('pxn').value = it.x.toFixed(2);
+      $('pz').value = $('pzn').value = it.z.toFixed(2);
+      var deg = Math.round((it.ry || 0) * 180 / Math.PI);
+      $('pr').value = $('prn').value = deg;
+      $('ps').value = $('psn').value = (it.s || 1).toFixed(2);
+    }
+    syncLabels();
+  }
+
+  function applyItem(id){
+    var it = getEntry(id);
+    var g = app.items[id];
+    if (!g) return;
+    if (getKind(id) === 'wall'){
+      if (typeof it.z === 'number') g.position.z = it.z;
+      if (typeof it.y === 'number') g.position.y = it.y;
+      g.scale.setScalar(it.s || 1);
+    } else {
+      g.position.x = it.x; g.position.z = it.z;
+      g.rotation.y = it.ry || 0;
+      g.scale.setScalar(it.s || 1);
+    }
+    if (selectionHelper && selected === id){
+      selectionHelper.setFromObject(g);
+      selectionHelper.visible = true;
+    }
+  }
+
+  function select(id){
+    selected = id;
+    $('picker').value = id || '';
+    if (selectionHelper){
+      selectionHelper.visible = !!id;
+      if (id && app.items[id]){
+        selectionHelper.setFromObject(app.items[id]);
+      }
+    }
+    syncPanel();
+  }
+
+  function itemIdOf(obj){
+    while (obj){
+      if (obj.userData && obj.userData.itemId) return obj.userData.itemId;
+      obj = obj.parent;
+    }
+    return null;
+  }
+
+  function castAt(e){
+    var r = app.renderer.domElement.getBoundingClientRect();
+    pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, app.camera);
+    return raycaster;
+  }
+
+  var el = null;
+  function bindEvents(){
+    el = app.renderer.domElement;
+    el.addEventListener('pointerdown', function(e){
+      var rc = castAt(e);
+      var meshes = [];
+      for (var id in app.items){
+        app.items[id].traverse(function(n){ if (n.isMesh) meshes.push(n); });
+      }
+      var hits = rc.intersectObjects(meshes, false);
+      if (hits.length){
+        var id = itemIdOf(hits[0].object);
+        select(id);
+        var hitPoint = new THREE.Vector3();
+        var kind = getKind(id);
+        if (kind === 'wall'){
+          var wallX = app.items[id].position.x;
+          rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(1, 0, 0), -wallX), hitPoint);
+          dragState = { kind: 'wall', dz: getEntry(id).z - hitPoint.z, dy: getEntry(id).y - hitPoint.y, wallX: wallX };
+        } else {
+          rc.ray.intersectPlane(floorPlane, hitPoint);
+          dragState = { kind: 'floor', dx: getEntry(id).x - hitPoint.x, dz: getEntry(id).z - hitPoint.z };
+        }
+        app.controls.enabled = false;
+        el.setPointerCapture(e.pointerId);
+      } else {
+        select(null);
+      }
+    });
+    el.addEventListener('pointermove', function(e){
+      if (!dragState || !selected) return;
+      var rc = castAt(e);
+      var p = new THREE.Vector3();
+      var it = getEntry(selected);
+      if (!it) return;
+      if (dragState.kind === 'wall'){
+        if (rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(1, 0, 0), -dragState.wallX), p)){
+          it.z = Math.min(Math.max(p.z + dragState.dz, 0.2), layout.room.d - 0.2);
+          it.y = Math.min(Math.max(p.y + dragState.dy, 0.4), layout.room.h - 0.4);
+          applyItem(selected);
+          syncPanel();
+        }
+      } else if (rc.ray.intersectPlane(floorPlane, p)){
+        it.x = Math.min(Math.max(p.x + dragState.dx, 0.2), layout.room.w - 0.2);
+        it.z = Math.min(Math.max(p.z + dragState.dz, 0.2), layout.room.d - 0.2);
+        applyItem(selected);
+        syncPanel();
+      }
+    });
+    el.addEventListener('pointerup', function(){
+      dragState = null;
+      app.controls.enabled = true;
+    });
+  }
+
+  // 面板绑定
+  function bindInput(slider, num, fn){
+    $(slider).addEventListener('input', function(){ $(num).value = this.value; fn(parseFloat(this.value)); });
+    $(num).addEventListener('change', function(){ $(slider).value = this.value; fn(parseFloat(this.value)); });
+  }
+  bindInput('px','pxn', function(v){
+    if (!selected) return;
+    var it = getEntry(selected); if (!it) return;
+    if (getKind(selected) === 'wall') it.z = v; else it.x = v;
+    applyItem(selected);
+  });
+  bindInput('pz','pzn', function(v){
+    if (!selected) return;
+    var it = getEntry(selected); if (!it) return;
+    if (getKind(selected) === 'wall') it.y = v; else it.z = v;
+    applyItem(selected);
+  });
+  bindInput('pr','prn', function(v){
+    if (!selected || getKind(selected) === 'wall') return;
+    var it = getEntry(selected); if (!it) return;
+    it.ry = v * Math.PI / 180;
+    applyItem(selected);
+  });
+  bindInput('ps','psn', function(v){
+    if (!selected) return;
+    var it = getEntry(selected); if (!it) return;
+    it.s = v;
+    applyItem(selected);
+  });
+  $('picker').addEventListener('change', function(){
+    select(this.value || null);
+  });
+
+  $('applyRoom').addEventListener('click', function(){
+    layout.room.w = Math.min(Math.max(parseFloat($('rw').value) || 6.9, 3), 12);
+    layout.room.d = Math.min(Math.max(parseFloat($('rd').value) || 5.5, 3), 12);
+    layout.room.h = Math.min(Math.max(parseFloat($('rh').value) || 3.0, 2.2), 5);
+    buildAll(); bindEvents(); populatePicker(); select(null);
+  });
+  $('save').addEventListener('click', function(){
+    RoomBuilder.saveLayout(layout);
+    this.textContent = '已保存 ✓';
+    var btn = this;
+    setTimeout(function(){ btn.textContent = '保存并应用'; }, 1500);
+  });
+  $('export').addEventListener('click', function(){
+    var blob = new Blob([JSON.stringify(layout, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'room-layout.json';
+    a.click();
+  });
+  $('reset').addEventListener('click', function(){
+    layout = RoomBuilder.deep(RoomBuilder.DEFAULT_LAYOUT);
+    buildAll(); bindEvents(); populatePicker(); select(null);
+  });
+
+  buildAll(); bindEvents(); populatePicker(); syncPanel();
+})();
+</script>
+</body>
+</html>

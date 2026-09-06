@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的房间 · 3D 预览</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#e8dcc8;font-family:-apple-system,"PingFang SC",sans-serif;}
+  #scene{position:fixed;inset:0;}
+  .chip{position:fixed;left:16px;top:16px;background:rgba(43,36,30,.72);color:#f5ead9;padding:8px 14px;border-radius:999px;font-size:13px;z-index:2;}
+  .chip a{color:#ffd9a0;text-decoration:none;margin-left:8px;}
+  .hint{position:fixed;left:16px;bottom:16px;background:rgba(43,36,30,.55);color:#f5ead9;padding:6px 12px;border-radius:8px;font-size:12px;z-index:2;}
+  .warn{position:fixed;right:16px;top:16px;background:rgba(159,58,44,.85);color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;z-index:11;display:none;max-width:320px;line-height:1.5;}
+  #fallback-hotspots{position:fixed;inset:0;z-index:10;pointer-events:none;display:none;}
+  #fallback-hotspots a,#fallback-hotspots button{position:fixed;border:none;background:rgba(255,255,255,.001);pointer-events:auto;cursor:pointer;padding:0;display:block;}
+  #fallback-hotspots a::after,#fallback-hotspots button::after{content:attr(data-hint);position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%) translateY(4px);opacity:0;pointer-events:none;white-space:nowrap;background:rgba(49,39,31,.94);color:#fff7ea;border:1px solid rgba(255,224,185,.45);border-radius:10px;padding:8px 11px;font:12px/1.35 -apple-system,"PingFang SC",sans-serif;box-shadow:0 8px 24px rgba(40,30,20,.25);transition:opacity .16s ease,transform .16s ease;}
+  #fallback-hotspots a:hover::after,#fallback-hotspots button:hover::after,#fallback-hotspots a:focus-visible::after,#fallback-hotspots button:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0);}
+  #fallback-hotspots a:hover,#fallback-hotspots button:hover{outline:1px dashed rgba(255,217,160,.35);}
+  #hs-map{left:4%;top:16%;width:28%;height:24%;}
+  #hs-photoWall{left:2.5%;top:33%;width:13%;height:29%;}
+  #hs-turntable{left:15%;top:41%;width:24%;height:25%;}
+  #hs-books{left:10%;top:8%;width:44%;height:13%;}
+  #hs-monitor{left:39%;top:28%;width:23%;height:22%;}
+  #hs-notebook{left:51%;top:44%;width:24%;height:18%;}
+  #fallback-player{position:fixed;right:16px;bottom:16px;width:min(360px,calc(100vw - 32px));background:rgba(255,248,239,.96);border:1px solid rgba(197,170,143,.75);border-radius:18px;box-shadow:0 16px 42px rgba(70,50,34,.24);z-index:12;display:none;overflow:hidden;}
+  #fallback-player .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;color:#4a3d31;font-size:13px;gap:10px;}
+  #fallback-player .meta{display:flex;flex-direction:column;gap:4px;}
+  #fallback-player .meta strong{font-size:14px;}
+  #fallback-player .meta span{color:#8d7968;font-size:12px;}
+  #fallback-player .btns{display:flex;gap:8px;}
+  #fallback-player button{border:none;border-radius:999px;background:#ead8c2;color:#4a3d31;padding:7px 11px;font-size:12px;cursor:pointer;}
+  #fallback-player iframe{display:block;width:100%;height:110px;border:0;background:#fff;}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="chip">我的房间 · 3D 预览 v0.3 <a href="./editor.html">布局编辑器 →</a></div>
+<div class="hint">拖拽环视 · 滚轮缩放 · 视角已限定在房间内</div>
+<div class="warn" id="warn"></div>
+<div id="fallback-hotspots">
+  <a id="hs-map" href="./portal.html#map" aria-label="点击查看 Map / 足迹地图" data-hint="点击查看 Map / 足迹地图"></a>
+  <a id="hs-photoWall" href="./portal.html#photos" aria-label="点击查看 Photos / 照片墙" data-hint="点击查看 Photos / 照片墙"></a>
+  <button id="hs-turntable" type="button" aria-label="点击切换网易云歌曲" data-hint="点击切换网易云歌曲"></button>
+  <a id="hs-books" href="./portal.html#books" aria-label="点击查看 Books / 书架" data-hint="点击查看 Books / 书架"></a>
+  <a id="hs-monitor" href="./portal.html#resume" aria-label="点击查看 Resume / 简历" data-hint="点击查看 Resume / 简历"></a>
+  <a id="hs-notebook" href="./portal.html#notebook" aria-label="点击查看 Notebook / 本子" data-hint="点击查看 Notebook / 本子"></a>
+</div>
+<div id="fallback-player">
+  <div class="hd">
+    <div class="meta"><strong>唱片机</strong><span id="fallback-player-meta">点击房间里的唱片机切歌</span></div>
+    <div class="btns"><button id="fallback-player-open" type="button">音乐页</button><button id="fallback-player-close" type="button">收起</button></div>
+  </div>
+  <iframe title="网易云播放器" allow="autoplay"></iframe>
+</div>
+<script src="./three.min.js"></script>
+<script src="./OrbitControls.js"></script>
+<script src="./libs/GLTFLoader.js"></script>
+<script src="./libs/DRACOLoader.js"></script>
+<script src="./room.js?v=20260823-4"></script>
+<script src="./interactions.js?v=20260823-4"></script>
+<script>
+(function(){
+  var warn = document.getElementById('warn');
+  var fallbackHotspots = document.getElementById('fallback-hotspots');
+  var fallbackPlayer = document.getElementById('fallback-player');
+  var fallbackMeta = document.getElementById('fallback-player-meta');
+  var content = { music: {} };
+  function showBootError(err){
+    window.__ROOM_BOOT_ERROR__ = String(err && err.stack || err);
+    warn.style.display = 'block';
+    warn.textContent = '房间初始化失败：' + window.__ROOM_BOOT_ERROR__;
+  }
+  function normalizeTracks(raw){
+    if (Array.isArray(raw)) return raw.map(function(v){ return String(v).trim(); }).filter(Boolean);
+    return String(raw || '').split(/[\s,，|]+/).map(function(v){ return v.trim(); }).filter(Boolean);
+  }
+  function getMusicConfig(){
+    var conf = {};
+    try { conf = JSON.parse(localStorage.getItem('music.v2') || localStorage.getItem('music.v1') || '{}') || {}; } catch(e){}
+    var base = (content && content.music) || (window.__ROOM_CONTENT__ && window.__ROOM_CONTENT__.music) || {};
+    var currentIndex = parseInt(conf.currentIndex, 10);
+    if (!isFinite(currentIndex)) currentIndex = -1;
+    return {
+      playlistId: (conf.playlistId || base.playlistId || '').trim(),
+      tracks: normalizeTracks(conf.tracks || conf.trackIds || conf.songIds || base.tracks || base.trackIds || base.songIds || ''),
+      currentIndex: currentIndex
+    };
+  }
+  function saveMusicConfig(conf){
+    localStorage.setItem('music.v2', JSON.stringify({
+      playlistId: conf.playlistId || '',
+      tracks: conf.tracks || [],
+      currentIndex: isFinite(conf.currentIndex) ? conf.currentIndex : -1
+    }));
+  }
+  function openFallbackMusic(){
+    var conf = getMusicConfig();
+    if (!conf.tracks.length){
+      location.href = './portal.html#music';
+      return;
+    }
+    conf.currentIndex = (conf.currentIndex + 1 + conf.tracks.length) % conf.tracks.length;
+    saveMusicConfig(conf);
+    fallbackMeta.textContent = '第 ' + (conf.currentIndex + 1) + ' 首 / 共 ' + conf.tracks.length + ' 首';
+    fallbackPlayer.querySelector('iframe').src = 'https://music.163.com/outchain/player?type=2&id=' + encodeURIComponent(conf.tracks[conf.currentIndex]) + '&auto=1&height=90';
+    fallbackPlayer.style.display = 'block';
+  }
+  function initFallbackHotspots(){
+    if (fallbackHotspots.dataset.ready === '1') return;
+    fallbackHotspots.dataset.ready = '1';
+    fallbackHotspots.style.display = 'block';
+    if (!window.__ROOM_INTERACTIONS__) {
+      warn.style.display = 'block';
+      warn.textContent = '主交互层未就绪，已启用后备点击热区。';
+    }
+    function bindFallbackLink(id, target){
+      document.getElementById(id).onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        location.href = target;
+      };
+    }
+    bindFallbackLink('hs-map', './portal.html#map');
+    bindFallbackLink('hs-photoWall', './portal.html#photos');
+    bindFallbackLink('hs-books', './portal.html#books');
+    bindFallbackLink('hs-monitor', './portal.html#resume');
+    bindFallbackLink('hs-notebook', './portal.html#notebook');
+    document.getElementById('hs-turntable').onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openFallbackMusic();
+    };
+    document.getElementById('fallback-player-close').onclick = function(){ fallbackPlayer.style.display = 'none'; };
+    document.getElementById('fallback-player-open').onclick = function(){ location.href = './portal.html#music'; };
+  }
+  fetch('./content.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    if (j){
+      content = j;
+      window.__ROOM_CONTENT__ = j;
+    }
+  }).catch(function(){});
+  window.addEventListener('error', function(e){
+    if (!window.__ROOM_BOOT_ERROR__) showBootError(e.error || e.message || '未知错误');
+  });
+  try {
+    var layout = RoomBuilder.loadLayout();
+    var app = RoomBuilder.build(document.getElementById('scene'), layout, {
+      fov: 68,
+      camPos: [6.6, 1.6, 5.9],
+      target: [3.6, 1.0, 2.2],
+      maxDistance: 6.5,
+      onWarn: function(){
+        warn.style.display = 'block';
+        warn.textContent = '部分模型加载失败:请不要直接双击 index.html,改为双击同目录下的「打开房间预览.command」即可。';
+      }
+    });
+    window.__ROOM_APP__ = app;
+    window.__ROOM_LAYOUT__ = layout;
+    Interactions.init(app);
+  } catch (err) {
+    showBootError(err);
+  }
+  initFallbackHotspots();
+  setTimeout(initFallbackHotspots, 600);
+})();
+</script>
+</body>
+</html>

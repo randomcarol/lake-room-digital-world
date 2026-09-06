@@ -1,0 +1,8 @@
+location = /room {
+    return 301 /room/;
+}
+
+location ^~ /room/ {
+    alias /var/www/room-preview/;
+    index index.html;
+}
