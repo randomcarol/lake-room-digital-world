@@ -1,50 +1,62 @@
-/* Lightweight, genuinely spatial garden; one shared day/night state. */
-window.OutdoorEnvironment = {
-  create(scene, lights) {
-    const trees = [], daySky = new THREE.Color('#b7d9e5'), nightSky = new THREE.Color('#111e39');
-    let night = false, blend = 0;
-    scene.fog = new THREE.Fog(daySky, 22, 65);
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(110, 110), new THREE.MeshStandardMaterial({color:'#8baf76', roughness:1}));
-    ground.rotation.x = -Math.PI/2; ground.position.set(4,-0.12,-20); ground.receiveShadow = true; scene.add(ground);
-    const trunkGeo = new THREE.CylinderGeometry(.10,.19,2.8,7);
-    const crownGeo = new THREE.IcosahedronGeometry(1,1);
-    const dayGround=new THREE.Color('#8baf76'),nightGround=new THREE.Color('#273d43');
-    const dayHemi=new THREE.Color('#fff4e2'),nightHemi=new THREE.Color('#7184b5');
-    const bark = new THREE.MeshStandardMaterial({color:'#826447',roughness:1});
-    const leafMats = ['#608747','#789f58','#91ae6a'].map(color=>new THREE.MeshStandardMaterial({color,roughness:1}));
-    const dayLeaves=leafMats.map(m=>m.color.clone()),nightLeaf=new THREE.Color('#263f43');
-    for(let i=0;i<22;i++) {
-      const tree = new THREE.Group(), row = Math.floor(i/8);
-      tree.position.set(-13+(i%8)*4.5+(row%2)*2,0,-5-row*7-(i%3));
-      tree.scale.setScalar(.85+(i%5)*.16);
-      const trunk = new THREE.Mesh(trunkGeo,bark); trunk.position.y=1.35; tree.add(trunk);
-      const crown = new THREE.Group(); crown.position.y=2.1; tree.add(crown);
-      for(let j=0;j<4;j++) {const leaf=new THREE.Mesh(crownGeo,leafMats[(i+j)%3]); leaf.position.set(Math.sin(j*2.4)*.65,j*.48,Math.cos(j*2.4)*.55);leaf.scale.set(1.05,1.3,1);crown.add(leaf);}
-      trees.push(crown); scene.add(tree);
-    }
-    for(let i=0;i<6;i++) { const hill=new THREE.Mesh(new THREE.SphereGeometry(1,16,8),leafMats[i%3]);hill.position.set(-24+i*13,-1.5,-35-i%2*8);hill.scale.set(12,4+i%3,8);scene.add(hill); }
-    const starGeo=new THREE.BufferGeometry(), points=[];
-    for(let i=0;i<160;i++){ points.push(Math.sin(i*13.7)*45,12+(i%23),-12-Math.abs(Math.cos(i*4.2))*36); }
-    starGeo.setAttribute('position',new THREE.Float32BufferAttribute(points,3));
-    const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:'#fff4d5',size:.10,transparent:true,opacity:0,depthWrite:false}));scene.add(stars);
-    const moon=new THREE.Mesh(new THREE.SphereGeometry(.65,16,12),new THREE.MeshBasicMaterial({color:'#fff2cc',transparent:true,opacity:0}));moon.position.set(-5,13,-27);scene.add(moon);
-    const lamp=new THREE.PointLight('#ffbc70',0,6,2);lamp.position.set(3.72,1.58,1.95);scene.add(lamp);
-    return {
-      setNight(value){night=!!value;},
-      get isNight(){return night;},
-      update(dt,t){
-        blend += ((night?1:0)-blend)*(1-Math.exp(-dt*1.8));
-        scene.background.copy(daySky).lerp(nightSky,blend);scene.fog.color.copy(scene.background);
-        lights.hemisphere.intensity=.70-.40*blend;
-        lights.hemisphere.color.copy(dayHemi).lerp(nightHemi,blend);
-        ground.material.color.copy(dayGround).lerp(nightGround,blend);
-        leafMats.forEach((m,i)=>m.color.copy(dayLeaves[i]).lerp(nightLeaf,blend));
-        lights.sun.intensity=1.5-1.22*blend;lights.sun.color.setRGB(1-.43*blend,.88-.18*blend,.72+.28*blend);
-        lights.fill.intensity=.22+.38*blend;lamp.intensity=blend*2.4;
-        lights.renderer.toneMappingExposure=1.05-.12*blend;
-        stars.material.opacity=blend*.8;moon.material.opacity=blend;
-        trees.forEach((c,i)=>{c.rotation.z=Math.sin(t*.48+i*1.7)*.025;c.rotation.x=Math.sin(t*.32+i)*.012;});
-      }
-    };
-  }
-};
+/* Lake shore environment: instanced conifers, terrain, view-dependent water and shared clock. */
+window.OutdoorEnvironment={create(scene,lights){
+ const state=WorldState.create(),rand=LandscapeAssets.random(2048),T=THREE;
+ const uniforms={time:{value:0},night:{value:0},dusk:{value:0},snow:{value:0},snowLine:{value:24},moon:{value:new T.Vector3(-22,30,-155)},sky:{value:new T.Color('#89b4cf')}};
+ const noise=`float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);} float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);} float fbm(vec2 p){float v=0.;v+=noise(p)*.5;p=p*2.03;v+=noise(p)*.25;p=p*2.01;v+=noise(p)*.125;return v;}`;
+ const clouds=`float cloud(vec3 d){vec2 p=d.xz/max(.13,d.y+.17)*1.5+vec2(time*.0025,0.);return smoothstep(.42,.73,fbm(p))*smoothstep(-.01,.22,d.y);}`;
+ const skyMaterial=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms,vertexShader:`varying vec3 direction;void main(){direction=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform float time,night,dusk;uniform vec3 sky;varying vec3 direction;${noise}${clouds}void main(){vec3 d=normalize(direction);float h=clamp(d.y,0.,1.);vec3 day=mix(vec3(.77,.84,.84),sky,pow(h,.45));day=mix(day,vec3(.83,.64,.50),dusk*pow(1.-h,4.)*.38);vec3 col=mix(day,mix(vec3(.12,.19,.27),vec3(.019,.041,.087),sqrt(h)),night);float c=cloud(d);col=mix(col,mix(vec3(.92,.93,.89),vec3(.20,.26,.34),night),c*.8);gl_FragColor=vec4(col,1.);}`});
+ const sky=new T.Mesh(new T.SphereGeometry(260,32,20),skyMaterial);sky.name='atmosphere';scene.add(sky);scene.fog=new T.FogExp2('#c3d4db',.0045);scene.background=new T.Color('#b2d1dc');
+ function shaderSeason(material,foliage=false){material.onBeforeCompile=s=>{s.uniforms.worldTime=uniforms.time;s.uniforms.worldSnow=uniforms.snow;s.uniforms.snowLine=uniforms.snowLine;s.vertexShader='uniform float worldTime;varying vec3 localWorld;\n'+s.vertexShader;s.vertexShader=s.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>\n${foliage?'transformed.x += sin(worldTime*.38+position.y*5.+instanceMatrix[3].x*.1)*position.y*.007;':''}\n localWorld=(modelMatrix*${foliage?'instanceMatrix*':''}vec4(transformed,1.)).xyz;`);s.fragmentShader='uniform float worldSnow;uniform float snowLine;varying vec3 localWorld;\n'+s.fragmentShader;s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>\nfloat snowAmount=${foliage?'worldSnow*step(.52,fract(vUv.y*5.))*0.55':'smoothstep(snowLine-3.,snowLine+3.,localWorld.y)+worldSnow*.45'};diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.82,.87,.88),clamp(snowAmount,0.,.88));`);};material.customProgramCacheKey=()=>foliage?'pine-season':'terrain-season';}
+ const terrainGeo=new T.PlaneGeometry(350,330,90,90);terrainGeo.rotateX(-Math.PI/2);terrainGeo.translate(4,0,-70);
+ function shore(x){return -11-4*Math.sin(x*.043)-Math.min(20,Math.abs(x-4)*.09);}
+ const pos=terrainGeo.attributes.position;for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);let y=-.20;if(z<shore(x))y=-3+Math.min(1,(shore(x)-z)/10)*-.7;if(z< -135)y=2+Math.sin(x*.041)*2+Math.max(0,-z-145)*.09;if(Math.abs(x)>75)y+=Math.pow((Math.abs(x)-75)/30,1.4)*3;if(z>14||x< -3||x>11)y+=Math.sin(x*.23)*Math.sin(z*.21)*.22;pos.setY(i,y);}terrainGeo.computeVertexNormals();
+ const terrainMaterial=new T.MeshStandardMaterial({color:'#7a8266',roughness:1});shaderSeason(terrainMaterial);const terrain=new T.Mesh(terrainGeo,terrainMaterial);terrain.name='forest-shore';terrain.receiveShadow=true;scene.add(terrain);
+ const mountains=[];
+ for(let layer=0;layer<3;layer++){
+  const g=new T.PlaneGeometry(420,1,120,1),p=g.attributes.position;
+  for(let i=0;i<p.count;i++){const x=p.getX(i),top=p.getY(i)>0;const h=13+layer*7+Math.sin(x*.038+layer*2)*7+Math.sin(x*.095+layer)*3.8+Math.sin(x*.193)*1.5;p.setXYZ(i,x,top?h:-6,-160-layer*30+Math.sin(x*.031+layer)*10);}
+  g.computeVertexNormals();const m=new T.MeshStandardMaterial({color:new T.Color('#738995').lerp(new T.Color('#a8bdc8'),layer*.17),roughness:1,side:T.DoubleSide});shaderSeason(m);const mesh=new T.Mesh(g,m);mesh.name='mountain-layer-'+layer;scene.add(mesh);mountains.push(m);
+ }
+ const water=new T.Mesh(new T.PlaneGeometry(330,250,1,1),new T.ShaderMaterial({uniforms,transparent:false,vertexShader:`varying vec3 world;void main(){world=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`,fragmentShader:`uniform float time,night,dusk;uniform vec3 moon;varying vec3 world;${noise}void main(){vec2 p=world.xz;float a=sin(p.x*.9+p.y*.29+time*.48),b=sin(p.y*1.85-p.x*.26+time*.37);vec3 n=normalize(vec3(a*.003,1.,b*.004));vec3 view=normalize(cameraPosition-world);vec3 r=reflect(-view,n);float fresnel=.08+.65*pow(1.-max(dot(view,n),0.),4.);vec3 base=mix(vec3(.085,.30,.34),vec3(.02,.075,.11),night);vec3 reflected=mix(vec3(.53,.70,.77),vec3(.08,.14,.23),night);float ridge=.075+sin(r.x*21.)*.015+sin(r.x*47.)*.012;reflected=mix(reflected,mix(vec3(.20,.32,.34),vec3(.04,.09,.13),night),1.-smoothstep(ridge-.07,ridge+.07,r.y));vec3 col=mix(base,reflected,fresnel);vec3 light=normalize(moon-world);vec3 halfDir=normalize(light+view);float sparkle=pow(max(dot(n,halfDir),0.),1100.);float breaks=.45+.55*noise(p*vec2(1.2,8.)+time*.18);col+=vec3(.66,.75,.81)*sparkle*breaks*night*.65;col+=vec3(.8,.68,.43)*dusk*.04;col+=sin(p.y*2.7+time*.5+a)*.0015;float distanceFog=1.-exp(-length(cameraPosition-world)*.003);col=mix(col,mix(vec3(.56,.70,.74),vec3(.09,.16,.24),night),distanceFog*.45);gl_FragColor=vec4(col,1.);}` }));
+ water.rotation.x=-Math.PI/2;water.position.set(4,-.48,-100);water.name='alpine-lake';scene.add(water);
+ const barkTexture=LandscapeAssets.bark(),needleTexture=LandscapeAssets.needles(),pineTexture=LandscapeAssets.pine();
+ const barkMat=new T.MeshStandardMaterial({color:'#b1a493',map:barkTexture,roughness:1});
+ const leafMat=new T.MeshStandardMaterial({color:'#718969',map:needleTexture,alphaTest:.28,side:T.DoubleSide,roughness:1});shaderSeason(leafMat,true);
+ const nearPositions=[[-6,-5,8],[-10,-16,10],[16,-7,9],[21,-19,11],[-17,-25,12],[28,-28,10],[-6,11,8],[18,14,9],[-20,6,11],[27,7,10],[-23,-42,12],[34,-44,11]];
+ const foliage=new T.InstancedMesh(LandscapeAssets.pineGeometry(),leafMat,nearPositions.length),trunks=new T.InstancedMesh(new T.CylinderGeometry(.016,.034,1,9,4),barkMat,nearPositions.length);foliage.name='near-pine-needles';trunks.name='pine-trunks';const dummy=new T.Object3D();
+ nearPositions.forEach(([x,z,h],i)=>{dummy.position.set(x,-.15,z);dummy.rotation.set(0,i*2.39,0);dummy.scale.set(h,h,h);dummy.updateMatrix();foliage.setMatrixAt(i,dummy.matrix);dummy.position.y=h*.5-.15;dummy.scale.set(h,h,h);dummy.updateMatrix();trunks.setMatrixAt(i,dummy.matrix);});scene.add(foliage,trunks);
+ // Visible branch structure is shared instanced geometry, not individual needle meshes.
+ const branchParts=[],branchCylinder=new T.CylinderGeometry(.008,.015,1,6);
+ for(let j=0;j<9;j++)for(let k=0;k<4;k++){const y=.25+j*.075,a=k*Math.PI/2+j*2.4,len=(1-y)*.37;dummy.position.set(Math.cos(a)*len*.48,y,Math.sin(a)*len*.48);dummy.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),new T.Vector3(Math.cos(a),-.22,Math.sin(a)).normalize());dummy.scale.set(1,len,1);dummy.updateMatrix();branchParts.push([branchCylinder,dummy.matrix.clone()]);}
+ const branches=new T.InstancedMesh(LandscapeAssets.merge(branchParts),barkMat,nearPositions.length);for(let i=0;i<nearPositions.length;i++){foliage.getMatrixAt(i,dummy.matrix);branches.setMatrixAt(i,dummy.matrix);}scene.add(branches);branchCylinder.dispose();
+ const farMat=new T.MeshStandardMaterial({color:'#829385',map:pineTexture,alphaTest:.28,side:T.DoubleSide,roughness:1});shaderSeason(farMat,true);
+ const farGeo=LandscapeAssets.merge([0,Math.PI/2].map(a=>{const m=new T.Matrix4().makeRotationY(a);return [new T.PlaneGeometry(1,2).translate(0,1,0),m];}));
+ const forest=new T.InstancedMesh(farGeo,farMat,240);forest.name='distant-forest';
+ for(let i=0;i<240;i++){const opposite=i<150,x=opposite?(rand()-.5)*320:(i%2?-1:1)*(35+rand()*65),z=opposite?-141-rand()*23:-28-rand()*85,h=3+rand()*4;dummy.position.set(x,opposite?1:-.6,z);dummy.rotation.set(0,rand()*Math.PI,0);dummy.scale.set(h*.65,h,h*.65);dummy.updateMatrix();forest.setMatrixAt(i,dummy.matrix);}scene.add(forest);
+ const rocks=new T.InstancedMesh(new T.SphereGeometry(1,10,7),new T.MeshStandardMaterial({color:'#505953',roughness:1}),45);for(let i=0;i<45;i++){const x=(rand()-.5)*95,z=shore(x)+rand()*4;dummy.position.set(x,-.2,z);dummy.rotation.set(rand(),rand(),rand());dummy.scale.set(.3+rand(),.18+rand()*.5,.25+rand());dummy.updateMatrix();rocks.setMatrixAt(i,dummy.matrix);}scene.add(rocks);
+ const grass=new T.InstancedMesh(new T.PlaneGeometry(.5,.5).translate(0,.25,0),leafMat,110);for(let i=0;i<110;i++){const x=(rand()-.5)*65,z=shore(x)+2+rand()*6;dummy.position.set(x,-.12,z);dummy.rotation.set(0,rand()*Math.PI,0);dummy.scale.setScalar(.8+rand());dummy.updateMatrix();grass.setMatrixAt(i,dummy.matrix);}scene.add(grass);
+ const starGeo=new T.BufferGeometry(),points=[],phases=[];for(let i=0;i<300;i++){const a=rand()*Math.PI*2,e=.10+rand()*1.15;points.push(Math.sin(a)*Math.cos(e)*220,Math.sin(e)*220,Math.cos(a)*Math.cos(e)*220);phases.push(rand()*30);}starGeo.setAttribute('position',new T.Float32BufferAttribute(points,3));starGeo.setAttribute('phase',new T.Float32BufferAttribute(phases,1));
+ const stars=new T.Points(starGeo,new T.ShaderMaterial({uniforms,transparent:true,depthWrite:false,vertexShader:`uniform float time;attribute float phase;varying float twinkle;void main(){twinkle=.65+.3*sin(time*(.35+fract(phase)*.2)+phase);gl_PointSize=1.+fract(phase)*1.5;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`uniform float night;varying float twinkle;void main(){float a=1.-smoothstep(.12,.5,length(gl_PointCoord-.5));gl_FragColor=vec4(.8,.87,1.,a*twinkle*night);}`}));stars.name='twinkling-stars';scene.add(stars);
+ const moon=new T.Mesh(new T.SphereGeometry(2.1,24,16),new T.ShaderMaterial({uniforms,transparent:true,depthWrite:false,vertexShader:`varying vec3 world;varying vec2 surface;void main(){surface=uv;world=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`,fragmentShader:`uniform float time,night;varying vec3 world;varying vec2 surface;${noise}${clouds}void main(){float c=cloud(normalize(world));float craters=fbm(surface*25.);gl_FragColor=vec4(vec3(.85,.89,.87)*( .87+craters*.19),night*(1.-c*.94));}`}));moon.position.copy(uniforms.moon.value);moon.name='moon';scene.add(moon);
+ const particlesGeo=new T.BufferGeometry(),particlePositions=new Float32Array(90*3);for(let i=0;i<90;i++){particlePositions[i*3]=(rand()-.5)*45;particlePositions[i*3+1]=rand()*13;particlePositions[i*3+2]=-3-rand()*30;}particlesGeo.setAttribute('position',new T.BufferAttribute(particlePositions,3));const particles=new T.Points(particlesGeo,new T.PointsMaterial({color:'#e0e7e7',size:.045,transparent:true,opacity:.6,depthWrite:false}));scene.add(particles);
+ const birdGeo=new T.SphereGeometry(.07,8,6),wingGeo=new T.BufferGeometry();wingGeo.setAttribute('position',new T.Float32BufferAttribute([0,0,0,.34,0,-.06,.08,0,.12],3));wingGeo.computeVertexNormals();const birdMat=new T.MeshStandardMaterial({color:'#4c5150',side:T.DoubleSide,roughness:1});const birds=[];
+ for(let i=0;i<4;i++){const group=new T.Group(),body=new T.Mesh(birdGeo,birdMat);body.scale.set(.8,.7,1.5);group.add(body);const left=new T.Mesh(wingGeo,birdMat),right=new T.Mesh(wingGeo,birdMat);right.scale.x=-1;group.add(left,right);scene.add(group);const tree=nearPositions[i],perch=new T.Vector3(tree[0]+.5,tree[2]*.56,tree[1]);group.position.copy(perch);birds.push({group,left,right,perch,state:'resting',phase:i*38});}
+ const lamp=new T.PointLight('#ffc783',0,7,2);lamp.position.set(3.72,1.58,1.95);scene.add(lamp);
+ let blend=state.sample().night,seasonBlend=0,quality='high',audio=null,volume=0,lastChirp=-100,shadowTimer=0;
+ const color=new T.Color(),nightColor=new T.Color('#263d50');
+ function chirp(){if(!audio||volume<=0||audio.state!=='running')return;const oscillator=audio.createOscillator(),gain=audio.createGain();oscillator.type='sine';oscillator.frequency.setValueAtTime(2100,audio.currentTime);oscillator.frequency.exponentialRampToValueAtTime(3200,audio.currentTime+.08);gain.gain.setValueAtTime(0,audio.currentTime);gain.gain.linearRampToValueAtTime(volume*.025,audio.currentTime+.025);gain.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.22);oscillator.connect(gain).connect(audio.destination);oscillator.start();oscillator.stop(audio.currentTime+.23);oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};}
+ return {state,water,birds,uniforms,
+ setNight(value){state.setMode(value?'night':'day');},get isNight(){return state.sample().night>.5;},setMode:value=>state.setMode(value),setSeason:value=>state.setSeason(value),
+ setQuality(value){quality=value;forest.count=value==='low'?120:240;stars.geometry.setDrawRange(0,value==='low'?120:300);lights.renderer.setPixelRatio(Math.min(devicePixelRatio,value==='low'?1:1.6));},
+ async setVolume(value){volume=Math.max(0,Math.min(1,value));if(volume>0){if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();await audio.resume();}else if(audio)await audio.suspend();},
+ update(dt,t){
+  const sample=state.sample(),season=sample.season;blend+=(sample.night-blend)*(1-Math.exp(-dt*1.25));seasonBlend+=(season.snow-seasonBlend)*(1-Math.exp(-dt));uniforms.time.value=t;uniforms.night.value=blend;uniforms.dusk.value=sample.dusk;uniforms.snow.value=seasonBlend;uniforms.snowLine.value+=(season.snowLine-uniforms.snowLine.value)*(1-Math.exp(-dt));uniforms.sky.value.lerp(color.set(season.sky),1-Math.exp(-dt));
+  scene.fog.color.set('#bacfd5').lerp(nightColor,blend);scene.background.copy(scene.fog.color);terrainMaterial.color.lerp(color.set(season.ground).convertSRGBToLinear().lerp(nightColor,blend*.58),1-Math.exp(-dt));leafMat.color.lerp(color.set(season.foliage).lerp(nightColor,blend*.4),1-Math.exp(-dt));farMat.color.copy(leafMat.color).lerp(new T.Color('#9cb0af'),.18);mountains.forEach((m,i)=>m.color.lerp(color.set(season.mountain).lerp(nightColor,blend*.55).lerp(scene.fog.color,i*.16),1-Math.exp(-dt)));
+  lights.hemisphere.intensity=.68-.36*blend;lights.hemisphere.color.set('#e5eff1').lerp(color.set('#7193b9'),blend);lights.sun.intensity=(1.22-1.02*blend)*season.light;lights.sun.color.set('#fff0d5').lerp(color.set('#a8c5e6'),blend);lights.fill.intensity=.18+.26*blend;lamp.intensity=blend*2.1;lights.renderer.toneMappingExposure=1.03-blend*.13;
+  // Solar direction follows time; moonlight uses the same world direction as water's reflected source.
+  const solarAngle=(sample.hours-6)/24*Math.PI*2;lights.sun.position.set(4+Math.cos(solarAngle)*7,4+Math.max(.1,sample.elevation)*6,-7);if(blend>.6)lights.sun.position.copy(uniforms.moon.value).multiplyScalar(.065);shadowTimer+=dt;if(shadowTimer>8){lights.renderer.shadowMap.needsUpdate=true;shadowTimer=0;}
+  particles.visible=season.particles>0;particles.geometry.setDrawRange(0,quality==='low'?Math.min(30,season.particles):season.particles);particles.material.color.set(season.particleKind==='leaves'?'#af8d59':'#e0e7e7');particles.material.size=season.particleKind==='leaves'?.07:.04;for(let i=0;i<season.particles;i++){particlePositions[i*3]+=(Math.sin(t*.3+i)*.03)*dt;particlePositions[i*3+1]-=dt*(season.particleKind==='snow'?.22:.4);if(particlePositions[i*3+1]<0)particlePositions[i*3+1]=13;}if(season.particles)particlesGeo.attributes.position.needsUpdate=true;
+  birds.forEach((b,i)=>{const cycle=(t+b.phase)%175,fly=blend<.5&&cycle<14;b.state=blend>.5?'resting':fly?'flying':cycle<25?'singing':'perched';if(fly){const f=cycle/14,arc=Math.sin(f*Math.PI);b.group.position.copy(b.perch).add(new T.Vector3(Math.sin(f*Math.PI*2)*5,arc*2.5,-arc*8));b.group.rotation.y=f*Math.PI*2;b.left.rotation.z=Math.sin(t*12+i)*.6;b.right.rotation.z=-b.left.rotation.z;}else{b.group.position.lerp(b.perch,1-Math.exp(-dt*3));b.left.rotation.z=.08;b.right.rotation.z=-.08;}if(b.state==='singing'&&t-lastChirp>14){chirp();lastChirp=t;}});
+ },dispose(){if(audio)audio.close();}
+ };
+}};

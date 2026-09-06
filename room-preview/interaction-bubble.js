@@ -8,7 +8,8 @@ window.InteractionBubble = class {
   }
   update(){
     const p=this.projected.copy(this.anchor).project(this.app.camera),el=this.button;
-    el.hidden=p.z>1||p.z< -1;
+    let object=this.app.hits[this.type],visible=true;while(object){if(!object.visible)visible=false;object=object.parent;}
+    el.hidden=!visible||p.z>1||p.z< -1;
     const scale=Math.max(.85,Math.min(1,10/this.app.camera.position.distanceTo(this.anchor)));
     el.style.left=Math.max(78,Math.min(innerWidth-78,(p.x*.5+.5)*innerWidth))+'px';
     el.style.top=Math.max(90,Math.min(innerHeight-90,(-p.y*.5+.5)*innerHeight))+'px';

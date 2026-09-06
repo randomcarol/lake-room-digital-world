@@ -37,7 +37,14 @@ window.Interactions = (()=>{
       if(e.shiftKey&&index<=0){e.preventDefault();focusables.at(-1).focus();}else if(!e.shiftKey&&(index===focusables.length-1||index===-1)){e.preventDefault();focusables[0].focus();}
     }
   },{signal});
-  document.getElementById('day-night').addEventListener('click',e=>{app.environment.setNight(!app.environment.isNight);document.body.dataset.theme=app.environment.isNight?'night':'day';e.currentTarget.textContent=app.environment.isNight?'☾ Night':'☀ Day';e.currentTarget.setAttribute('aria-pressed',String(app.environment.isNight));},{signal});
+  const dayButton=document.getElementById('day-night'),timeSelect=document.getElementById('world-time');
+  function syncWorldUI(){document.body.dataset.theme=app.environment.isNight?'night':'day';dayButton.textContent=app.environment.isNight?'☾ Night':'☀ Day';dayButton.setAttribute('aria-pressed',String(app.environment.isNight));timeSelect.value=app.environment.state.mode;}
+  dayButton.addEventListener('click',()=>{app.environment.setNight(!app.environment.isNight);syncWorldUI();},{signal});
+  timeSelect.addEventListener('change',()=>{app.environment.setMode(timeSelect.value);syncWorldUI();},{signal});
+  document.getElementById('world-season').addEventListener('change',e=>app.environment.setSeason(e.target.value),{signal});
+  document.getElementById('world-quality').addEventListener('change',e=>app.environment.setQuality(e.target.value),{signal});
+  document.getElementById('world-volume').addEventListener('input',e=>app.environment.setVolume(Number(e.target.value)).catch(()=>{e.target.value=0;}),{signal});
+  const uiTimer=setInterval(syncWorldUI,10000);syncWorldUI();
   const ray=new THREE.Raycaster(),point=new THREE.Vector2();let down=null;
   app.renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,id:e.pointerId};},{signal});
   app.renderer.domElement.addEventListener('pointerup',e=>{
@@ -58,7 +65,7 @@ window.Interactions = (()=>{
   const aliases={resume:'monitor',music:'turntable',photos:'photoWall',notebook:'notebook',map:'map',books:'books'};
   const requested=aliases[location.hash.slice(1).split(':')[0]];if(requested)activate(requested);
   window.__ROOM_INTERACTIONS__={controller,activate};
-  window.addEventListener('pagehide',()=>{cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.dispose();},{once:true});
+  window.addEventListener('pagehide',()=>{clearInterval(uiTimer);cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.dispose();},{once:true});
  }
  return {init};
 })();

@@ -45,11 +45,11 @@ window.RoomBuilder = (function(){
 
     var scene = new THREE.Scene();
     scene.background = new THREE.Color(0xefe7d8); // 无天花/南墙,背景即"室外天色"
-    var camera = new THREE.PerspectiveCamera(opts.fov || 68, container.clientWidth/container.clientHeight, 0.05, 80);
+    var camera = new THREE.PerspectiveCamera(opts.fov || 68, container.clientWidth/container.clientHeight, 0.05, 420);
     var cp = opts.camPos || [5.6, 1.55, 4.8];
     camera.position.set(cp[0], cp[1], cp[2]);
     var renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -64,9 +64,9 @@ window.RoomBuilder = (function(){
     var tp = opts.target || [3.4, 1.0, 2.3];
     controls.target.set(tp[0], tp[1], tp[2]);
     controls.enableDamping = true; controls.dampingFactor = 0.07;
-    controls.minDistance = 7; controls.maxDistance = opts.maxDistance || 16;
+    controls.minDistance = 10; controls.maxDistance = opts.maxDistance || 16;
     controls.enablePan = false;
-    controls.minAzimuthAngle = 0.20; controls.maxAzimuthAngle = 1.12;
+    controls.minAzimuthAngle = -Infinity; controls.maxAzimuthAngle = Infinity;
     controls.minPolarAngle = 0.78; controls.maxPolarAngle = 1.32;
     controls.update();
 
@@ -180,11 +180,12 @@ window.RoomBuilder = (function(){
 
     // ---------- 墙体(西/东/北三面 + 去掉天花与南墙,视野更开阔) ----------
     var wallMat = mat(0xf3e8d8, 0.95);
-    box(scene, 0.08, RH, RD, wallMat, -0.04, RH/2, RD/2);
+    var westWall = box(scene, 0.08, RH, RD, wallMat.clone(), -0.04, RH/2, RD/2);
+    var northArchitecture = new THREE.Group(); scene.add(northArchitecture);
     // Open east elevation: a slim architectural beam keeps the room connected to the garden.
     box(scene, 0.10, 0.14, RD, wallMat, RW, RH, RD/2);
-    box(scene, RW, SILL_H, 0.08, wallMat, RW/2, SILL_H/2, -0.04);
-    box(scene, RW, RH-WIN_TOP, 0.08, wallMat, RW/2, (RH+WIN_TOP)/2, -0.04);
+    box(northArchitecture, RW, SILL_H, 0.08, wallMat, RW/2, SILL_H/2, -0.04);
+    box(northArchitecture, RW, RH-WIN_TOP, 0.08, wallMat, RW/2, (RH+WIN_TOP)/2, -0.04);
     var baseMat = mat(0xe2d3bd, 0.9);
     box(scene, 0.03, 0.09, RD, baseMat, 0.015, 0.045, RD/2);
     box(scene, 0.03, 0.09, RD, baseMat, RW-0.015, 0.045, RD/2);
@@ -192,21 +193,21 @@ window.RoomBuilder = (function(){
 
     // ---------- 飘窗(白色细窗框,随房高加高) ----------
     var frameMat = mat(0xf5f2ea, 0.55, 0.1);
-    box(scene, RW, SILL_H, SILL_D, mat(0xf0e4cf, 0.85), RW/2, SILL_H/2, SILL_D/2);
-    box(scene, RW, 0.035, SILL_D+0.05, mat(0xd8b98c, 0.6), RW/2, SILL_H+0.017, 0.28);
-    box(scene, RW, 0.045, 0.06, frameMat, RW/2, WIN_TOP-0.022, 0);
-    box(scene, RW, 0.045, 0.06, frameMat, RW/2, SILL_H+0.022, 0);
+    box(northArchitecture, RW, SILL_H, SILL_D, mat(0xf0e4cf, 0.85), RW/2, SILL_H/2, SILL_D/2);
+    box(northArchitecture, RW, 0.035, SILL_D+0.05, mat(0xd8b98c, 0.6), RW/2, SILL_H+0.017, 0.28);
+    box(northArchitecture, RW, 0.045, 0.06, frameMat, RW/2, WIN_TOP-0.022, 0);
+    box(northArchitecture, RW, 0.045, 0.06, frameMat, RW/2, SILL_H+0.022, 0);
     var paneN = 6;
     for (var wi = 0; wi <= paneN; wi++){
       var wx = -0.02 + (RW + 0.04) * wi / paneN;
-      box(scene, 0.045, WIN_TOP-SILL_H, 0.06, frameMat, wx, (SILL_H+WIN_TOP)/2, 0);
+      box(northArchitecture, 0.045, WIN_TOP-SILL_H, 0.06, frameMat, wx, (SILL_H+WIN_TOP)/2, 0);
     }
     // 中部一道横梁
-    box(scene, RW, 0.04, 0.05, frameMat, RW/2, (SILL_H+WIN_TOP)/2, 0);
+    box(northArchitecture, RW, 0.04, 0.05, frameMat, RW/2, (SILL_H+WIN_TOP)/2, 0);
     var glass = new THREE.Mesh(new THREE.PlaneGeometry(RW, WIN_TOP-SILL_H),
       new THREE.MeshStandardMaterial({ color: 0xd6ecf2, transparent: true, opacity: 0.1, roughness: 0.1, metalness: 0.3, side: THREE.DoubleSide }));
     glass.position.set(RW/2, (SILL_H+WIN_TOP)/2, -0.02);
-    scene.add(glass);
+    northArchitecture.add(glass);
 
     var environment = OutdoorEnvironment.create(scene, {sun: sun, fill: fill, hemisphere: hemisphere, renderer: renderer});
     // ---------- 树影斑驳(白底乘算:只加暗斑,不再染绿半间屋) ----------
@@ -540,6 +541,10 @@ window.RoomBuilder = (function(){
       var t = clock.elapsedTime;
       if (vinylDisc && musicPlaying) vinylDisc.rotation.y += dt * 1.5;
       environment.update(dt, t);
+      // Full orbit stays outside the room footprint. Cut away the obstructing facade from its exterior.
+      westWall.visible = camera.position.x > .12;
+      mapGroup.visible = photoWallGroup.visible = westWall.visible;
+      northArchitecture.visible = camera.position.z > .12;
       notebookOpen += ((notebookFocused ? 1 : 0)-notebookOpen)*(1-Math.exp(-dt*3));
       if(notebookCover) notebookCover.rotation.z = -Math.PI*(1-notebookOpen);
       updates.forEach(function(update){ update(Math.min(dt, 0.25), t); });
@@ -570,6 +575,7 @@ window.RoomBuilder = (function(){
         alive = false;
         removeEventListener('resize', onResize);
         updates.clear();
+        environment.dispose();
         controls.dispose();
         if (draco) draco.dispose();
         var disposed = new Set();
