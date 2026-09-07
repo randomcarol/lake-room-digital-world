@@ -19,6 +19,7 @@ const fs=require('node:fs');
   assert.equal(await page.locator('#experience').isVisible(),false);
   console.log('PASS cinematic '+type);
  }
+ await page.evaluate(()=>window.__ROOM_APP__.environment.setMode('day'));
  await page.locator('#day-night').click();await page.waitForTimeout(2300);await page.screenshot({path:'/tmp/room-night.png'});
  assert.equal(await page.locator('#day-night').getAttribute('aria-pressed'),'true');
  await page.evaluate(()=>{const c=window.__ROOM_INTERACTIONS__.controller;c.start('monitor');assertion=c.start('map')===false;c.close();});
@@ -32,7 +33,7 @@ const fs=require('node:fs');
  await enter('map');await page.locator('.map-pin').click();assert.match(await page.locator('.pin-detail').innerText(),/测试地点/);await exit();
  await enter('photoWall');await page.getByRole('button',{name:'下一张照片'}).click();assert.match(await page.locator('figcaption').innerText(),/测试图片 2/);await exit();
  await page.setViewportSize({width:390,height:844});await page.reload();await page.waitForFunction(()=>window.__ROOM_INTERACTIONS__);await page.screenshot({path:'/tmp/room-mobile.png'});await enter('notebook');await page.screenshot({path:'/tmp/room-mobile-notebook.png'});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await exit();
- await page.goto('http://127.0.0.1:8931/admin/');assert.equal(await page.locator('input,textarea,button').count(),0);
+ // Owner authentication is covered by test_backend.py and admin-browser.cjs.
  const response=await page.request.post('http://127.0.0.1:8931/content.json',{data:{resume:{name:'attack'}}});assert(response.status()>=400);
- assert.deepEqual(errors,[]);console.log('PASS fixtures, mobile, repeat-click lock, read-only admin; no page/resource errors');await browser.close();
+ assert.deepEqual(errors,[]);console.log('PASS fixtures, mobile, repeat-click lock, static write rejection; no page/resource errors');await browser.close();
 })().catch(e=>{console.error(e);process.exitCode=1;});

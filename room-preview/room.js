@@ -74,6 +74,7 @@ window.RoomBuilder = (function(){
       var previousNarrow = camera.aspect < .8;
       camera.aspect = container.clientWidth/container.clientHeight;
       var narrow = camera.aspect < .8;
+      camera.fov = narrow ? 57 : 49;
       controls.maxDistance = narrow ? 32 : 20;
       if(controls.enabled && narrow !== previousNarrow){
         var offset = camera.position.clone().sub(controls.target).multiplyScalar(narrow ? 1.5 : 1/1.5);
@@ -550,7 +551,7 @@ window.RoomBuilder = (function(){
       updates.forEach(function(update){ update(Math.min(dt, 0.25), t); });
       dappleTex.offset.x = Math.sin(t * 0.12) * 0.02;
       dappleTex.offset.y = Math.cos(t * 0.09) * 0.015;
-      if (controls.enabled) controls.update();
+      if (controls.enabled) { controls.dampingFactor = 1-Math.exp(-5*Math.min(dt,.25)); controls.update(); }
       renderer.render(scene, camera);
     })();
 

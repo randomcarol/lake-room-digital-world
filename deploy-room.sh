@@ -18,4 +18,4 @@ scp -i "$KEY" -o IdentitiesOnly=yes "$ARCHIVE" "$HOST:/tmp/room-preview-deploy.t
 ssh -i "$KEY" -o IdentitiesOnly=yes "$HOST" \
   "sudo mkdir -p '$REMOTE_DIR' && sudo tar -xzf /tmp/room-preview-deploy.tar.gz -C /var/www && sudo chown -R www-data:www-data '$REMOTE_DIR' && rm -f /tmp/room-preview-deploy.tar.gz"
 rm -f "$ARCHIVE"
-echo "部署完成: http://101.33.230.97/room/"
+echo "静态预览部署完成（不含内容后台，参见 docs/OWNER-SETUP.md）: http://101.33.230.97/room/"

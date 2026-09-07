@@ -1,0 +1,19 @@
+[Unit]
+Description=Personal Room Content Service
+After=network.target
+[Service]
+Type=simple
+User=room-content
+Group=room-content
+WorkingDirectory=/opt/personal-room
+ExecStart=/usr/bin/python3 /opt/personal-room/backend/server.py --port 8932 --data-dir /var/lib/personal-room --secure-cookie
+EnvironmentFile=/etc/personal-room.env
+Restart=on-failure
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/personal-room
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

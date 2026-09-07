@@ -52,20 +52,32 @@ window.Interactions = (()=>{
     const moved=Math.hypot(down.x-e.clientX,down.y-e.clientY);down=null;
     if(moved>7||controller.phase!=='overview')return;
     const r=app.renderer.domElement.getBoundingClientRect();point.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(point,app.camera);
-    const hit=ray.intersectObjects(Object.values(app.hits),false)[0];if(hit)activate(hit.object.userData.action);
+    const visibleHits=Object.values(app.hits).filter(o=>{while(o){if(!o.visible)return false;o=o.parent;}return true;});
+    const hit=ray.intersectObjects(visibleHits,false)[0];if(hit)activate(hit.object.userData.action);
   },{signal});
   app.renderer.domElement.addEventListener('pointercancel',()=>down=null,{signal});
-  // Pins use normalized image coordinates: x left→right, y top→bottom.
-  content.travelPins.forEach(p=>{
-    const pin=new THREE.Mesh(new THREE.SphereGeometry(.032,10,8),new THREE.MeshStandardMaterial({color:'#bd6346',emissive:'#7d311b',emissiveIntensity:.25}));
-    pin.position.set(.035,(.5-p.y)*1.25,(.5-p.x)*2.2);pin.userData.action='map';app.mapGroup.add(pin);
-  });
-  if(ContentStore.url(content.map?.image))new THREE.TextureLoader().load(ContentStore.url(content.map.image),t=>{t.encoding=THREE.sRGBEncoding;app.mapMesh.material.map=t;app.mapMesh.material.needsUpdate=true;},undefined,()=>{});
-  content.photos.forEach((photo,i)=>{const mesh=app.photoMeshes.find(m=>m.userData.photoId===photo.id)||app.photoMeshes[i];if(mesh&&ContentStore.url(photo.src))new THREE.TextureLoader().load(ContentStore.url(photo.src),t=>{t.encoding=THREE.sRGBEncoding;mesh.material.map=t;mesh.material.color.set('#ffffff');mesh.material.needsUpdate=true;},undefined,()=>{});});
+  // Update public geometry only when the published revision changes; never retain a visitor-side editable copy.
+  const pinGroup=new THREE.Group();app.mapGroup.add(pinGroup);
+  const pinGeometry=new THREE.SphereGeometry(.032,10,8),pinMaterial=new THREE.MeshStandardMaterial({color:'#bd6346',emissive:'#7d311b',emissiveIntensity:.25});
+  const originalColors=app.photoMeshes.map(m=>m.material.color.clone());let contentVersion=0,refreshing=false;
+  function applyContent(next){
+    content=next;const version=++contentVersion;
+    while(pinGroup.children.length)pinGroup.remove(pinGroup.children[0]);
+    content.travelPins.forEach(p=>{const pin=new THREE.Mesh(pinGeometry,pinMaterial);pin.position.set(.035,(.5-p.y)*1.25,(.5-p.x)*2.2);pin.userData.action='map';pinGroup.add(pin);});
+    app.photoMeshes.forEach((mesh,i)=>{if(mesh.material.map){mesh.material.map.dispose();mesh.material.map=null;}mesh.material.color.copy(originalColors[i]);mesh.material.needsUpdate=true;});
+    content.photos.forEach((photo,i)=>{const mesh=app.photoMeshes.find(m=>m.userData.photoId===photo.id)||app.photoMeshes[i];if(mesh&&ContentStore.url(photo.src))new THREE.TextureLoader().load(ContentStore.url(photo.src),t=>{if(version!==contentVersion||signal.aborted){t.dispose();return;}t.encoding=THREE.sRGBEncoding;mesh.material.map=t;mesh.material.color.set('#ffffff');mesh.material.needsUpdate=true;},undefined,()=>{});});
+    if(ContentStore.url(content.map?.image))new THREE.TextureLoader().load(ContentStore.url(content.map.image),t=>{if(version!==contentVersion||signal.aborted){t.dispose();return;}t.encoding=THREE.sRGBEncoding;app.mapMesh.material.map=t;app.mapMesh.material.needsUpdate=true;},undefined,()=>{});
+  }
+  async function refreshContent(){
+    if(refreshing||controller.phase!=='overview'||document.hidden||ContentStore.mode!=='api')return;
+    refreshing=true;try{const next=await ContentStore.load();if(!signal.aborted&&next.revision!==content.revision)applyContent(next);document.getElementById('status').hidden=true;}catch{if(!signal.aborted){const status=document.getElementById('status');status.textContent='内容同步暂时失败，将自动重试。';status.hidden=false;}}finally{refreshing=false;}
+  }
+  applyContent(content);const contentTimer=setInterval(refreshContent,20000);
+  window.addEventListener('focus',refreshContent,{signal});document.addEventListener('room-overview',refreshContent,{signal});
   const aliases={resume:'monitor',music:'turntable',photos:'photoWall',notebook:'notebook',map:'map',books:'books'};
   const requested=aliases[location.hash.slice(1).split(':')[0]];if(requested)activate(requested);
-  window.__ROOM_INTERACTIONS__={controller,activate};
-  window.addEventListener('pagehide',()=>{clearInterval(uiTimer);cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.dispose();},{once:true});
+  window.__ROOM_INTERACTIONS__={controller,activate,refreshContent,get content(){return content;}};
+  window.addEventListener('pagehide',()=>{clearInterval(contentTimer);pinGeometry.dispose();pinMaterial.dispose();clearInterval(uiTimer);cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.dispose();},{once:true});
  }
  return {init};
 })();

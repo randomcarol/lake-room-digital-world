@@ -67,7 +67,22 @@ window.Experiences=(()=>{
    const books=data.books.filter(b=>!/^示例书/.test(b.title));
    root.innerHTML=`<section class="reading-room"><span class="eyebrow">THE READING SHELF</span><h1>与文字相处</h1><div class="book-collection">${books.length?books.map(b=>`<article class="reading-book">${image(b.cover,b.title)}<h2>${esc(b.title)}</h2><p>${esc(b.author)}</p><p>${esc(b.note)}</p>${ContentStore.url(b.link)?`<a href="${esc(ContentStore.url(b.link))}" target="_blank" rel="noopener">了解这本书 ↗</a>`:''}</article>`).join(''):empty('书单尚未发布','喜欢的书，值得拥有一个安静的位置。')}</div></section>`;
   }
-  return ()=>{release();abort.abort();root.getAnimations({subtree:true}).forEach(a=>a.cancel());};
+  // Supplemental collection items share a renderer, so every existing object can hold documents, video and links.
+  const collection=data.collections?.find(c=>c.id===type);
+  const nativeKinds={monitor:['pdf'],notebook:['text','image'],turntable:['audio'],map:['text','image'],photoWall:['image'],books:['text','image','link']};
+  let firstPDF=true;
+  const extra=collection?.items.filter(i=>{if(type==='monitor'&&i.kind==='pdf'){if(firstPDF){firstPDF=false;return false;}return true;}return !nativeKinds[type]?.includes(i.kind);})||[];
+  if(extra.length){
+    const details=document.createElement('details');details.className='collection-extra';details.innerHTML='<summary>更多资料 · '+extra.length+'</summary>'+extra.map(i=>{
+      const src=ContentStore.url(i.media_url||i.url);let media='';
+      if(src&&i.kind==='video')media=`<video controls preload="none" playsinline src="${esc(src)}"></video>`;
+      else if(src&&i.kind==='audio')media=`<audio controls preload="none" src="${esc(src)}"></audio>`;
+      else if(src&&i.kind==='image')media=image(src,i.title);
+      else if(src)media=`<a href="${esc(src)}" target="_blank" rel="noopener">${i.kind==='pdf'?'阅读文档':'打开链接'} ↗</a>`;
+      return `<article><h2>${esc(i.title)}</h2><p>${esc(i.description)}</p><p>${esc(i.body)}</p>${media}</article>`;
+    }).join('');root.append(details);
+  }
+  return ()=>{release();root.querySelectorAll('audio,video').forEach(m=>{m.pause();m.removeAttribute('src');m.load();});abort.abort();root.getAnimations({subtree:true}).forEach(a=>a.cancel());};
  }
  return {open};
 })();

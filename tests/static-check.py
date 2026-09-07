@@ -19,5 +19,6 @@ for path in root.glob('models/*/model.gltf'):
         if uri and not uri.startswith('data:'):
             assert (path.parent/uri).exists(),str(path)+': '+uri
 admin=(root/'admin/index.html').read_text()
-assert not re.search(r'<(?:input|textarea|form)\b',admin)
-print('PASS JSON schema basics, public read-only boundary, local scripts, all model dependencies, fail-closed admin')
+assert 'admin.js' in admin
+assert (root.parent/'backend/schema.sql').exists()
+print('PASS JSON schema basics, public read-only boundary, local scripts, all model dependencies, real admin entry and backend schema')

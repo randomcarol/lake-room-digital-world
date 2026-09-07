@@ -1,3 +1,3 @@
-待补素材：resume/resume.pdf、audio/ 中的授权音频、photos/ 中的个人照片、covers/ 中的封面。
-发布时同步填写 ../content.json。不要使用不存在的文件路径开启 resume.available。
-笔记、旅行地点及真实书单直接维护于 content.json，完整字段与权限说明见仓库 docs/CONTENT-AND-SECURITY.md。
+当前建议通过 /admin/ 上传并发布资料，无需再手改 content.json。
+静态离线预览仍可使用这里的 resume/、audio/、photos/、covers/ 与 content.json。
+服务器私有资料不能放在此公开目录；上传接口将其保存到站点根目录以外的私有存储中。

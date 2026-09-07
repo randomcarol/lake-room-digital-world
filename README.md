@@ -1,19 +1,28 @@
-# A room of my own
+# Lake Room · Personal Digital World
 
-保留原生 Three.js、GLTF 模型与暖色房间，加入开放空间、3D 庭院、昼夜渐变、常驻交互标签和六类统一镜头体验。
+沿用原生 Three.js 房间，加入湖岸、松林、湖面、层叠远山、真实时间与四季配置、完整水平环绕，以及可持续管理内容的 Owner Studio。
 
-本地启动：`python3 -m http.server 8931 --bind 127.0.0.1 --directory room-preview`。访问 http://127.0.0.1:8931/ 。无需安装前端依赖或执行 build。
+## 启动
 
-- room.js：现有场景、模型与帧循环。
-- environment.js：低面数立体植被、远景、统一昼夜灯光。
-- camera-controller.js：overview / approach / hold / experience / closing / return 状态机。
-- interaction-bubble.js、interactions.js：可读标签、射线交互、键盘与生命周期。
-- experiences.js、experience.css：电脑 PDF、手记翻页与展开、音频、地图、画廊和书架。
-- content-store.js、content.json：只读发布数据。
-- admin/：未配置后端时默认禁用的管理边界。
+`python3 backend/server.py` → http://127.0.0.1:8932/ ，管理入口 http://127.0.0.1:8932/admin/ 。也可双击 room-preview/打开房间预览.command。
 
-内容与素材字段、已有数据迁移及安全审计见 docs/CONTENT-AND-SECURITY.md。未来方向见 docs/CREATIVE-DIRECTIONS.md。
+首次密码在私有 `.room-data/owner-bootstrap.txt`，首次登录必须修改。操作和生产配置见 [Owner 使用说明](docs/OWNER-SETUP.md)。没有 npm 安装、TypeScript 或构建步骤。
 
-验证：`python3 tests/static-check.py`；Node `--check` 检查应用 JS。Playwright 验证脚本为 tests/browser.cjs、tests/media.cjs、tests/visual-final.cjs，需要可用的 Playwright 与 Chrome（可用 CHROME_PATH 指定）。没有 TypeScript、lint 或框架 build 命令。
+## 模块
 
-未自动部署生产环境；Nginx 只读方法配置需要随部署应用。
+- room.js：室内场景、外部安全环绕、遮挡立面隐藏与渲染循环。
+- world-state.js：独立时间与四季配置；自动本地时间、白天、黄昏、夜晚预览。
+- landscape-assets.js / environment.js：原创程序材质、实例化森林、湖水、云、星月、季节粒子和鸟类状态。
+- camera-controller.js / interaction-bubble.js / interactions.js：统一物件交互与发布内容更新。
+- experiences.js / experience.css：六类紧凑半透明体验、统一补充资料展示。
+- content-store.js：公开发布 API 与显式静态模式的数据适配。
+- backend/server.py / schema.sql：真实 Owner 认证、SQLite、受保护媒体与内容 CRUD。
+- room-preview/admin/：登录、上传、编辑、排序、公开／私有。
+
+[视觉参考与产品架构判断](docs/TAHOE-IMPLEMENTATION.md) · [当前 Owner 与权限说明](docs/OWNER-SETUP.md)。旧 docs/CONTENT-AND-SECURITY.md 记录前一次静态版审计，当前后端实现以上述说明为准。
+
+## 验证
+
+`python3 tests/test_backend.py`；Node `--check` 检查 JS。Playwright 脚本 tests/admin-browser.cjs 与 tests/tahoe-browser.cjs 使用本机 Chrome，管理测试用隔离临时数据库，不修改个人内容。tests/tahoe-preview.cjs 用于视觉迭代。
+
+生产未部署新后端；旧 deploy-room.sh 仅发布静态预览。完整部署参考 backend/ 下的 systemd、Nginx 和环境变量模板。
