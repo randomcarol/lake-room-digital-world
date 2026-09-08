@@ -1,0 +1,28 @@
+{
+  "calls": {
+    "before": 431,
+    "after": 426,
+    "changePercent": -1.1600928074245953
+  },
+  "triangles": {
+    "before": 741289,
+    "after": 844048,
+    "changePercent": 13.862204889051366
+  },
+  "textures": {
+    "before": 74,
+    "after": 76
+  },
+  "fps": {
+    "before": 60.050332643780465,
+    "after": 60.05931168513122
+  },
+  "readyMs": {
+    "before": 2245.5,
+    "after": 967.8000000119209
+  },
+  "resourcesReadyMs": {
+    "before": 2368.9000000059605,
+    "after": 1066.4000000059605
+  }
+}

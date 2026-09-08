@@ -23,6 +23,6 @@ assert 'admin.js' in admin
 assert 'content-schema.js' in admin
 environment=(root/'environment.js').read_text()
 assert 'AudioContext' not in environment and 'chirp' not in environment
-assert 'dimensional-mountain' in environment and 'AnimalSystem.create' in environment
+assert 'WorldSurface.create' in environment and 'AnimalSystem.createDisabled' in environment
 assert (root.parent/'backend/schema.sql').exists()
 print('PASS JSON schema basics, public read-only boundary, local scripts, all model dependencies, real admin entry and backend schema')

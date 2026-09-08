@@ -1,0 +1,140 @@
+{
+  "fail": [],
+  "details": {
+    "threeRevision": "128",
+    "terrainRaycastMaxError": 0.0000012277079690647952,
+    "routes": [
+      "201 time samples / 3 walkers"
+    ],
+    "seasons": {
+      "summer": {
+        "appliedMs": 0.30000001192092896,
+        "snow": 0,
+        "conifer": "04120b",
+        "deciduous": "0d2f0a",
+        "grass": "213d11",
+        "roof": "121715"
+      },
+      "autumn": {
+        "appliedMs": 0.09999999403953552,
+        "snow": 0,
+        "conifer": "04110c",
+        "deciduous": "630c05",
+        "grass": "5a4212",
+        "roof": "211a10"
+      },
+      "winter": {
+        "appliedMs": 0,
+        "snow": 0.83,
+        "conifer": "0a1b17",
+        "deciduous": "414a3b",
+        "grass": "94a9a7",
+        "roof": "c3cdc7"
+      },
+      "spring": {
+        "appliedMs": 0.09999999403953552,
+        "snow": 0.08,
+        "conifer": "05160c",
+        "deciduous": "235d11",
+        "grass": "345317",
+        "roof": "17201a"
+      }
+    },
+    "shadows": {
+      "day": {
+        "direction": [
+          -0.24367051961974162,
+          0.17259995139654152,
+          -0.9543762018439881
+        ],
+        "windowEmission": 9.027163512226614e-12
+      },
+      "dusk": {
+        "direction": [
+          -0.24566333222065884,
+          0.11771368002239907,
+          -0.962181384530914
+        ],
+        "windowEmission": 0.65
+      },
+      "night": {
+        "direction": [
+          -0.24447829730694698,
+          0.15279893581684187,
+          -0.9575399977855424
+        ],
+        "windowEmission": 0.95
+      }
+    },
+    "audit": {
+      "total": 382,
+      "counts": {
+        "tree": 201,
+        "rock": 18,
+        "shrub": 25,
+        "grass": 90,
+        "flower": 16,
+        "path-stone": 9,
+        "house": 8,
+        "fence": 12,
+        "person": 3
+      },
+      "invalid": [],
+      "paths": [
+        {
+          "id": "room-to-pier",
+          "samples": 123
+        },
+        {
+          "id": "village-lane",
+          "samples": 1312
+        },
+        {
+          "id": "inhabitant-0",
+          "samples": 492
+        },
+        {
+          "id": "inhabitant-1",
+          "samples": 492
+        },
+        {
+          "id": "inhabitant-2",
+          "samples": 492
+        }
+      ],
+      "crossings": [
+        {
+          "id": "near-pier",
+          "kind": "shoreline-crossing",
+          "start": [
+            16,
+            -12.274985519921996
+          ],
+          "end": [
+            16,
+            -19.774985519921998
+          ],
+          "width": 2.8,
+          "deckY": 0.02
+        },
+        {
+          "id": "village-pier",
+          "kind": "shoreline-crossing",
+          "start": [
+            -46,
+            -105.29097704282744
+          ],
+          "end": [
+            -46,
+            -94.79097704282744
+          ],
+          "width": 2.2,
+          "deckY": 0.28
+        }
+      ],
+      "waterLevel": -0.47,
+      "shoreSafeBand": 1.8
+    }
+  },
+  "errors": []
+}

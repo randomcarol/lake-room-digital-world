@@ -22,7 +22,7 @@ window.CameraController = class {
   close(){
     if(this.phase==='overview'||this.phase==='closing'||this.phase==='return')return;
     const narrow=this.app.camera.aspect<.8;
-    if(this.saved.narrow!==narrow){this.saved.position.sub(this.saved.target).multiplyScalar(narrow?1.5:1/1.5).add(this.saved.target);this.saved.narrow=narrow;}
+    if(this.saved.narrow!==narrow){const preset=RoomQACameras[narrow?'mobile':'desktop'];this.saved.position.fromArray(preset.position);this.saved.target.fromArray(preset.target);this.saved.narrow=narrow;}
     this.app.focusNotebook(false);
     this.onExit();this.setPhase('closing');
   }
@@ -39,3 +39,10 @@ window.CameraController = class {
   }
   dispose(){this.off();}
 };
+
+/* Fixed evidence cameras, also used for initial overview. Never rescale the room for composition. */
+window.RoomQACameras=Object.freeze({
+ desktop:Object.freeze({position:[10.7,3.9,11.7],target:[4,1.75,2.8],fov:45}),
+ mobile:Object.freeze({position:[13,6.5,24],target:[4,1.75,2.8],fov:53}),
+ apply(app,device){const p=this[device];app.controls.enabled=false;app.camera.position.fromArray(p.position);app.controls.target.fromArray(p.target);app.camera.fov=p.fov;app.camera.updateProjectionMatrix();app.camera.lookAt(app.controls.target);}
+});

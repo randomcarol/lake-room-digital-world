@@ -67,7 +67,7 @@ window.RoomBuilder = (function(){
     controls.minDistance = camera.aspect < .8 ? 10.5 : 7.6; controls.maxDistance = opts.maxDistance || 16;
     controls.enablePan = false;
     controls.minAzimuthAngle = -Infinity; controls.maxAzimuthAngle = Infinity;
-    controls.minPolarAngle = 0.78; controls.maxPolarAngle = 1.32;
+    controls.minPolarAngle = 0.78; controls.maxPolarAngle = 1.42;
     controls.update();
 
     function onResize(){
@@ -78,8 +78,9 @@ window.RoomBuilder = (function(){
       controls.minDistance = narrow ? 10.5 : 7.6;
       controls.maxDistance = narrow ? 25 : 16;
       if(controls.enabled && narrow !== previousNarrow){
-        var offset = camera.position.clone().sub(controls.target).multiplyScalar(narrow ? 1.5 : 1/1.5);
-        camera.position.copy(controls.target).add(offset);
+        var preset = window.RoomQACameras && RoomQACameras[narrow ? 'mobile' : 'desktop'];
+        if (preset) { camera.position.fromArray(preset.position); controls.target.fromArray(preset.target); }
+        else { var offset = camera.position.clone().sub(controls.target).multiplyScalar(narrow ? 1.5 : 1/1.5); camera.position.copy(controls.target).add(offset); }
       }
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
@@ -152,11 +153,7 @@ window.RoomBuilder = (function(){
     sun.position.set(RW*0.45, 4.5, -3.5);
     sun.target.position.set(RW*0.65, 0, RD*0.6);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.left = -6; sun.shadow.camera.right = 6;
-    sun.shadow.camera.top = 7;   sun.shadow.camera.bottom = -3;
-    sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 20;
-    sun.shadow.bias = -0.0004;
+    // SunRig owns the shared solar direction, shadow bounds and quality settings.
     scene.add(sun); scene.add(sun.target);
     var fill = new THREE.PointLight(0xffd9b0, 0.22, 14);
     fill.position.set(RW/2, 2.4, RD*0.6); scene.add(fill);
@@ -212,29 +209,7 @@ window.RoomBuilder = (function(){
     northArchitecture.add(glass);
 
     var environment = OutdoorEnvironment.create(scene, {sun: sun, fill: fill, hemisphere: hemisphere, renderer: renderer});
-    // ---------- 树影斑驳(白底乘算:只加暗斑,不再染绿半间屋) ----------
-    var dappleTex = canvasTex(512, 512, function(c, w, h){
-      c.fillStyle = '#ffffff'; c.fillRect(0, 0, w, h);
-      for (var i = 0; i < 46; i++){
-        var x = (i * 131) % w, y = (i * 197) % h, r = 18 + (i * 41 % 46);
-        c.save(); c.translate(x, y); c.rotate(i * 0.7); c.scale(1, 0.55 + (i % 4) * 0.15);
-        var g = c.createRadialGradient(0, 0, r*0.15, 0, 0, r);
-        g.addColorStop(0, 'rgba(70,86,58,.42)'); g.addColorStop(1, 'rgba(70,86,58,0)');
-        c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
-        c.restore();
-      }
-    });
-    dappleTex.wrapS = dappleTex.wrapT = THREE.RepeatWrapping;
-    var dappleFloor = new THREE.Mesh(new THREE.PlaneGeometry(RW, 2.6),
-      new THREE.MeshBasicMaterial({ map: dappleTex, blending: THREE.MultiplyBlending, depthWrite: false }));
-    dappleFloor.rotation.x = -Math.PI/2;
-    dappleFloor.position.set(RW/2, 0.012, 1.5);
-    scene.add(dappleFloor);
-    var dappleSill = new THREE.Mesh(new THREE.PlaneGeometry(RW, SILL_D),
-      new THREE.MeshBasicMaterial({ map: dappleTex, blending: THREE.MultiplyBlending, depthWrite: false }));
-    dappleSill.rotation.x = -Math.PI/2;
-    dappleSill.position.set(RW/2, SILL_H + 0.037, 0.28);
-    scene.add(dappleSill);
+    // Outdoor tree and window shadows come from the shared directional light.
 
     // ---------- 西墙:世界地图(修复闪面:与相框错开 1cm;支持 textures/world-map.jpg 替换) ----------
     var CONTINENTS = [
@@ -565,8 +540,6 @@ window.RoomBuilder = (function(){
       notebookOpen += ((notebookFocused ? 1 : 0)-notebookOpen)*(1-Math.exp(-dt*3));
       if(notebookCover) notebookCover.rotation.z = -Math.PI*(1-notebookOpen);
       updates.forEach(function(update){ update(Math.min(dt, 0.25), t); });
-      dappleTex.offset.x = Math.sin(t * 0.12) * 0.02;
-      dappleTex.offset.y = Math.cos(t * 0.09) * 0.015;
       if (controls.enabled) { controls.dampingFactor = 1-Math.exp(-5*Math.min(dt,.25)); controls.update(); }
       renderer.render(scene, camera);
     })();

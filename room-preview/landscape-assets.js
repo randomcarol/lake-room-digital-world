@@ -9,3 +9,37 @@ window.LandscapeAssets=(()=>{
  function pineGeometry(){const parts=[],dummy=new THREE.Object3D(),plane=new THREE.PlaneGeometry(1,1);for(let j=0;j<11;j++){const y=.23+j*.065,radius=(1-y)*.38;for(let k=0;k<5;k++){const a=k*Math.PI*2/5+j*2.4;dummy.position.set(Math.cos(a)*radius*.55,y,Math.sin(a)*radius*.55);dummy.rotation.set(-.25,k*1.7+j,.3);dummy.scale.set(radius*2.3,.11+.1*(1-y),1);dummy.updateMatrix();parts.push([plane,dummy.matrix.clone()]);dummy.rotation.y+=Math.PI/2;dummy.updateMatrix();parts.push([plane,dummy.matrix.clone()]);}}const out=merge(parts);plane.dispose();return out;}
  return {random,texture,needles,pine,bark,merge,pineGeometry};
 })();
+
+/* Original, code-authored additions: compact solid foliage, wood siding and walking silhouettes. */
+window.LandscapeAssets.solidPine=function(){
+ const T=THREE,parts=[],rand=this.random(56),d=new T.Object3D();
+ for(let j=0;j<6;j++){
+  const h=.27-j*.017,r=.26*(1-j*.12),g=new T.ConeGeometry(r,h,11,2),p=g.attributes.position;
+  for(let i=0;i<p.count;i++){const y=p.getY(i);if(y<h*.45){const x=p.getX(i),z=p.getZ(i),k=1+.12*Math.sin(x*81+z*53+y*17);p.setX(i,x*k);p.setZ(i,z*k);}}
+  g.computeVertexNormals();d.position.set((rand()-.5)*.04,.30+j*.115,0);d.rotation.set(.02,rand()*6,.02);d.scale.setScalar(1);d.updateMatrix();parts.push([g,d.matrix.clone()]);
+ }
+ return this.merge(parts);
+};
+window.LandscapeAssets.crown=function(){
+ const T=THREE,parts=[],d=new T.Object3D(),rand=this.random(86);
+ for(let i=0;i<7;i++){const g=new T.IcosahedronGeometry(1,1),p=g.attributes.position;for(let j=0;j<p.count;j++){const k=.94+.06*Math.sin(p.getX(j)*19+p.getY(j)*13+p.getZ(j)*23);p.setXYZ(j,p.getX(j)*k,p.getY(j)*k,p.getZ(j)*k);}g.computeVertexNormals();const a=i*2.4;d.position.set(Math.cos(a)*.16,.60+(i%3)*.10,Math.sin(a)*.16);d.scale.set(.20,.24,.19);d.rotation.set(i,0,i*.4);d.updateMatrix();parts.push([g,d.matrix.clone()]);}
+ return this.merge(parts);
+};
+window.LandscapeAssets.siding=function(){
+ const t=this.texture(128,128,(c,w,h)=>{const rand=this.random(109);c.fillStyle='#d4d0c5';c.fillRect(0,0,w,h);for(let x=0;x<w;x+=16){c.fillStyle='#9e9b92';c.fillRect(x,0,1,h);c.fillStyle='#e1dfd8';c.fillRect(x+1,0,1,h);}for(let i=0;i<360;i++){c.fillStyle='rgba(71,57,42,.11)';c.fillRect(rand()*w,rand()*h,.5,3+rand()*13);}});t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
+};
+window.LandscapeAssets.walkers=function(){
+ // Four gait frames, three inhabitants, 64 x 128 per frame. Boots touch the baseline.
+ return this.texture(256,512,(c)=>{
+  const coats=['#d0ac68','#8b3e34','#536e77'];
+  for(let person=0;person<3;person++)for(let f=0;f<4;f++){
+   c.save();c.translate(f*64,person*128);const gait=Math.sin(f*Math.PI/2)*8;
+   c.lineCap='round';c.lineWidth=6;c.strokeStyle='#333b3f';
+   c.beginPath();c.moveTo(31,77);c.lineTo(28-gait,99);c.lineTo(26-gait,122);c.moveTo(35,77);c.lineTo(37+gait,101);c.lineTo(40+gait,122);c.stroke();
+   c.lineWidth=7;c.strokeStyle=coats[person];c.beginPath();c.moveTo(25,45);c.lineTo(19+gait*.6,65);c.lineTo(19+gait,81);c.moveTo(40,45);c.lineTo(46-gait*.6,65);c.lineTo(45-gait,78);c.stroke();
+   c.fillStyle=coats[person];c.beginPath();c.moveTo(26,38);c.lineTo(39,38);c.lineTo(44,79);c.lineTo(22,79);c.closePath();c.fill();
+   c.fillStyle='#cbb39a';c.fillRect(29,31,8,11);c.beginPath();c.ellipse(33,24,8,11,0,0,Math.PI*2);c.fill();c.fillStyle='#453c35';c.beginPath();c.ellipse(32,18,9,7,-.1,Math.PI,Math.PI*2);c.fill();
+   c.strokeStyle='#222d30';c.lineWidth=4;c.beginPath();c.moveTo(22-gait,124);c.lineTo(28-gait,124);c.moveTo(37+gait,124);c.lineTo(44+gait,124);c.stroke();c.restore();
+  }
+ });
+};

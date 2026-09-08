@@ -1,5 +1,7 @@
 # Lake Tahoe 改造执行记录
 
+> 历史记录：这里的“树在干地”等旧视觉结论不再作为验收依据。2026-09-08 重构复现了 298 棵侧岸树浸水，当前代码、渲染与空间证据见 [ENVIRONMENT-REFACTOR.md](ENVIRONMENT-REFACTOR.md)。
+
 ## 参考图核对
 
 已读取外部参考包 FINAL-CODEX-PROMPT.md 并实际查看 01、02、03 和 04 的图像。04 的可用文件名为 04-night-detail.webp（内容与 03 相同），指定的 .jpg 不存在。05-winter-season-reference.jpg 在参考包及其项目中未找到，因此冬季仅依照文字规范实现，不声称完成与该图的对照。

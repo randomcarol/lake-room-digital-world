@@ -1,0 +1,120 @@
+{
+  "phase": "after",
+  "device": "local Chrome / ANGLE metal",
+  "viewport": "1280x900 DPR1",
+  "readyMs": 967.8000000119209,
+  "resourcesReadyMs": 1066.4000000059605,
+  "settleMs": 3200,
+  "measureMs": 4000,
+  "cases": [
+    "desktop-summer-day",
+    "desktop-summer-dusk",
+    "desktop-summer-night",
+    "desktop-autumn-day",
+    "desktop-autumn-dusk",
+    "desktop-autumn-night",
+    "desktop-winter-day",
+    "desktop-winter-dusk",
+    "desktop-winter-night",
+    "mobile-summer-day",
+    "mobile-summer-dusk",
+    "mobile-summer-night",
+    "mobile-autumn-day",
+    "mobile-autumn-dusk",
+    "mobile-autumn-night",
+    "mobile-winter-day",
+    "mobile-winter-dusk",
+    "mobile-winter-night"
+  ],
+  "errors": [],
+  "performance": {
+    "fps": 60.05931168513122,
+    "calls": 426,
+    "triangles": 844048,
+    "textures": 76,
+    "geometries": 222,
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)",
+    "camera": {
+      "position": [
+        10.7,
+        3.9,
+        11.7
+      ],
+      "target": [
+        4,
+        1.75,
+        2.8
+      ],
+      "fov": 45
+    }
+  },
+  "spatial": {
+    "total": 382,
+    "counts": {
+      "tree": 201,
+      "rock": 18,
+      "shrub": 25,
+      "grass": 90,
+      "flower": 16,
+      "path-stone": 9,
+      "house": 8,
+      "fence": 12,
+      "person": 3
+    },
+    "invalid": [],
+    "paths": [
+      {
+        "id": "room-to-pier",
+        "samples": 123
+      },
+      {
+        "id": "village-lane",
+        "samples": 1312
+      },
+      {
+        "id": "inhabitant-0",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-1",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-2",
+        "samples": 492
+      }
+    ],
+    "crossings": [
+      {
+        "id": "near-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          16,
+          -12.274985519921996
+        ],
+        "end": [
+          16,
+          -19.774985519921998
+        ],
+        "width": 2.8,
+        "deckY": 0.02
+      },
+      {
+        "id": "village-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          -46,
+          -105.29097704282744
+        ],
+        "end": [
+          -46,
+          -94.79097704282744
+        ],
+        "width": 2.2,
+        "deckY": 0.28
+      }
+    ],
+    "waterLevel": -0.47,
+    "shoreSafeBand": 1.8
+  }
+}

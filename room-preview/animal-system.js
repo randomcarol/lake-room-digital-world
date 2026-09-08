@@ -71,5 +71,6 @@ window.AnimalSystem=(()=>{
   function dispose(){root.removeFromParent();}
   return {root,animals,pickables,update,describe,setQuality,dispose};
  }
- return {create};
+ function createDisabled(scene){const root=new THREE.Group();root.name='near-wildlife-disabled';root.visible=false;scene.add(root);return {root,animals:[],pickables:[],blocker:'近景动物需有明确许可的 GLB 与动画，本轮停用 primitive 动物。',update(){},setQuality(){},describe(){return '';},dispose(){scene.remove(root);}};}
+ return {create,createDisabled};
 })();

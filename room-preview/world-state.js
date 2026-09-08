@@ -1,18 +1,17 @@
-/* Independent season and clock state. All environment parameters live here. */
+/* Category-based season presets. All appearance changes settle immediately on selection. */
 window.WorldState=(()=>{
  const seasons={
-  spring:{label:'春',foliage:'#4f8b55',foliageAccent:'#79aa60',foliageGold:'#d6b66b',ground:'#86a96c',mountain:'#718d8e',snowLine:20,snow:.06,light:1.05,sky:'#78c2e7',water:'#1380a5',reflection:'#8ed6eb',warmth:.62,particles:28,particleKind:'petals'},
-  summer:{label:'夏',foliage:'#256c45',foliageAccent:'#4e9450',foliageGold:'#86a84f',ground:'#75a45b',mountain:'#667f82',snowLine:26,snow:0,light:1.12,sky:'#55afe0',water:'#087ba9',reflection:'#73ccea',warmth:.78,particles:0,particleKind:'none'},
-  autumn:{label:'秋',foliage:'#a6492f',foliageAccent:'#d8752f',foliageGold:'#e2ad3f',ground:'#a98b4f',mountain:'#9a7149',snowLine:22,snow:.02,light:1.05,sky:'#69b6df',water:'#0b79a9',reflection:'#79c7e4',warmth:.92,particles:62,particleKind:'leaves'},
-  winter:{label:'冬',foliage:'#315b52',foliageAccent:'#4e7569',foliageGold:'#769487',ground:'#d8e3e2',mountain:'#839bae',snowLine:7,snow:.78,light:.96,sky:'#89c1df',water:'#247d9b',reflection:'#a0d4e2',warmth:.42,particles:90,particleKind:'snow'}
+  summer:{label:'夏',conifer:'#244d3c',deciduous:['#427839','#649342','#83a348'],grass:'#65874a',shrub:'#587f3c',mountain:'#777e73',water:'#08688e',sky:'#5ba6d1',sun:{color:'#ffdfa3',intensity:1},particles:{count:0,kind:'none'},villageRoof:'#4c5552',windowLight:'#ffbc64',snow:0,snowLine:34},
+  autumn:{label:'秋',conifer:'#264b3e',deciduous:['#a83f27','#cf702c','#dba740'],grass:'#a18c4c',shrub:'#a57432',mountain:'#9b875e',water:'#08688f',sky:'#70b0d3',sun:{color:'#ffd096',intensity:.96},particles:{count:42,kind:'leaves'},villageRoof:'#655b48',windowLight:'#ffb258',snow:0,snowLine:32},
+  winter:{label:'冬',conifer:'#3a5d55',deciduous:['#8b9385','#a1aaa0','#b7bdb2'],grass:'#c9d5d4',shrub:'#a9b8ad',mountain:'#86969c',water:'#296b88',sky:'#94bdd3',sun:{color:'#ffddbb',intensity:.90},particles:{count:64,kind:'snow'},villageRoof:'#e3e8e5',windowLight:'#ffa94b',snow:.83,snowLine:10},
+  spring:{label:'春',conifer:'#29533f',deciduous:['#68a34b','#8ab65b','#a5bd6b'],grass:'#7d9b56',shrub:'#8cab58',mountain:'#7d8b72',water:'#13748f',sky:'#78b9d9',sun:{color:'#ffe3b4',intensity:.96},particles:{count:12,kind:'petals'},villageRoof:'#55645a',windowLight:'#ffbd70',snow:.08,snowLine:31}
  };
  function create(){
-  let mode='auto',season='summer',hours=12,night=0;
+  let mode='auto',season='summer';
   function sample(date=new Date()){
-   hours=mode==='auto'?date.getHours()+date.getMinutes()/60+date.getSeconds()/3600:mode==='day'?12:mode==='dusk'?18.4:0;
-   const elevation=Math.sin((hours-6)/24*Math.PI*2);
-   night=1-Math.max(0,Math.min(1,(elevation+.12)/.38));
-   return {hours,night,elevation,dusk:Math.exp(-Math.pow(elevation/.20,2))*(1-night*.5),season:seasons[season]};
+   const hours=mode==='auto'?date.getHours()+date.getMinutes()/60:mode==='day'?12:mode==='dusk'?18.0:0;
+   const elevation=Math.sin((hours-6)/24*Math.PI*2),night=mode==='dusk'?.25:1-Math.max(0,Math.min(1,(elevation+.12)/.38));
+   return {hours,night,elevation,dusk:mode==='dusk'?1:Math.exp(-Math.pow(elevation/.20,2))*(1-night),season:seasons[season]};
   }
   return {sample,setMode(value){if(['auto','day','dusk','night'].includes(value))mode=value;},setSeason(value){if(seasons[value])season=value;},get mode(){return mode;},get season(){return season;},seasons};
  }
