@@ -99,7 +99,7 @@ class Handler(BaseHTTPRequestHandler):
     def route(self):
         path=self.path_info();method=self.command
         if path=='/site-config.json' and method in ('GET','HEAD'):return self.json(200,{'api':True})
-        if path=='/api/health' and method in ('GET','HEAD'):return self.json(200,{'service':'room-content','version':1})
+        if path=='/api/health' and method in ('GET','HEAD'):return self.json(200,{'service':'room-content','version':2,'schema':'object-specific'})
         if path=='/api/session' and method=='GET':
             session=self.session()
             with self.db() as db:owner=db.execute('SELECT must_change FROM owner').fetchone()
@@ -220,9 +220,20 @@ class Handler(BaseHTTPRequestHandler):
         metadata=data.get('metadata',{})
         if not isinstance(metadata,dict) or len(json.dumps(metadata))>12000:raise APIError(400,'扩展字段无效')
         if collection=='map':
-            for key in ('x','y'):
-                value=metadata.get(key)
-                if not isinstance(value,(float,int)) or not 0<=value<=1:raise APIError(400,'地图 x、y 必须为 0–1 坐标')
+            role=metadata.get('role','pin')
+            if role not in ('pin','map-image'):raise APIError(400,'地图内容类型无效')
+            if role=='map-image':
+                if kind!='image' or not media_id:raise APIError(400,'自定义地图必须上传图片')
+            else:
+                for key in ('x','y'):
+                    value=metadata.get(key)
+                    if not isinstance(value,(float,int)) or isinstance(value,bool) or not 0<=value<=1:raise APIError(400,'地图 x、y 必须为 0–1 坐标')
+                photo_urls=metadata.get('photoUrls',[])
+                if not isinstance(photo_urls,list) or len(photo_urls)>24:raise APIError(400,'旅行照片列表无效')
+                for value in photo_urls:
+                    if not isinstance(value,str) or len(value)>2048 or urlsplit(value).scheme not in ('http','https'):raise APIError(400,'旅行照片链接只允许 http / https')
+        rating=metadata.get('rating')
+        if collection=='books' and rating not in ('',None) and (not isinstance(rating,(float,int)) or isinstance(rating,bool) or not 0<=rating<=5):raise APIError(400,'书籍评分必须为 0–5')
         return (collection,kind,*fields,media_id,int(data.get('published',False)),position,json.dumps(metadata,ensure_ascii=False))
     def check_media(self,db,item):
         if item[6] and not db.execute('SELECT 1 FROM media WHERE id=?',(item[6],)).fetchone():raise APIError(400,'关联文件不存在')

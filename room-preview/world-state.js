@@ -1,10 +1,10 @@
 /* Independent season and clock state. All environment parameters live here. */
 window.WorldState=(()=>{
  const seasons={
-  spring:{label:'春',foliage:'#52704c',ground:'#788465',mountain:'#74878b',snowLine:18,snow:.10,light:1,sky:'#8fb8d0',particles:0,particleKind:'none'},
-  summer:{label:'夏',foliage:'#385b47',ground:'#7a8266',mountain:'#71838a',snowLine:24,snow:0,light:1,sky:'#89b4cf',particles:0,particleKind:'none'},
-  autumn:{label:'秋',foliage:'#65704a',ground:'#8c8061',mountain:'#7d8589',snowLine:20,snow:.05,light:.93,sky:'#9fb8c7',particles:14,particleKind:'leaves'},
-  winter:{label:'冬',foliage:'#36544c',ground:'#bec9cb',mountain:'#92a4b4',snowLine:6,snow:.72,light:.88,sky:'#a4bdcc',particles:90,particleKind:'snow'}
+  spring:{label:'春',foliage:'#4f8b55',foliageAccent:'#79aa60',foliageGold:'#d6b66b',ground:'#86a96c',mountain:'#718d8e',snowLine:20,snow:.06,light:1.05,sky:'#78c2e7',water:'#1380a5',reflection:'#8ed6eb',warmth:.62,particles:28,particleKind:'petals'},
+  summer:{label:'夏',foliage:'#256c45',foliageAccent:'#4e9450',foliageGold:'#86a84f',ground:'#75a45b',mountain:'#667f82',snowLine:26,snow:0,light:1.12,sky:'#55afe0',water:'#087ba9',reflection:'#73ccea',warmth:.78,particles:0,particleKind:'none'},
+  autumn:{label:'秋',foliage:'#a6492f',foliageAccent:'#d8752f',foliageGold:'#e2ad3f',ground:'#a98b4f',mountain:'#9a7149',snowLine:22,snow:.02,light:1.05,sky:'#69b6df',water:'#0b79a9',reflection:'#79c7e4',warmth:.92,particles:62,particleKind:'leaves'},
+  winter:{label:'冬',foliage:'#315b52',foliageAccent:'#4e7569',foliageGold:'#769487',ground:'#d8e3e2',mountain:'#839bae',snowLine:7,snow:.78,light:.96,sky:'#89c1df',water:'#247d9b',reflection:'#a0d4e2',warmth:.42,particles:90,particleKind:'snow'}
  };
  function create(){
   let mode='auto',season='summer',hours=12,night=0;

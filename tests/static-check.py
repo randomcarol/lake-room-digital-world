@@ -7,7 +7,7 @@ for key in ('notebookPages','tracks','photos','travelPins','books'):
     assert isinstance(data[key],list),key
 for pin in data['travelPins']:
     assert 0<=pin['x']<=1 and 0<=pin['y']<=1
-for file in ('index.html','room.js','interactions.js','content-store.js','experiences.js'):
+for file in ('index.html','room.js','interactions.js','content-store.js','content-schema.js','animal-system.js','experiences.js'):
     assert 'localStorage' not in re.sub(r'/\*.*?\*/','',(root/file).read_text(),flags=re.S),file
 for path in re.findall(r'(?:src|href)="([^"]+)"',(root/'index.html').read_text()):
     if path.startswith('data:'):continue
@@ -20,5 +20,9 @@ for path in root.glob('models/*/model.gltf'):
             assert (path.parent/uri).exists(),str(path)+': '+uri
 admin=(root/'admin/index.html').read_text()
 assert 'admin.js' in admin
+assert 'content-schema.js' in admin
+environment=(root/'environment.js').read_text()
+assert 'AudioContext' not in environment and 'chirp' not in environment
+assert 'dimensional-mountain' in environment and 'AnimalSystem.create' in environment
 assert (root.parent/'backend/schema.sql').exists()
 print('PASS JSON schema basics, public read-only boundary, local scripts, all model dependencies, real admin entry and backend schema')

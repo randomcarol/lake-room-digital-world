@@ -64,7 +64,7 @@ window.RoomBuilder = (function(){
     var tp = opts.target || [3.4, 1.0, 2.3];
     controls.target.set(tp[0], tp[1], tp[2]);
     controls.enableDamping = true; controls.dampingFactor = 0.07;
-    controls.minDistance = 10; controls.maxDistance = opts.maxDistance || 16;
+    controls.minDistance = camera.aspect < .8 ? 10.5 : 7.6; controls.maxDistance = opts.maxDistance || 16;
     controls.enablePan = false;
     controls.minAzimuthAngle = -Infinity; controls.maxAzimuthAngle = Infinity;
     controls.minPolarAngle = 0.78; controls.maxPolarAngle = 1.32;
@@ -74,8 +74,9 @@ window.RoomBuilder = (function(){
       var previousNarrow = camera.aspect < .8;
       camera.aspect = container.clientWidth/container.clientHeight;
       var narrow = camera.aspect < .8;
-      camera.fov = narrow ? 57 : 49;
-      controls.maxDistance = narrow ? 32 : 20;
+      camera.fov = narrow ? 53 : 45;
+      controls.minDistance = narrow ? 10.5 : 7.6;
+      controls.maxDistance = narrow ? 25 : 16;
       if(controls.enabled && narrow !== previousNarrow){
         var offset = camera.position.clone().sub(controls.target).multiplyScalar(narrow ? 1.5 : 1/1.5);
         camera.position.copy(controls.target).add(offset);
@@ -530,6 +531,15 @@ window.RoomBuilder = (function(){
       }
     });
 
+    // ---------- 统一物件反馈：暖色轮廓、按下脉冲与原有镜头靠近 ----------
+    var hits = {map:mapHit,photoWall:photoWallHit,monitor:monitorHit,notebook:notebookHit,turntable:turntableHit,books:booksHit};
+    var feedback = {}, hoveredType = null, feedbackPulse = 0;
+    Object.keys(hits).forEach(function(type){
+      var helper = new THREE.BoxHelper(hits[type], 0xffd58b);
+      helper.material.transparent = true; helper.material.opacity = 0; helper.material.depthTest = false;
+      helper.renderOrder = 20; helper.visible = false; scene.add(helper); feedback[type] = helper;
+    });
+
     // ---------- 动画循环 ----------
     var clock = new THREE.Clock();
     var updates = new Set();
@@ -542,6 +552,12 @@ window.RoomBuilder = (function(){
       var t = clock.elapsedTime;
       if (vinylDisc && musicPlaying) vinylDisc.rotation.y += dt * 1.5;
       environment.update(dt, t);
+      feedbackPulse = Math.max(0, feedbackPulse-dt);
+      Object.keys(feedback).forEach(function(type){
+        var helper=feedback[type],active=type===hoveredType;
+        helper.visible=active;
+        if(active){helper.update();helper.material.opacity=.52+Math.sin(t*3.1)*.14+(feedbackPulse>0?.22:0);helper.scale.setScalar(1+(feedbackPulse>0?Math.sin(feedbackPulse*22)*.018:0));}
+      });
       // Full orbit stays outside the room footprint. Cut away the obstructing facade from its exterior.
       westWall.visible = camera.position.x > .12;
       mapGroup.visible = photoWallGroup.visible = westWall.visible;
@@ -558,20 +574,15 @@ window.RoomBuilder = (function(){
     return {
       environment: environment,
       onFrame: function(fn){ updates.add(fn); return function(){ updates.delete(fn); }; },
+      setHovered: function(type){ hoveredType=type&&hits[type]?type:null; },
+      pressFeedback: function(type){ if(hits[type]){hoveredType=type;feedbackPulse=.36;} },
       focusNotebook: function(value){ notebookFocused=value; },
       setMusicPlaying: function(value){ musicPlaying = value; },
       scene: scene, camera: camera, renderer: renderer, controls: controls,
       items: items, layout: layout, photoMeshes: photoMeshes, photoGroups: photoGroups,
       itemKinds: itemKinds, mapMesh: mapMesh, mapGroup: mapGroup, mapTex: mapTex,
       photoWallGroup: photoWallGroup,
-      hits: {
-        map: mapHit,
-        photoWall: photoWallHit,
-        monitor: monitorHit,
-        notebook: notebookHit,
-        turntable: turntableHit,
-        books: booksHit
-      },
+      hits: hits,
       dispose: function(){
         alive = false;
         removeEventListener('resize', onResize);

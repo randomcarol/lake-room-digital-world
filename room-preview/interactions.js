@@ -10,7 +10,7 @@ window.Interactions = (()=>{
     (body.querySelector('button,a,input')||back).focus();
   },()=>{root.classList.add('leaving');cleanup();cleanup=()=>{};});
   const labels={monitor:'查看我的简历',notebook:'翻开手记',turntable:'听一张唱片',map:'探索旅行足迹',photoWall:'看看我的记忆',books:'浏览书架'};
-  function activate(type){if(controller.start(type)){lastFocus=document.activeElement;back.hidden=false;document.getElementById('bubbles').inert=true;}}
+  function activate(type){if(controller.start(type)){app.pressFeedback(type);app.setHovered(null);lastFocus=document.activeElement;back.hidden=false;document.getElementById('bubbles').inert=true;}}
   const bubbles=Object.entries(labels).map(([type,label])=>new InteractionBubble(document.getElementById('bubbles'),app,type,label,()=>activate(type)));
   let frame=0;
   const off=app.onFrame(dt=>{frame+=dt;if(frame>.08){bubbles.forEach(b=>b.update());
@@ -45,15 +45,25 @@ window.Interactions = (()=>{
   document.getElementById('world-quality').addEventListener('change',e=>app.environment.setQuality(e.target.value),{signal});
   document.getElementById('world-volume').addEventListener('input',e=>app.environment.setVolume(Number(e.target.value)).catch(()=>{e.target.value=0;}),{signal});
   const uiTimer=setInterval(syncWorldUI,10000);syncWorldUI();
-  const ray=new THREE.Raycaster(),point=new THREE.Vector2();let down=null;
-  app.renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,id:e.pointerId};},{signal});
+  const ray=new THREE.Raycaster(),point=new THREE.Vector2(),animalStory=document.getElementById('animal-story');let down=null,hovered=null,animalTimer=0;
+  function cast(e,objects){const r=app.renderer.domElement.getBoundingClientRect();point.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(point,app.camera);return ray.intersectObjects(objects,false)[0];}
+  function fullyVisible(object){let current=object;while(current){if(!current.visible)return false;current=current.parent;}return true;}
+  function objectHits(){return Object.values(app.hits).filter(o=>{let current=o;while(current){if(!current.visible)return false;current=current.parent;}return true;});}
+  function showAnimal(animal,locked=false){clearTimeout(animalTimer);animalStory.textContent=app.environment.animals.describe(animal);animalStory.hidden=false;animalStory.dataset.locked=locked?'true':'false';if(locked)animalTimer=setTimeout(()=>{animalStory.hidden=true;},5200);}
+  app.renderer.domElement.addEventListener('pointermove',e=>{
+    if(controller.phase!=='overview')return;const objectHit=cast(e,objectHits()),animalHit=cast(e,app.environment.animals.pickables.filter(fullyVisible));
+    if(animalHit&&(!objectHit||animalHit.distance<objectHit.distance)){hovered={animal:animalHit.object.userData.animal};app.setHovered(null);app.renderer.domElement.style.cursor='pointer';showAnimal(hovered.animal);}
+    else if(objectHit){hovered={type:objectHit.object.userData.action};app.setHovered(hovered.type);app.renderer.domElement.style.cursor='pointer';if(animalStory.dataset.locked!=='true')animalStory.hidden=true;}
+    else{hovered=null;app.setHovered(null);app.renderer.domElement.style.cursor='grab';if(animalStory.dataset.locked!=='true')animalStory.hidden=true;}
+  },{signal});
+  app.renderer.domElement.addEventListener('pointerleave',()=>{hovered=null;app.setHovered(null);app.renderer.domElement.style.cursor='grab';if(animalStory.dataset.locked!=='true')animalStory.hidden=true;},{signal});
+  app.renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,id:e.pointerId};if(hovered?.type)app.pressFeedback(hovered.type);},{signal});
   app.renderer.domElement.addEventListener('pointerup',e=>{
     if(!down||down.id!==e.pointerId)return;
     const moved=Math.hypot(down.x-e.clientX,down.y-e.clientY);down=null;
     if(moved>7||controller.phase!=='overview')return;
-    const r=app.renderer.domElement.getBoundingClientRect();point.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(point,app.camera);
-    const visibleHits=Object.values(app.hits).filter(o=>{while(o){if(!o.visible)return false;o=o.parent;}return true;});
-    const hit=ray.intersectObjects(visibleHits,false)[0];if(hit)activate(hit.object.userData.action);
+    const hit=cast(e,objectHits()),animalHit=cast(e,app.environment.animals.pickables.filter(fullyVisible));
+    if(animalHit&&(!hit||animalHit.distance<hit.distance))showAnimal(animalHit.object.userData.animal,true);else if(hit)activate(hit.object.userData.action);
   },{signal});
   app.renderer.domElement.addEventListener('pointercancel',()=>down=null,{signal});
   // Update public geometry only when the published revision changes; never retain a visitor-side editable copy.
@@ -66,7 +76,8 @@ window.Interactions = (()=>{
     content.travelPins.forEach(p=>{const pin=new THREE.Mesh(pinGeometry,pinMaterial);pin.position.set(.035,(.5-p.y)*1.25,(.5-p.x)*2.2);pin.userData.action='map';pinGroup.add(pin);});
     app.photoMeshes.forEach((mesh,i)=>{if(mesh.material.map){mesh.material.map.dispose();mesh.material.map=null;}mesh.material.color.copy(originalColors[i]);mesh.material.needsUpdate=true;});
     content.photos.forEach((photo,i)=>{const mesh=app.photoMeshes.find(m=>m.userData.photoId===photo.id)||app.photoMeshes[i];if(mesh&&ContentStore.url(photo.src))new THREE.TextureLoader().load(ContentStore.url(photo.src),t=>{if(version!==contentVersion||signal.aborted){t.dispose();return;}t.encoding=THREE.sRGBEncoding;mesh.material.map=t;mesh.material.color.set('#ffffff');mesh.material.needsUpdate=true;},undefined,()=>{});});
-    if(ContentStore.url(content.map?.image))new THREE.TextureLoader().load(ContentStore.url(content.map.image),t=>{if(version!==contentVersion||signal.aborted){t.dispose();return;}t.encoding=THREE.sRGBEncoding;app.mapMesh.material.map=t;app.mapMesh.material.needsUpdate=true;},undefined,()=>{});
+    if(app.mapMesh.material.map!==app.mapTex){app.mapMesh.material.map.dispose();app.mapMesh.material.map=app.mapTex;app.mapMesh.material.needsUpdate=true;}
+    if(ContentStore.url(content.map?.image))new THREE.TextureLoader().load(ContentStore.url(content.map.image),t=>{if(version!==contentVersion||signal.aborted){t.dispose();return;}t.encoding=THREE.sRGBEncoding;if(app.mapMesh.material.map!==app.mapTex)app.mapMesh.material.map.dispose();app.mapMesh.material.map=t;app.mapMesh.material.needsUpdate=true;},undefined,()=>{});
   }
   async function refreshContent(){
     if(refreshing||controller.phase!=='overview'||document.hidden||ContentStore.mode!=='api')return;
@@ -77,7 +88,7 @@ window.Interactions = (()=>{
   const aliases={resume:'monitor',music:'turntable',photos:'photoWall',notebook:'notebook',map:'map',books:'books'};
   const requested=aliases[location.hash.slice(1).split(':')[0]];if(requested)activate(requested);
   window.__ROOM_INTERACTIONS__={controller,activate,refreshContent,get content(){return content;}};
-  window.addEventListener('pagehide',()=>{clearInterval(contentTimer);pinGeometry.dispose();pinMaterial.dispose();clearInterval(uiTimer);cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.dispose();},{once:true});
+  window.addEventListener('pagehide',()=>{clearTimeout(animalTimer);clearInterval(contentTimer);pinGeometry.dispose();pinMaterial.dispose();clearInterval(uiTimer);cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.dispose();},{once:true});
  }
  return {init};
 })();

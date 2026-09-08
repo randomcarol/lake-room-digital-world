@@ -1,8 +1,53 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Owner Content Studio</title><link rel="stylesheet" href="admin.css"></head><body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Owner Content Studio</title><link rel="stylesheet" href="admin.css"></head>
+<body>
 <header><a href="../index.html">← 返回房间</a><span>OWNER CONTENT STUDIO</span><button id="logout" hidden>退出登录</button></header>
-<main><p id="status" role="status">正在连接内容服务…</p>
-<section id="login-panel" hidden><small>一个人的内容工作室</small><h1>欢迎回来</h1><form id="login-form"><label>Owner 密码<input id="password" type="password" autocomplete="current-password" required></label><button>登录</button></form><p class="muted">首次运行服务时，初始密码保存在服务器私有数据目录的 owner-bootstrap.txt。登录后必须更换。</p></section>
-<section id="change-panel" hidden><h1>设置你的新密码</h1><p>首次使用请更换初始密码；新密码至少 12 个字符。</p><form id="change-form"><label>新密码<input id="new-password" type="password" autocomplete="new-password" minlength="12" required></label><button>保存密码并重新登录</button></form></section>
-<section id="studio" hidden><div class="studio-heading"><div><small>ROOM OBJECT → COLLECTION → CONTENT</small><h1>给房间添一点故事</h1></div><button id="add-item">＋ 添加内容</button></div><div class="studio-layout"><nav id="objects" aria-label="房间物件"></nav><div><h2 id="collection-title"></h2><div id="items"></div></div></div></section>
-<dialog id="editor"><form id="item-form"><div class="dialog-heading"><h2 id="editor-title">编辑内容</h2><button id="cancel" type="button" aria-label="关闭编辑">×</button></div><label>标题<input name="title" maxlength="300" required></label><div class="two-columns"><label>内容类型<select name="kind"><option value="text">文字 / 日记</option><option value="link">链接 / 收藏</option><option value="image">图片</option><option value="pdf">PDF / 文档</option><option value="audio">音乐</option><option value="video">视频</option></select></label><label class="check"><input name="published" type="checkbox"> 公开发布</label></div><label>描述<textarea name="description" rows="2" maxlength="3000"></textarea></label><label>正文<textarea name="body" rows="6" maxlength="150000"></textarea></label><label>关联链接（可选）<input name="url" type="url" placeholder="https://"></label><label>上传媒体（最大 64 MB）<input id="upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,audio/mpeg,audio/wav,audio/ogg,audio/flac,video/mp4,video/webm"></label><progress id="upload-progress" value="0" max="100" hidden></progress><p id="media-status"></p><button id="remove-media" type="button" hidden>解除文件关联</button><div class="two-columns"><label>作者 / 歌手<input name="creator"></label><label>日期<input name="date" type="date"></label></div><div id="map-fields"><div class="two-columns"><label>城市<input name="city"></label><label>国家 / 地区<input name="country"></label><label>地图 x（左→右 0–1）<input name="x" type="number" min="0" max="1" step="any"></label><label>地图 y（上→下 0–1）<input name="y" type="number" min="0" max="1" step="any"></label></div></div><p class="muted">上传文件默认私有，保存为公开内容后访客才能读取。取消公开后，服务端会拒绝访客访问；已被下载的文件无法远程收回。</p><p id="form-status" role="status"></p><button id="save-item">保存内容</button></form></dialog>
-</main><script src="admin.js"></script></body></html>
+<main>
+ <p id="status" role="status">正在连接内容服务…</p>
+ <section id="login-panel" hidden><small>一个人的内容工作室</small><h1>欢迎回来</h1><form id="login-form"><label>Owner 密码<input id="password" type="password" autocomplete="current-password" required></label><button>登录</button></form><p class="muted">首次运行服务时，初始密码保存在服务器私有数据目录的 owner-bootstrap.txt。登录后必须更换。</p></section>
+ <section id="change-panel" hidden><h1>设置你的新密码</h1><p>首次使用请更换初始密码；新密码至少 12 个字符。</p><form id="change-form"><label>新密码<input id="new-password" type="password" autocomplete="new-password" minlength="12" required></label><button>保存密码并重新登录</button></form></section>
+ <section id="studio" hidden>
+  <div class="studio-heading"><div><small>ROOM OBJECT → ITS OWN STORY FORMAT</small><h1>给房间添一点故事</h1></div><button id="add-item">＋ 添加内容</button></div>
+  <div class="studio-layout"><nav id="objects" aria-label="房间物件"></nav><div><h2 id="collection-title"></h2><p id="collection-description" class="muted"></p><div id="items"></div></div></div>
+ </section>
+ <dialog id="editor">
+  <form id="item-form">
+   <div class="dialog-heading"><div><small id="editor-object"></small><h2 id="editor-title">编辑内容</h2></div><button id="cancel" type="button" aria-label="关闭编辑">×</button></div>
+   <p id="object-guidance" class="object-guidance"></p>
+   <input name="kind" type="hidden" value="text">
+   <label>标题<input name="title" maxlength="300" required></label>
+   <div class="map-role-field" data-for="map"><label>地图内容类型<select name="role"><option value="pin">旅行图钉</option><option value="map-image">自定义地图图片</option></select></label></div>
+   <label id="description-label">一句话说明<textarea name="description" rows="2" maxlength="3000"></textarea></label>
+   <label id="body-label">故事 / 正文<textarea name="body" rows="6" maxlength="150000"></textarea></label>
+   <label id="url-label" data-for="monitor,turntable,books">关联链接<input name="url" type="url" placeholder="https://"></label>
+
+   <div class="two-columns object-fields">
+    <label data-for="books">作者<input name="author"></label>
+    <label data-for="turntable">歌手 / 创作者<input name="artist"></label>
+    <label data-for="notebook,map,photoWall">日期<input name="date" type="date"></label>
+    <label data-for="photoWall">地点<input name="location"></label>
+    <label data-for="books,map,photoWall">标签（逗号分隔）<input name="tags"></label>
+    <label data-for="books">评分（可选）<input name="rating" type="number" min="0" max="5" step="0.5"></label>
+    <label data-for="turntable">心情标签<input name="moodTags" placeholder="夜晚、散步、温柔"></label>
+    <label data-for="turntable">封面图片 URL（可选）<input name="coverUrl" type="url" placeholder="https://"></label>
+    <label data-for="notebook">贴纸 / 小装饰<input name="stickers" placeholder="咖啡, 花, 星星"></label>
+   </div>
+
+   <div id="map-pin-fields" class="pin-only" data-for="map">
+    <div class="two-columns"><label>城市<input name="city"></label><label>国家 / 地区<input name="country"></label></div>
+    <label>图钉位置（直接在地图上拖动）</label>
+    <div id="map-position-editor" tabindex="0" aria-label="拖动以设置地图图钉位置"><div id="map-position-dot"></div><span>拖动图钉</span></div>
+    <div class="two-columns coordinate-fields"><label>x（左→右 0–1）<input name="x" type="number" min="0" max="1" step="any"></label><label>y（上→下 0–1）<input name="y" type="number" min="0" max="1" step="any"></label></div>
+    <label>更多照片 URL（每行一个，可选）<textarea name="photoUrls" rows="3" placeholder="https://"></textarea></label>
+   </div>
+
+   <label id="upload-label">上传媒体（最大 64 MB）<input id="upload" type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,audio/mpeg,audio/wav,audio/ogg,audio/flac,video/mp4,video/webm"></label>
+   <progress id="upload-progress" value="0" max="100" hidden></progress><p id="media-status"></p><button id="remove-media" type="button" hidden>解除文件关联</button>
+   <label class="check"><input name="published" type="checkbox"> 公开发布</label>
+   <p class="muted">上传文件默认私有。公开发布后访客才能读取；取消公开后，服务端会重新拒绝访客访问。</p><p id="form-status" role="status"></p><button id="save-item">保存内容</button>
+  </form>
+ </dialog>
+</main>
+<script src="../content-schema.js"></script><script src="admin.js"></script>
+</body></html>

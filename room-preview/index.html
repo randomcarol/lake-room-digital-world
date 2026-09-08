@@ -3,18 +3,18 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e9dfcd"><link rel="icon" href="data:,"><title>邓知蕾 · A room of my own</title><link rel="stylesheet" href="experience.css"></head>
 <body data-interaction-phase="overview">
 <div id="scene" aria-label="可探索的三维个人空间"></div>
-<header class="room-header"><a href="./index.html" class="identity">邓知蕾<span>A ROOM OF MY OWN</span></a><div class="world-controls"><button id="day-night" aria-pressed="false">☀ Day</button><details><summary aria-label="环境设置">环境</summary><div class="world-settings"><label>时间<select id="world-time"><option value="auto">与本地时间同步</option><option value="day">白天预览</option><option value="dusk">黄昏预览</option><option value="night">月夜预览</option></select></label><label>季节<select id="world-season"><option value="spring">春</option><option value="summer" selected>夏</option><option value="autumn">秋</option><option value="winter">冬</option></select></label><label>画质<select id="world-quality"><option value="high">精致</option><option value="low">节能</option></select></label><label>自然声音<input id="world-volume" aria-label="鸟鸣音量" type="range" min="0" max="1" step=".05" value="0"></label><small>默认静音 · 合成轻微鸟鸣</small></div></details></div></header>
-<div id="bubbles"></div><footer class="room-hint">拖动探索 · 点击物件走近它</footer>
+<header class="room-header"><a href="./index.html" class="identity">邓知蕾<span>A ROOM OF MY OWN</span></a><div class="world-controls"><button id="day-night" aria-pressed="false">☀ Day</button><details><summary aria-label="环境设置">环境</summary><div class="world-settings"><label>时间<select id="world-time"><option value="auto">与本地时间同步</option><option value="day">白天预览</option><option value="dusk">黄昏预览</option><option value="night">月夜预览</option></select></label><label>季节<select id="world-season"><option value="spring">春</option><option value="summer" selected>夏</option><option value="autumn">秋</option><option value="winter">冬</option></select></label><label>画质<select id="world-quality"><option value="high">精致</option><option value="low">节能</option></select></label><label>自然声音<input id="world-volume" aria-label="自然环境声音" type="range" min="0" max="1" step=".05" value="0" disabled></label><small>环境声景预留 · 当前保持安静</small></div></details></div></header>
+<div id="bubbles"></div><aside id="animal-story" role="status" hidden></aside><footer class="room-hint">拖动探索 · 点击物件走近它</footer>
 <button id="return-room" hidden>← 返回房间 <small>Esc</small></button>
 <div id="experience" role="dialog" aria-modal="true" aria-label="物件体验" hidden><div id="experience-content"></div></div>
 <p id="status" role="status">正在打开房间…</p>
 <script src="three.min.js"></script><script src="OrbitControls.js"></script><script src="libs/GLTFLoader.js"></script><script src="libs/DRACOLoader.js"></script>
-<script src="world-state.js"></script><script src="landscape-assets.js"></script><script src="environment.js"></script><script src="room.js"></script><script src="content-store.js"></script><script src="camera-controller.js"></script><script src="interaction-bubble.js"></script><script src="experiences.js"></script><script src="interactions.js"></script>
+<script src="world-state.js"></script><script src="landscape-assets.js"></script><script src="animal-system.js"></script><script src="environment.js"></script><script src="room.js"></script><script src="content-schema.js"></script><script src="content-store.js"></script><script src="camera-controller.js"></script><script src="interaction-bubble.js"></script><script src="experiences.js"></script><script src="interactions.js"></script>
 <script>
 (async()=>{try{
 const content=await ContentStore.load();
 const mobile=innerWidth<700;
-const app=RoomBuilder.build(document.getElementById('scene'),RoomBuilder.loadLayout(),{fov:mobile?57:49,camPos:mobile?[20,9,25]:[13.2,5.4,15.5],target:[4,2.15,3.0],maxDistance:mobile?32:20});
+const app=RoomBuilder.build(document.getElementById('scene'),RoomBuilder.loadLayout(),{fov:mobile?53:45,camPos:mobile?[16.5,7.4,20]:[10.7,4.7,11.7],target:[4,1.75,2.8],maxDistance:mobile?25:16});
 window.__ROOM_APP__=app;Interactions.init(app,content);document.getElementById('status').hidden=true;
 }catch(error){document.getElementById('status').textContent='房间暂时无法打开，请刷新重试。';console.error(error);}})();
 </script></body></html>

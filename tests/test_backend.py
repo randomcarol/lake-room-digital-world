@@ -27,6 +27,13 @@ class ContentSecurityTest(unittest.TestCase):
   self.assertEqual(self.req('/api/collections',cookie=cookie)[0],401)
   status,s,h=self.req('/api/login','POST',{'password':'a-better-test-password'});self.assertEqual(status,200);cookie=h['Set-Cookie'].split(';')[0];csrf=s['csrf']
   png=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=')
+  status,map_media,_=self.req('/api/media','POST',png,cookie,csrf,{'X-File-Name':'map.png'});self.assertEqual(status,201)
+  map_image={'collection_id':'map','kind':'image','title':'Custom map','description':'','body':'','url':'','media_id':map_media['id'],'published':False,'position':0,'metadata':{'role':'map-image'}}
+  status,map_created,_=self.req('/api/items','POST',map_image,cookie,csrf);self.assertEqual(status,201)
+  bad_pin={**map_image,'kind':'text','title':'Bad pin','media_id':None,'metadata':{'role':'pin'}};self.assertEqual(self.req('/api/items','POST',bad_pin,cookie,csrf)[0],400)
+  good_pin={**bad_pin,'title':'Queenstown','metadata':{'role':'pin','x':.84,'y':.78,'city':'Queenstown','photoUrls':['https://example.com/photo.jpg']}}
+  status,pin_created,_=self.req('/api/items','POST',good_pin,cookie,csrf);self.assertEqual(status,201)
+  self.assertEqual(self.req('/api/items/'+pin_created['id'],'DELETE',cookie=cookie,csrf=csrf)[0],200);self.assertEqual(self.req('/api/items/'+map_created['id'],'DELETE',cookie=cookie,csrf=csrf)[0],200);self.assertEqual(self.req('/api/media/'+map_media['id'],'DELETE',cookie=cookie,csrf=csrf)[0],200)
   status,media,_=self.req('/api/media','POST',png,cookie,csrf,{'X-File-Name':'photo.png'});self.assertEqual(status,201);mid=media['id'];url='/api/media/'+mid
   self.assertEqual(self.req(url)[0],404);self.assertEqual(self.req(url,cookie=cookie)[0],200)
   self.assertEqual(self.req('/api/media','POST',b'<html>attack</html>',cookie,csrf)[0],415)
