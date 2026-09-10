@@ -6,10 +6,6 @@ window.WorldState=(()=>{
   winter:{label:'冬',conifer:'#3a5d55',deciduous:['#8b9385','#a1aaa0','#b7bdb2'],grass:'#c9d5d4',shrub:'#a9b8ad',mountain:'#86969c',water:'#296b88',sky:'#94bdd3',sun:{color:'#ffddbb',intensity:.90},particles:{count:64,kind:'snow'},villageRoof:'#e3e8e5',windowLight:'#ffa94b',snow:.83,snowLine:10},
   spring:{label:'春',conifer:'#29533f',deciduous:['#68a34b','#8ab65b','#a5bd6b'],grass:'#7d9b56',shrub:'#8cab58',mountain:'#7d8b72',water:'#13748f',sky:'#78b9d9',sun:{color:'#ffe3b4',intensity:.96},particles:{count:12,kind:'petals'},villageRoof:'#55645a',windowLight:'#ffbd70',snow:.08,snowLine:31}
  };
- const dormant={enabled:false,count:0,palette:[],speciesMix:[],minScale:.75,maxScale:1,clusterCount:0,clusterRadius:0,windStrength:0,bloomAmount:0,stem:'#405b32'};
- seasons.spring.flower={enabled:true,count:216,palette:['#fff5df','#f6dfa0','#efd1dc','#cdc2ee','#b6d6ee'],speciesMix:['daisy','buttercup','campanula','lavender'],minScale:.78,maxScale:1.13,clusterCount:8,clusterRadius:1.30,windStrength:.016,bloomAmount:.86,stem:'#629048'};
- seasons.summer.flower={enabled:true,count:132,palette:['#f9f1db','#efc154','#ea9e82','#9d9bd3'],speciesMix:['daisy','buttercup','campanula','lavender'],minScale:.88,maxScale:1.25,clusterCount:6,clusterRadius:1.25,windStrength:.013,bloomAmount:1.06,stem:'#3c6638'};
- seasons.autumn.flower={...dormant};seasons.winter.flower={...dormant};
  function create(){
   let mode='auto',season='summer';
   function sample(date=new Date()){

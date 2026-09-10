@@ -36,21 +36,7 @@ window.WorldSurface=(()=>{
  const inZone=(x,z,name)=>!name||!!zones[name]&&x>=zones[name].x[0]&&x<=zones[name].x[1]&&z>=zones[name].z[0]&&z<=zones[name].z[1];
  const glsl=`float shoreNear(float x){return -14.-2.2*sin(x*.043)-abs(x+5.)*.018;}float shoreFar(float x){return -100.+3.2*sin(x*.039+1.2);}float shoreDistance(vec2 p){return max(max(p.y-shoreNear(p.x),shoreFar(p.x)-p.y),abs(p.x+10.)-(108.+12.*sin((p.y+100.)/86.*3.14159265)));}`;
  function create(){
-  const placements=[],paths=[],crossings=[],reserves=[],flowerCores=[],animalPaths=[];
-  const segmentDistance=(x,z,a,b)=>{const dx=b[0]-a[0],dz=b[1]-a[1],l=dx*dx+dz*dz,t=l?Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/l)):0;return Math.hypot(x-a[0]-t*dx,z-a[1]-t*dz);};
-  function corridorHit(p,points,width){for(let i=1;i<points.length;i++)if(segmentDistance(p.x,p.z,points[i-1],points[i])<p.radius+width)return true;return false;}
-  function obstacleErrors(p){
-   const errors=[],flower=p.kind==='flower'||p.kind==='flower-cluster',animal=p.kind==='land-animal';
-   if(!flower&&!animal)return errors;
-   // The room slab plus a 0.35 m perimeter. No change to terrain or the existing room geometry.
-   if(p.x+p.radius>-.35&&p.x-p.radius<8.35&&p.z+p.radius>-.35&&p.z-p.radius<7.05)errors.push('room footprint');
-   for(const q of placements){if(!['house','rock','path-stone','fence','tree'].includes(q.kind))continue;const r=q.kind==='tree'?Math.min(.42,q.radius):q.radius;if(Math.hypot(p.x-q.x,p.z-q.z)<p.radius+r+.18)errors.push('obstacle '+q.id);}
-   for(const q of paths)if(corridorHit(p,q.points,q.radius+.35))errors.push('road '+q.id);
-   for(const q of crossings)if(corridorHit(p,[q.start,q.end],q.width/2+.35))errors.push('pier '+q.id);
-   if(flower)for(const q of reserves)if(corridorHit(p,q.points,q.radius+.18))errors.push('animal reserve '+q.id);
-   if(animal)for(const q of flowerCores)if(Math.hypot(p.x-q.x,p.z-q.z)<p.radius+q.coreRadius)errors.push('flower core '+q.id);
-   return [...new Set(errors)];
-  }
+  const placements=[],paths=[],crossings=[];
   function validate(p){
    const invalid=[];
    if(![p.x,p.z,p.baseY,p.radius,p.clearance].every(Number.isFinite))return ['non-finite placement'];
@@ -62,7 +48,7 @@ window.WorldSurface=(()=>{
     if(!inZone(x,z,p.zone))invalid.push('outside spawn zone');
    }
    if(Math.abs(p.baseY-terrainHeight(p.x,p.z))>.025)invalid.push('base does not follow terrain');
-   return [...new Set(invalid.concat(obstacleErrors(p)))];
+   return [...new Set(invalid)];
   }
   function place(kind,x,z,options={}){
    const p={id:kind+'-'+placements.length,kind,x,z,baseY:terrainHeight(x,z),radius:.2,clearance:.12,...options};
@@ -73,29 +59,14 @@ window.WorldSurface=(()=>{
   }
   function path(id,points,radius=.35){
    const samples=[];for(let i=1;i<points.length;i++)for(let n=0;n<=40;n++){const t=n/40,x=points[i-1][0]*(1-t)+points[i][0]*t,z=points[i-1][1]*(1-t)+points[i][1]*t,p={id,kind:'path',x,z,baseY:terrainHeight(x,z),radius,clearance:.12};const errors=validate(p);if(errors.length)throw new Error('Invalid path '+id+': '+errors);samples.push(p);}
-   const route={id,points,samples,radius};paths.push(route);return route;
+   const route={id,points,samples};paths.push(route);return route;
   }
   function crossing(id,start,end,width,deckY){
    if(surfaceType(...start)!=='land'||surfaceType(...end)!=='water'||deckY<waterLevel+.15)throw new Error('Invalid shoreline crossing '+id);
    const c={id,kind:'shoreline-crossing',start,end,width,deckY};crossings.push(c);return c;
   }
   function audit(){const invalid=placements.flatMap(p=>validate(p).map(reason=>({id:p.id,reason})));for(const route of paths)for(const p of route.samples)for(const reason of validate(p))invalid.push({id:route.id,reason});return {total:placements.length,counts:placements.reduce((a,p)=>(a[p.kind]=(a[p.kind]||0)+1,a),{}),invalid,paths:paths.map(p=>({id:p.id,samples:p.samples.length})),crossings,waterLevel,shoreSafeBand};}
-  function validateWater(p){
-   if(![p.x,p.z,p.baseY,p.radius].every(Number.isFinite))return ['non-finite water placement'];
-   const errors=[],band=p.shoreClearance??2.5;
-   for(let i=0;i<17;i++){const a=i*Math.PI/8,r=i===16?0:p.radius,x=p.x+Math.cos(a)*r,z=p.z+Math.sin(a)*r;if(distanceToShore(x,z)>-band)errors.push('water shoreline clearance');if(waterLevel-terrainHeight(x,z)<(p.minDepth??.8))errors.push('insufficient water depth');}
-   if(p.bounds&&(p.x<p.bounds.x[0]||p.x>p.bounds.x[1]||p.z<p.bounds.z[0]||p.z>p.bounds.z[1]))errors.push('outside water species zone');
-   if(p.baseY>waterLevel+.03||p.baseY<terrainHeight(p.x,p.z)+.15)errors.push('water vertical range');
-   for(const q of crossings)if(corridorHit(p,[q.start,q.end],q.width/2+1))errors.push('water pier clearance');
-   return [...new Set(errors)];
-  }
-  function motionPath(id,points,options={}){
-   const samples=[],water=options.medium==='water';
-   for(let i=1;i<points.length;i++){const n=Math.max(2,Math.ceil(Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1])/.1));for(let k=0;k<=n;k++){const t=k/n,x=points[i-1][0]*(1-t)+points[i][0]*t,z=points[i-1][1]*(1-t)+points[i][1]*t;const p={kind:water?'water-animal':'land-animal',id,x,z,baseY:water?waterLevel-(options.submerge||0):terrainHeight(x,z),radius:.3,clearance:.12,...options};const errors=water?validateWater(p):validate(p);if(errors.length)return {id,valid:false,errors,samples};samples.push(p);}}
-   return {id,points:points.map(p=>p.slice()),samples,valid:true,medium:options.medium||'land',radius:options.radius||.3};
-  }
-  function reserve(id,points,radius){const route=motionPath(id,points,{radius});if(!route.valid)throw new Error(id+': '+route.errors);reserves.push({...route,radius});return route;}
-  return {waterLevel,shoreSafeBand,nearShore,farShore,halfWidth,baseTerrainHeight,mountainLayerHeight,terrainHeight,distanceToShore,surfaceType,zones,placements,paths,crossings,reserves,flowerCores,animalPaths,validate,validateWater,obstacleErrors,motionPath,reserve,place,sample,path,crossing,audit,glsl};
+  return {waterLevel,shoreSafeBand,nearShore,farShore,halfWidth,baseTerrainHeight,mountainLayerHeight,terrainHeight,distanceToShore,surfaceType,zones,placements,paths,crossings,validate,place,sample,path,crossing,audit,glsl};
  }
  return {create,waterLevel,nearShore,farShore,terrainHeight,distanceToShore,surfaceType,glsl};
 })();
