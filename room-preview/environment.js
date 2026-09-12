@@ -80,10 +80,8 @@ window.OutdoorEnvironment={create(scene,lights){
  for(let i=0;i<25;i++){const p=surface.sample('shrub',i<10?'near':'village',rand,{radius:.55},p=>i<10||p.z<surface.farShore(p.x)-13);shrubs.push({p,h:.7+rand()*.6,rot:rand()*6});}instance(crownGeo,shrubMat,shrubs,'scattered-shrubs');
  const grassGeo=new T.BufferGeometry();grassGeo.setAttribute('position',new T.Float32BufferAttribute([-.12,0,0,-.05,.48,.04,.01,0,0,0,0,.03,.10,.35,0,.1,0,-.01,-.04,0,-.07,.03,.30,-.16,.03,0,0],3));grassGeo.setAttribute('uv',new T.Float32BufferAttribute([0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0],2));grassGeo.computeVertexNormals();const grassMat=new T.MeshStandardMaterial({color:'#65874a',side:T.DoubleSide,roughness:1});const grasses=[];
  for(let i=0;i<90;i++){const x=(rand()-.5)*85,z=surface.nearShore(x)+3.6+rand()*5;grasses.push({p:surface.place('grass',x,z,{radius:.25}),h:.45+rand()*.6,rot:rand()*6});}instance(grassGeo,grassMat,grasses,'rooted-grass');
- const flowersTexture=A.texture(128,128,c=>{c.strokeStyle='#597638';c.lineWidth=3;c.beginPath();c.moveTo(63,126);c.bezierCurveTo(58,90,76,57,64,28);c.stroke();c.fillStyle='#699146';for(const side of [-1,1]){c.beginPath();c.ellipse(64+side*9,80,15,5,side*.7,0,Math.PI*2);c.fill();}for(let k=0;k<5;k++){const a=k*6.28/5;c.fillStyle='#e8c9ad';c.beginPath();c.ellipse(64+Math.cos(a)*9,27+Math.sin(a)*9,7,4,a,0,Math.PI*2);c.fill();}c.fillStyle='#b9973c';c.beginPath();c.arc(64,27,4,0,6.28);c.fill();});
- const flowerMat=new T.MeshStandardMaterial({map:flowersTexture,alphaTest:.4,side:T.DoubleSide,roughness:1}),flowerEntries=[];
- for(let i=0;i<16;i++){const x=-9+rand()*18,z=surface.nearShore(x)+4+rand()*4;flowerEntries.push({p:surface.place('flower',x,z,{radius:.2}),h:.35+rand()*.2,rot:rand()*6});}
- const flowers=instance(new T.PlaneGeometry(.5,1).translate(0,.5,0),flowerMat,flowerEntries,'rooted-spring-wildflowers');
+ // Consume the legacy flower RNG draws so stars and all unrelated assets keep their exact layout.
+ for(let i=0;i<16*4;i++)rand();
  // A modest near-shore boardwalk: planks and supports are merged into two shadow-casting draws.
  const woodMat=new T.MeshStandardMaterial({color:'#92704f',map:A.siding(),roughness:.94}),dockParts=[];
  const dx=16,sz=surface.nearShore(dx);surface.crossing('near-pier',[dx,sz+3.5],[dx,sz-4],2.8,.02);
@@ -92,11 +90,12 @@ window.OutdoorEnvironment={create(scene,lights){
  const pathPts=[[8.7,-.5],[11.5,-4],[14,-8],[16,sz+4.5]];surface.path('room-to-pier',pathPts,.5);
  const steps=[];for(let i=0;i<9;i++){const x=8.7+i*.8,z=-.5-i*1.2;steps.push({p:surface.place('path-stone',x,z,{radius:.6}),h:.65,rot:.07*Math.sin(i)});}instance(new T.BoxGeometry(1.4,.12,.9).translate(0,.06,0),rockMat,steps,'grounded-path-stones',true);
  const village=LakesideVillage.create(scene,surface,uniforms);
+ const flowers=FlowerSystem.create(root,surface,uniforms);
  const starsGeo=new T.BufferGeometry(),starPos=[];for(let i=0;i<220;i++){const a=rand()*6.28,e=.15+rand()*1.25;starPos.push(Math.cos(a)*Math.cos(e)*300,Math.sin(e)*300,Math.sin(a)*Math.cos(e)*300);}starsGeo.setAttribute('position',new T.Float32BufferAttribute(starPos,3));const stars=new T.Points(starsGeo,new T.PointsMaterial({color:'#bcd1eb',size:.32,transparent:true,opacity:0,depthWrite:false}));root.add(stars);
  const moon=new T.Mesh(new T.SphereGeometry(2.5,16,12),new T.MeshBasicMaterial({color:'#dbe5e0'}));moon.name='moon';moon.position.set(-105,83,-205);root.add(moon);
  const particlePos=new Float32Array(64*3);for(let i=0;i<64;i++){particlePos[i*3]=(rand()-.5)*45;particlePos[i*3+1]=rand()*15;particlePos[i*3+2]=-8-rand()*25;}const pg=new T.BufferGeometry();pg.setAttribute('position',new T.BufferAttribute(particlePos,3));const particles=new T.Points(pg,new T.PointsMaterial({color:'#e9eeee',size:.045,transparent:true,opacity:.65,depthWrite:false}));root.add(particles);
- const animals=AnimalSystem.createDisabled(scene),lamp=new T.PointLight('#ffc181',0,7,2);lamp.position.set(3.72,1.58,1.95);root.add(lamp);
- const dev=location.hostname==='localhost'||location.hostname==='127.0.0.1';let debug=null,debugLegend=null,quality='high',appearanceKey='';
+ const animals=AnimalSystem.create(scene,surface),lamp=new T.PointLight('#ffc181',0,7,2);lamp.position.set(3.72,1.58,1.95);root.add(lamp);
+ const dev=location.hostname==='localhost'||location.hostname==='127.0.0.1';let debug=null,debugLegend=null,quality='high',appearanceKey='',animalShadowTime=0;
  function setDebug(enabled){
   if(!dev)return false;
   if(enabled&&!debug){debug=new T.Group();debug.name='world-surface-debug';scene.add(debug);
@@ -107,9 +106,11 @@ window.OutdoorEnvironment={create(scene,lights){
    const pointsGeo=new T.BufferGeometry().setFromPoints(surface.placements.map(p=>new T.Vector3(p.x,p.baseY+.6,p.z)));const points=new T.Points(pointsGeo,new T.PointsMaterial({color:'#f26faf',size:3,sizeAttenuation:false,depthTest:false}));points.renderOrder=110;debug.add(points);
    const v=surface.zones.village;line([[v.x[0],1,v.z[0]],[v.x[1],1,v.z[0]],[v.x[1],1,v.z[1]],[v.x[0],1,v.z[1]]],'#d8a0ff',true);
    surface.paths.forEach(p=>line(p.samples.map(p=>[p.x,p.baseY+.3,p.z]),'#ffffff'));
+   surface.reserves.forEach(p=>line(p.samples.map(p=>[p.x,p.baseY+.32,p.z]),'#65e6b3'));
+   for(const c of flowers.clusters){const ring=[];for(let i=0;i<40;i++){const a=i*Math.PI/20;ring.push([c.x+Math.cos(a)*c.radius,c.baseY+.16,c.z+Math.sin(a)*c.radius]);}line(ring,c.season==='spring'?'#ffb8ed':'#ffe47c',true);}
    const helper=new T.CameraHelper(lights.sun.shadow.camera);helper.material.depthTest=false;helper.renderOrder=105;debug.add(helper);debug.userData.shadowHelper=helper;
    const arrow=new T.ArrowHelper(rig.direction.clone().negate(),lights.sun.position,32,0xffd265,3,2);debug.add(arrow);debug.userData.sunArrow=arrow;
-   debugLegend=document.createElement('div');debugLegend.style.cssText='position:fixed;left:24px;bottom:52px;background:#14202de8;color:white;padding:14px 18px;font:13px monospace;z-index:100;pointer-events:none;line-height:1.8';debugLegend.textContent='DEV · 青：湖界 | 金：岸线禁种带 / 阴影范围 | 粉：放置点 | 紫：小镇区 | 白：行人 / 动物预留路径';document.body.appendChild(debugLegend);
+   debugLegend=document.createElement('div');debugLegend.style.cssText='position:fixed;left:24px;bottom:52px;background:#14202de8;color:white;padding:14px 18px;font:13px monospace;z-index:100;pointer-events:none;line-height:1.8';debugLegend.textContent='DEV · 青：湖界 | 金：岸线禁种带 / 阴影范围 | 粉：放置点 / 春花圈 | 黄圈：夏花 | 紫：小镇 | 白：道路 | 绿：动物走廊';document.body.appendChild(debugLegend);
   }if(debug){debug.visible=enabled;debugLegend.hidden=!enabled;}return true;
  }
  function update(dt,t){
@@ -117,16 +118,18 @@ window.OutdoorEnvironment={create(scene,lights){
   const key=state.season+':'+state.mode;if(key!==appearanceKey){terrainMat.color.set(season.grass).convertSRGBToLinear();grassMat.color.set(season.grass).convertSRGBToLinear();shrubMat.color.set(season.shrub).convertSRGBToLinear();pineMat.color.set(season.conifer).convertSRGBToLinear();spraysMat.color.set(season.conifer).convertSRGBToLinear();farMat.color.set(season.conifer).convertSRGBToLinear().lerp(new T.Color('#91a3a3'),.18);leafMats.forEach((m,i)=>m.color.set(season.deciduous[i]).convertSRGBToLinear());mountains.forEach((m,i)=>m.color.set(season.mountain).convertSRGBToLinear().lerp(new T.Color('#a3b8bd'),i*.19));appearanceKey=key;rig.invalidate();}
   scene.fog.color.set('#9bb6bd').lerp(new T.Color('#15263c'),sample.night);scene.fog.density=rig.config.fogDensity;stars.material.opacity=sample.night*.8;moon.visible=sample.night>.5;moon.position.copy(rig.direction).multiplyScalar(280);lamp.intensity=sample.night*1.9+sample.dusk*.7;
   village.update(t,season,sample.night,sample.dusk);
-  flowers.visible=state.season==='spring';
+  flowers.apply(state.season);
+  animals.update(dt,t,sample);
+  animalShadowTime+=dt;if(animalShadowTime>=(quality==='low'?.25:.12)){animalShadowTime=0;if(animals.animals.some(a=>a.group.visible))lights.renderer.shadowMap.needsUpdate=true;}
   const n=quality==='low'?Math.min(24,season.particles.count):season.particles.count;particles.visible=n>0;pg.setDrawRange(0,n);particles.material.color.set(season.particles.kind==='leaves'?'#b76b33':season.particles.kind==='petals'?'#ddbbb7':'#eef3f3');particles.material.size=season.particles.kind==='leaves'?.065:.035;
   for(let i=0;i<n;i++){particlePos[i*3]+=Math.sin(t*.2+i)*dt*.05;particlePos[i*3+1]-=Math.min(dt,.1)*.4;if(particlePos[i*3+1]<0)particlePos[i*3+1]=15;}if(n)pg.attributes.position.needsUpdate=true;
   if(debug&&debug.visible){debug.userData.shadowHelper.update();debug.userData.sunArrow.position.copy(lights.sun.position);debug.userData.sunArrow.setDirection(rig.direction.clone().negate());}
  }
  update(0,0);
  if(dev&&new URLSearchParams(location.search).get('debug')==='surface')setDebug(true);
- return {state,surface,water,uniforms,rig,village,animals,birds:[],root,setDebug,
+ return {state,surface,water,uniforms,rig,village,flowers,animals,birds:[],root,setDebug,
   setNight(v){this.setMode(v?'night':'day');},get isNight(){return state.sample().night>.5;},setMode(v){state.setMode(v);rig.invalidate();update(0,uniforms.time.value);},setSeason(v){state.setSeason(v);rig.invalidate();update(0,uniforms.time.value);},
-  setQuality(v){quality=v;far.count=v==='low'?36:farEntries.length;lights.renderer.setPixelRatio(Math.min(devicePixelRatio,v==='low'?1:1.6));},async setVolume(){},update,
+  setQuality(v){quality=v;far.count=v==='low'?36:farEntries.length;flowers.setQuality(v);animals.setQuality(v);lights.renderer.setPixelRatio(Math.min(devicePixelRatio,v==='low'?1:1.6));},async setVolume(){},update,
   dispose(){
    const geometries=new Set(),materials=new Set(),textures=new Set();
    [root,village.root,debug].filter(Boolean).forEach(group=>group.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}));

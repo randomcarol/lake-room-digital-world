@@ -10,14 +10,14 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   check(a.camera.position.distanceTo(new T.Vector3(...RoomQACameras.desktop.position))<.01,'initial overview differs from QA camera');
   const ids=new Map(s.placements.map(x=>[x.id,x])),covered=new Set(),matrix=new T.Matrix4(),v=new T.Vector3();
   e.root.traverse(o=>{if(!o.userData.placementIds)return;o.userData.placementIds.forEach((id,i)=>{const pos=ids.get(id);check(!!pos,'unknown placement '+id);o.getMatrixAt(i,matrix);v.setFromMatrixPosition(matrix);check(v.distanceTo(new T.Vector3(pos.x,pos.baseY,pos.z))<.0001,'mesh detached from placement '+id);covered.add(id);});});
-  for(const p of s.placements)if(['tree','rock','shrub','grass','flower','path-stone'].includes(p.kind))check(covered.has(p.id),'missing rendered placement '+p.id);
+  for(const p of s.placements)if(['tree','rock','shrub','grass','flower','path-stone'].includes(p.kind)&&(p.kind!=='flower'||p.season===e.state.season))check(covered.has(p.id),'missing rendered placement '+p.id);
   // Raycast the rendered triangle surfaces; an analytical point above water alone is insufficient.
   const land=e.root.children.filter(o=>o.name==='sampled-terrain'||o.name.startsWith('folded-rock-massif'));
   a.scene.updateMatrixWorld(true);const ray=new T.Raycaster(),down=new T.Vector3(0,-1,0);let maxError=0;
   for(const p of s.placements){ray.set(new T.Vector3(p.x,150,p.z),down);const hit=ray.intersectObjects(land)[0];check(!!hit,'no rendered terrain '+p.id);if(hit){maxError=Math.max(maxError,Math.abs(hit.point.y-p.baseY));check(Math.abs(hit.point.y-p.baseY)<.001,'base differs from rendered terrain '+p.id);}}
   details.terrainRaycastMaxError=maxError;
   details.routes=[];for(let t=0;t<=600;t+=3){e.village.update(t,WorldState.seasons.summer,0,0);for(const p of e.village.agents)check(!s.validate(p).length,'moving inhabitant left legal terrain');}details.routes.push('201 time samples / 3 walkers');
-  check(e.animals.animals.length===0&&e.animals.pickables.length===0&&!e.animals.root.visible,'near primitive animals active');
+  check(e.animals.animals.every(a=>a.source==='GLTFLoader'&&a.meshes.every(m=>m.isSkinnedMesh)),'near primitive animals active');
   check(e.village.houses.length===8&&new Set(e.village.houses.map(p=>p.variant)).size===3,'house silhouettes');
   check(e.village.floats.every(p=>s.surfaceType(p.x,p.z)==='water'),'boat on land');
   details.seasons={};for(const name of ['summer','autumn','winter','spring']){

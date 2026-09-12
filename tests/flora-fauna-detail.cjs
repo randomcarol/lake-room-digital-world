@@ -1,0 +1,18 @@
+const {chromium}=require('playwright'),fs=require('fs'),out='tests/artifacts/flora-fauna/after';
+(async()=>{const b=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--use-angle=metal','--enable-gpu']});try{const p=await b.newPage({viewport:{width:1280,height:900},deviceScaleFactor:1});await p.goto('http://127.0.0.1:8940/?qa=1');await p.waitForFunction(()=>window.__ROOM_APP__);await p.waitForLoadState('networkidle');await p.evaluate(()=>__ROOM_APP__.environment.animals.ready);
+ await p.evaluate(()=>{const a=__ROOM_APP__;a.environment.setMode('day');a.environment.setSeason('spring');a.controls.enabled=false;a.environment.animals.update=()=>{};});
+ await p.addStyleTag({content:'#bubbles,.room-header,.room-hint{display:none !important}'});
+ const evidence={};
+ for(const season of ['spring','summer']){await p.evaluate(season=>{const a=__ROOM_APP__;a.environment.setSeason(season);const c=a.environment.flowers.clusters.find(c=>c.season===season&&c.id.endsWith('-1'));a.camera.position.set(c.x+2.2,c.baseY+1.3,c.z+3.2);a.controls.target.set(c.x,c.baseY+.25,c.z);a.camera.fov=42;a.camera.updateProjectionMatrix();a.camera.lookAt(a.controls.target);},season);await p.waitForTimeout(500);await p.screenshot({path:`${out}/flowers-${season}-detail.png`});}
+ // Simulate actors from their actual initialized positions; don't teleport them into photograph staging.
+ await p.evaluate(()=>{__ROOM_APP__.environment.setSeason('spring');});
+ for(const id of ['rabbit','fox']){
+  const enabled=await p.evaluate(id=>__ROOM_APP__.environment.animals.animals.some(a=>a.id===id),id);if(!enabled){evidence[id]={blocked:true};continue;}
+  let elapsed=0;const times=id==='rabbit'?[.4,2.15,2.4,2.62,2.92]:[15];
+  for(const t of times){const data=await p.evaluate(({id,delta})=>{const a=__ROOM_APP__,actor=a.environment.animals.animals.find(x=>x.id===id);for(let left=delta;left>.00001;){const dt=Math.min(left,1/60);actor.update(dt,{night:0});left-=dt;}const pos=actor.group.position;a.camera.position.set(pos.x+(id==='rabbit'?1.5:2.3),pos.y+(id==='rabbit'?.9:1.25),pos.z+(id==='rabbit'?1.8:2.8));a.controls.target.copy(pos).add(new THREE.Vector3(0,id==='rabbit'?.28:.45,0));a.camera.fov=40;a.camera.updateProjectionMatrix();a.camera.lookAt(a.controls.target);a.renderer.shadowMap.needsUpdate=true;return {state:actor.state,position:pos.toArray(),clip:actor.animation.action.getClip().name,clipTime:actor.animation.action.time};},{id,delta:t-elapsed});elapsed=t;const label=id==='fox'?'fox-encounter':t<1?'rabbit-idle':'rabbit-hop-'+Math.round(t*100);await p.waitForTimeout(100);await p.screenshot({path:`${out}/${label}.png`});evidence[label]=data;}
+ }
+ // Zoomed spatial proof complements the full lake/shadow-frustum overview.
+ await p.evaluate(()=>{const a=__ROOM_APP__;a.environment.setDebug(true);a.camera.position.set(4,24,16);a.controls.target.set(-3,0,-5);a.camera.fov=55;a.camera.updateProjectionMatrix();a.camera.lookAt(a.controls.target);});await p.waitForTimeout(200);await p.screenshot({path:`${out}/debug-near-surface-paths.png`});
+ await p.evaluate(()=>{const a=__ROOM_APP__;a.camera.position.set(65,140,125);a.controls.target.set(0,0,-65);a.camera.far=1000;a.camera.updateProjectionMatrix();a.camera.lookAt(a.controls.target);});await p.waitForTimeout(100);await p.screenshot({path:`${out}/debug-surface.png`});
+ evidence.blockers=await p.evaluate(()=>__ROOM_APP__.environment.animals.status.filter(x=>x.status!=='ready'));fs.writeFileSync(`${out}/detail-evidence.json`,JSON.stringify(evidence,null,2));console.log(JSON.stringify(evidence,null,2));
+}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

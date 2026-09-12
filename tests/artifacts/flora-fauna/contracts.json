@@ -1,0 +1,163 @@
+{
+  "fail": [
+    "no real limb animation rabbit"
+  ],
+  "flowers": {
+    "spring": {
+      "count": 216,
+      "clusters": 8
+    },
+    "summer": {
+      "count": 132,
+      "clusters": 6
+    },
+    "autumn": {
+      "count": 0,
+      "clusters": 0
+    },
+    "winter": {
+      "count": 0,
+      "clusters": 0
+    }
+  },
+  "animals": {
+    "fox": {
+      "states": [
+        "lookAround",
+        "walk",
+        "idle",
+        "leave"
+      ],
+      "nativeBonePoses": 202,
+      "distance": 43.56373824499598,
+      "clips": [
+        "Survey",
+        "Walk",
+        "Run"
+      ],
+      "footOffset": 0.001339192435145378
+    },
+    "rabbit": {
+      "states": [
+        "idle",
+        "hop"
+      ],
+      "nativeBonePoses": 1,
+      "distance": 49.313336035607485,
+      "clips": [
+        "Armature|Jump",
+        "Armature|Running",
+        "Armature|Guarding",
+        "Armature|Sitting.000"
+      ],
+      "footOffset": 0.01808087628354806
+    }
+  },
+  "three": "128",
+  "flowerRootMaxError": 1.3940707921378248e-8,
+  "simulation": {
+    "seconds": 120,
+    "steps": 7200,
+    "largestStep": 0.023213150802846326
+  },
+  "memory": {
+    "before": {
+      "geometries": 185,
+      "textures": 81
+    },
+    "after": {
+      "geometries": 185,
+      "textures": 81
+    }
+  },
+  "audit": {
+    "total": 730,
+    "counts": {
+      "tree": 201,
+      "rock": 18,
+      "shrub": 25,
+      "grass": 90,
+      "path-stone": 9,
+      "house": 8,
+      "fence": 12,
+      "person": 3,
+      "flower-cluster": 14,
+      "flower": 348,
+      "land-animal": 2
+    },
+    "invalid": [],
+    "paths": [
+      {
+        "id": "room-to-pier",
+        "samples": 123
+      },
+      {
+        "id": "village-lane",
+        "samples": 1312
+      },
+      {
+        "id": "inhabitant-0",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-1",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-2",
+        "samples": 492
+      }
+    ],
+    "crossings": [
+      {
+        "id": "near-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          16,
+          -12.274985519921996
+        ],
+        "end": [
+          16,
+          -19.774985519921998
+        ],
+        "width": 2.8,
+        "deckY": 0.02
+      },
+      {
+        "id": "village-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          -46,
+          -105.29097704282744
+        ],
+        "end": [
+          -46,
+          -94.79097704282744
+        ],
+        "width": 2.2,
+        "deckY": 0.28
+      }
+    ],
+    "waterLevel": -0.47,
+    "shoreSafeBand": 1.8
+  },
+  "cache": {
+    "entries": 2,
+    "requests": 2,
+    "refs": 2,
+    "states": [
+      "ready",
+      "ready"
+    ]
+  },
+  "failure": {
+    "status": {
+      "id": "missing",
+      "status": "failed",
+      "reason": "GLTF load failed missing: [object ProgressEvent]"
+    },
+    "count": 0,
+    "pickables": 0
+  },
+  "errors": []
+}

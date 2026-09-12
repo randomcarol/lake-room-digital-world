@@ -1,0 +1,47 @@
+[
+  {
+    "id": "rabbit",
+    "fileSize": 2361252,
+    "triangles": 2640,
+    "skins": 2,
+    "textures": [
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        512,
+        512
+      ]
+    ],
+    "clips": [
+      "Armature|Jump",
+      "Armature|Running",
+      "Armature|Guarding",
+      "Armature|Sitting.000"
+    ],
+    "checksum": "aa7abb1b0e731041e4354471a836eb1fabd213b7a789c0ebfe6e3ca7bee90d1c"
+  },
+  {
+    "id": "fox",
+    "fileSize": 162852,
+    "triangles": 576,
+    "skins": 1,
+    "textures": [
+      [
+        1024,
+        1024
+      ]
+    ],
+    "clips": [
+      "Survey",
+      "Walk",
+      "Run"
+    ],
+    "checksum": "d97044e701822bac5a62696459b27d7b375aada5de8574ed4362edbba94771f7"
+  }
+]

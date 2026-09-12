@@ -30,14 +30,14 @@ window.FlowerSystem=(()=>{
   };material.customProgramCacheKey=()=> 'grounded-flowers-r128-v1';
   // Reserve two short habitat corridors before placing flower cores or individual plants.
   surface.reserve('rabbit-meadow',[[-3,-4.5],[-1,-5.5],[2,-6.2],[5,-6.2]],.34);
-  surface.reserve('fox-forest-edge',[[-19,-4],[-16,-6],[-12,-8],[-9,-10]],.48);
-  const seeds=[[-7.9,-4],[-3.7,-9.6],[.3,-9.8],[4.1,-10],[7.8,-9.7],[9.0,-3.2],[13.6,-1.4],[-10.3,-3.2]];
+  surface.reserve('fox-forest-edge',[[-19,-4],[-16,-6],[-12,-7],[-9,-6]],.48);
+  const seeds=[[-7.9,-3],[-3.7,-8.8],[.3,-9],[4.1,-9],[7.8,-9],[9.0,-3.2],[13.6,-1.4],[-10.3,-3.2]];
   for(const season of ['spring','summer']){
    const cfg=WorldState.seasons[season].flower,rand=A.random(season==='spring'?7331:9441);entries[season]=[];
    for(let c=0;c<cfg.clusterCount;c++){
     let core=null;
     for(let attempt=0;attempt<1800&&!core;attempt++){
-     const x=seeds[c][0]+(rand()-.5)*2.1,z=seeds[c][1]+(rand()-.5)*1.7;
+     const x=seeds[c][0]+(rand()-.5)*4,z=seeds[c][1]+(rand()-.5)*3;
      const p={id:`flower-cluster-${season}-${c}`,kind:'flower-cluster',season,x,z,baseY:surface.terrainHeight(x,z),radius:cfg.clusterRadius,clearance:.12};
      if(surface.validate(p).length||clusters.some(q=>q.season===season&&Math.hypot(x-q.x,z-q.z)<cfg.clusterRadius+q.radius+.45))continue;
      core=surface.place('flower-cluster',x,z,p);core.coreRadius=.85;core.tier=c===0||c===7?'middle':'near';clusters.push(core);surface.flowerCores.push(core);

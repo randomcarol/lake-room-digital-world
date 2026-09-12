@@ -1,0 +1,44 @@
+const {chromium}=require('playwright'),assert=require('assert/strict'),fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--use-angle=metal','--enable-gpu']});const errors=[];
+try{const page=await b.newPage({viewport:{width:1280,height:900},deviceScaleFactor:1});page.on('pageerror',e=>errors.push(String(e)));await page.goto('http://127.0.0.1:8940/?qa=1');await page.waitForFunction(()=>window.__ROOM_APP__);await page.waitForLoadState('networkidle');await page.evaluate(()=>__ROOM_APP__.environment.animals.ready);
+const report=await page.evaluate(async()=>{
+ const a=__ROOM_APP__,e=a.environment,s=e.surface,T=THREE,fail=[],check=(v,m)=>{if(!v)fail.push(m);};e.update=()=>{};e.state.setMode('day');const result={fail,flowers:{},animals:{},three:T.REVISION};
+ const render=()=>a.renderer.render(a.scene,a.camera),key=()=>JSON.stringify(a.renderer.info.memory);
+ for(const season of ['spring','summer','autumn','winter']){e.flowers.apply(season);render();const cfg=WorldState.seasons[season].flower;result.flowers[season]={count:e.flowers.count,clusters:e.flowers.clusters.filter(c=>c.season===season).length};check(e.flowers.count===cfg.count,'flower count '+season);check(e.flowers.root.visible===cfg.enabled,'flower visibility '+season);}
+ check(JSON.stringify(WorldState.seasons.spring.flower)!==JSON.stringify(WorldState.seasons.summer.flower),'same spring/summer config');
+ for(const season of ['spring','summer']){e.flowers.apply(season);e.flowers.setQuality('low');check(e.flowers.count===WorldState.seasons[season].flower.count/2,'low flowers '+season);e.flowers.setQuality('high');}
+ const land=e.root.children.filter(o=>o.name==='sampled-terrain'||o.name.startsWith('folded-rock-massif')),ray=new T.Raycaster(),down=new T.Vector3(0,-1,0);a.scene.updateMatrixWorld(true);let maxRootError=0;
+ for(const p of s.placements.filter(p=>p.kind==='flower'||p.kind==='flower-cluster')){check(s.validate(p).length===0,'invalid flower '+p.id);ray.set(new T.Vector3(p.x,100,p.z),down);const hit=ray.intersectObjects(land)[0];check(!!hit,'missing flower terrain');if(hit)maxRootError=Math.max(maxRootError,Math.abs(p.baseY-hit.point.y));}
+ result.flowerRootMaxError=maxRootError;check(maxRootError<.001,'flower roots do not match rendered terrain');
+ for(const season of ['spring','summer']){e.flowers.apply(season);for(const b of e.flowers.batches){check(b.mesh.isInstancedMesh&&!b.mesh.castShadow,'flowers not batched / excessive shadow');for(let i=0;i<b.mesh.count;i++){const m=new T.Matrix4();b.mesh.getMatrixAt(i,m);const v=new T.Vector3().setFromMatrixPosition(m),p=s.placements.find(p=>p.id===b.mesh.userData.placementIds[i]);check(Math.hypot(v.x-p.x,v.z-p.z,v.y-p.baseY)<.00001,'flower matrix mismatch');}}}
+ const negative=(kind,x,z,r=.2)=>s.validate({kind,x,z,radius:r,clearance:.12,baseY:s.terrainHeight(x,z)});
+ check(negative('flower',3,3).includes('room footprint'),'room obstruction not enforced');check(negative('flower',8.7,-.5).some(e=>e.includes('road')||e.includes('path-stone')),'near path not blocked');
+ const pier=s.crossings[0];check(negative('flower',...pier.start).some(e=>e.includes('pier')),'pier not blocked');const vp=s.paths.find(p=>p.id==='village-lane');check(negative('flower',...vp.points[1]).some(e=>e.includes('road')),'village road not blocked');
+ check(!s.motionPath('bad-land',[[0,-5],[0,-40]],{radius:.3}).valid,'cross-water land path accepted');
+ for(const species of ['swan','fish']){const d=AnimalSpecies[species],r=s.motionPath(species+'-test',d.route,d);check(r.valid,'valid '+species+' water path rejected');check(!s.motionPath(species+'-bad',[[0,-30],[0,3]],d).valid,'water path crosses land');}
+ e.animals.update(0,0,{night:0});check(e.animals.animals.length===AnimalManifest.filter(d=>d.enabled).length,'enabled animal missing');
+ const actorStates={},boneSamples={};for(const actor of e.animals.animals){check(actor.source==='GLTFLoader'&&actor.meshes.every(m=>m.isSkinnedMesh),'primitive or unskinned animal');check(actor.movement.route.valid,'invalid route '+actor.id);check(actor.animation.mapped.idle&&actor.animation.mapped[actor.config.moveState],'missing native clips');actorStates[actor.id]=new Set();boneSamples[actor.id]=new Set();}
+ let largestStep=0;const previous=new Map(e.animals.animals.map(x=>[x.id,x.group.position.clone()]));
+ for(let frame=0;frame<7200;frame++){
+  e.animals.update(1/60,frame/60,{night:0});
+  for(const actor of e.animals.animals){const p=actor.movement.p,pos=actor.group.position,step=pos.distanceTo(previous.get(actor.id));largestStep=Math.max(largestStep,step);check([pos.x,pos.y,pos.z,actor.group.rotation.y].every(Number.isFinite),'NaN animal');check(step<.035,'teleport '+actor.id);check(!actor.movement.validate(p).length,'animal left legal ground');check(!['idle','lookAround'].includes(actor.state)||step<.00001,'idle sliding '+actor.id);previous.get(actor.id).copy(pos);actorStates[actor.id].add(actor.state);
+   if(frame%8===0){const bones=actor.meshes[0].skeleton.bones.filter(b=>/Paw|Leg|leg/i.test(b.name)&&!b.name.startsWith('IK_'));boneSamples[actor.id].add(bones.map(b=>b.quaternion.toArray().map(x=>x.toFixed(3)).join(',')).join('|'));}
+  }
+ }
+ result.simulation={seconds:120,steps:7200,largestStep};
+ for(const actor of e.animals.animals){result.animals[actor.id]={states:[...actorStates[actor.id]],nativeBonePoses:boneSamples[actor.id].size,distance:actor.distance,clips:actor.clipNames,footOffset:actor.footOffset};check(actor.distance>1,'stationary animal '+actor.id);check(boneSamples[actor.id].size>12,'no real limb animation '+actor.id);}
+ e.animals.update(0,0,{night:1});check(e.animals.pickables.length===0,'hidden animals still pickable');e.animals.update(0,0,{night:0});
+ // Warm each season/program first, then compare GPU allocation and scene counts after repeated toggles.
+ for(const season of ['spring','summer','autumn','winter']){e.setSeason(season);e.flowers.apply(season);render();}const memory=key(),ids=e.animals.animals.map(a=>a.group.uuid).join(',');
+ for(let i=0;i<32;i++){e.setSeason(['spring','summer','autumn','winter'][i%4]);e.flowers.apply(e.state.season);e.setQuality(i%2?'low':'high');e.animals.update(0,0,{night:i%3===0?1:0});render();}
+ e.setQuality('high');e.animals.update(0,0,{night:0});e.flowers.apply('winter');render();result.memory={before:JSON.parse(memory),after:a.renderer.info.memory};check(key()===memory,'GPU resources grew across season/quality changes');check(e.animals.animals.map(a=>a.group.uuid).join(',')===ids,'duplicate actors');
+ // Concurrent acquisition shares buffers but clones bones. Reference release must leave live actors valid.
+ const def=AnimalManifest.find(d=>d.id==='fox'),before=AnimalLoader.stats(),[one,two]=await Promise.all([AnimalLoader.acquire(def),AnimalLoader.acquire(def)]);let m1,m2;one.scene.traverse(o=>{if(o.isSkinnedMesh)m1=o;});two.scene.traverse(o=>{if(o.isSkinnedMesh)m2=o;});check(m1.geometry===m2.geometry&&m1.skeleton.bones[0]!==m2.skeleton.bones[0],'cache skeleton ownership');one.release();two.release();check(AnimalLoader.stats().refs===before.refs,'cache reference leak');
+ const detached=new T.Scene(),copy=AnimalSystem.create(detached,WorldSurface.create(),[]);copy.dispose();copy.dispose();check(detached.children.length===0,'double disposal not safe');
+ result.audit=s.audit();check(result.audit.invalid.length===0,'surface audit failed');result.cache=AnimalLoader.stats();return result;
+});
+ // Missing files are simulated as a failed request; the facade must consume rejection and stay empty.
+ await page.route('**/models/animals/missing.glb',r=>r.abort('failed'));
+ report.failure=await page.evaluate(async()=>{const def={...AnimalManifest.find(d=>d.id==='fox'),id:'missing',localFile:'models/animals/missing.glb'};const scene=new THREE.Scene(),sys=AnimalSystem.create(scene,WorldSurface.create(),[def]);await sys.ready;const out={status:sys.status[0],count:sys.animals.length,pickables:sys.pickables.length};sys.dispose();return out;});
+ report.errors=errors;fs.writeFileSync('tests/artifacts/flora-fauna/contracts.json',JSON.stringify(report,null,2));console.log(JSON.stringify({fail:report.fail,flowers:report.flowers,animals:report.animals,simulation:report.simulation,memory:report.memory,failure:report.failure,errors},null,2));assert.deepEqual(report.fail,[]);assert.equal(report.failure.status.status,'failed');assert.equal(report.failure.count,0);assert.deepEqual(errors,[]);
+}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
