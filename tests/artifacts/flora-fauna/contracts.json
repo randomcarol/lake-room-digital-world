@@ -1,7 +1,5 @@
 {
-  "fail": [
-    "no real limb animation rabbit"
-  ],
+  "fail": [],
   "flowers": {
     "spring": {
       "count": 216,
@@ -28,7 +26,7 @@
         "idle",
         "leave"
       ],
-      "nativeBonePoses": 202,
+      "nativeBonePoses": 197,
       "distance": 43.56373824499598,
       "clips": [
         "Survey",
@@ -42,7 +40,7 @@
         "idle",
         "hop"
       ],
-      "nativeBonePoses": 1,
+      "nativeBonePoses": 65,
       "distance": 49.313336035607485,
       "clips": [
         "Armature|Jump",
@@ -63,11 +61,11 @@
   "memory": {
     "before": {
       "geometries": 185,
-      "textures": 81
+      "textures": 79
     },
     "after": {
       "geometries": 185,
-      "textures": 81
+      "textures": 79
     }
   },
   "audit": {

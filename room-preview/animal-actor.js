@@ -6,14 +6,14 @@ window.AnimalActor={create(asset,definition,surface){
  const actor={id:definition.id,label:config.label,story:config.story,config,group,model,animation,movement,footOffset,state:'idle',source:'GLTFLoader',clipNames:asset.animations.map(c=>c.name),meshes,elapsed:0,distance:0,visible:true};
   model.traverse(o=>{if(o.isMesh){o.userData.animal=actor;o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;meshes.push(o);}});
  group.position.set(movement.p.x,movement.p.baseY,movement.p.z);group.rotation.y=movement.heading;
- let dwell=2,travel=false,away=0,returning=false,settling=0;
+ let dwell=1.2+rand()*1.4,travel=false,away=0,returning=false,settling=0,restState='idle',qualityVisible=true;
  function setState(s){actor.state=s;animation.play(s);}
  function step(dt,world){
   actor.elapsed+=dt;const nightHidden=world.night>=config.nightThreshold;
-  group.visible=!nightHidden&&away<=0;actor.visible=group.visible;if(nightHidden)return;
-  if(away>0){setState('idle');away=Math.max(0,away-dt);if(!away){movement.next();travel=true;returning=false;}return;}
+  group.visible=qualityVisible&&!nightHidden&&away<=0;actor.visible=group.visible;if(nightHidden||!qualityVisible)return;
+  if(away>0){setState('idle');away=Math.max(0,away-dt);if(!away){movement.next(rand());travel=true;returning=false;}return;}
   if(settling>0){settling=Math.max(0,settling-dt);animation.update(dt);return;}
-  if(!travel){dwell-=dt;setState(actor.id==='fox'?'lookAround':'idle');if(dwell<=0){travel=true;movement.next(returning);}}
+  if(!travel){dwell-=dt;setState(restState);if(dwell<=0){travel=true;movement.next(rand(),returning&&config.leaveHome);}}
   if(travel){
    const moveState=returning&&actor.id==='fox'?'leave':config.moveState;animation.play(moveState);
    const phase=animation.action.time/animation.mapped[config.moveState].duration;
@@ -23,13 +23,14 @@ window.AnimalActor={create(asset,definition,surface){
    setState(!result.turning&&!result.blocked?moveState:'idle');actor.distance+=result.distance;
    if(result.blocked){travel=false;dwell=3;setState('idle');}
    else if(result.arrived){
-    if(actor.id==='fox'&&movement.atHome&&returning){travel=false;away=config.away[0]+rand()*(config.away[1]-config.away[0]);group.visible=false;actor.visible=false;}
-    else if(movement.atEnd||movement.atHome){travel=false;returning=movement.atEnd;dwell=config.rest[0]+rand()*(config.rest[1]-config.rest[0]);if(config.gait)settling=Math.max(0,.78-phase)*animation.mapped[config.moveState].duration;}
-    else movement.next(returning);
+    if(actor.id.startsWith('fox')&&movement.atHome&&returning&&config.away){travel=false;away=config.away[0]+rand()*(config.away[1]-config.away[0]);group.visible=false;actor.visible=false;}
+    else if(movement.atEnd||movement.atHome){travel=false;returning=movement.atEnd;dwell=config.rest[0]+rand()*(config.rest[1]-config.rest[0]);restState=actor.id.startsWith('fox')?'lookAround':rand()<.42&&animation.actions.lookAround?'lookAround':'idle';if(config.gait)settling=Math.max(0,.78-phase)*animation.mapped[config.moveState].duration;}
+    else movement.next(rand());
    }
   }
   group.position.set(movement.p.x,movement.p.baseY,movement.p.z);animation.update(dt);
  }
- actor.update=(dt,world)=>{if(dt===0){group.visible=world.night<config.nightThreshold&&away<=0;actor.visible=group.visible;return;}let left=Math.min(Math.max(dt,0),1);while(left>1e-7){const h=Math.min(left,1/30);step(h,world);left-=h;}};
+ actor.update=(dt,world)=>{if(dt===0){group.visible=qualityVisible&&world.night<config.nightThreshold&&away<=0;actor.visible=group.visible;return;}let left=Math.min(Math.max(dt,0),1);while(left>1e-7){const h=Math.min(left,1/30);step(h,world);left-=h;}};
+ actor.setQuality=value=>{qualityVisible=value!=='low'||config.primary!==false;group.visible=qualityVisible&&group.visible;actor.visible=group.visible;};
  actor.dispose=()=>{animation.dispose();movement.dispose();asset.release();group.removeFromParent();meshes.length=0;};return actor;
 }};

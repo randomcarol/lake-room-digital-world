@@ -26,4 +26,6 @@
 
 当前没有随本轮交付的、可核实授权与动画质量的近景动物 GLB。旧鱼、天鹅、兔子、狐狸以及 primitive 鸟类不再进入默认场景或拾取列表。远景生活感由原创行人图集承担，不能视为近景动物已完成。
 
+> 2026-09-12 更新：该历史 blocker 已由 Rabbit 与 Fox 的许可模型部分解除。当前资产、作者、许可、文件、clip、压缩和校验和以 [春夏花卉与动画动物报告](FLORA-FAUNA-REFACTOR.md) 及 `room-preview/animal-manifest.js` 为准。Swan 与 Fish 仍保持停用。
+
 下一轮先收齐模型作者、原始下载地址、许可原文与署名条件；再挑选少量适合近看的 GLB，检查比例和 idle/walk 动画，使用现有 r128 GLTFLoader 与 AnimationMixer 接入。陆地动物路径继续经过 WorldSurface 验证，水生动物另加水域路径合同；分别设置低面数 LOD 与远距离隐藏，并重新测量性能。

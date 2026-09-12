@@ -22,7 +22,7 @@ const report=await page.evaluate(async()=>{
  for(let frame=0;frame<7200;frame++){
   e.animals.update(1/60,frame/60,{night:0});
   for(const actor of e.animals.animals){const p=actor.movement.p,pos=actor.group.position,step=pos.distanceTo(previous.get(actor.id));largestStep=Math.max(largestStep,step);check([pos.x,pos.y,pos.z,actor.group.rotation.y].every(Number.isFinite),'NaN animal');check(step<.035,'teleport '+actor.id);check(!actor.movement.validate(p).length,'animal left legal ground');check(!['idle','lookAround'].includes(actor.state)||step<.00001,'idle sliding '+actor.id);previous.get(actor.id).copy(pos);actorStates[actor.id].add(actor.state);
-   if(frame%8===0){const bones=actor.meshes[0].skeleton.bones.filter(b=>/Paw|Leg|leg/i.test(b.name)&&!b.name.startsWith('IK_'));boneSamples[actor.id].add(bones.map(b=>b.quaternion.toArray().map(x=>x.toFixed(3)).join(',')).join('|'));}
+   if(frame%8===0){const bones=actor.meshes.flatMap(m=>m.skeleton.bones).filter(b=>/Paw|Leg|leg/i.test(b.name)&&!b.name.startsWith('IK_'));boneSamples[actor.id].add(bones.map(b=>b.position.toArray().concat(b.quaternion.toArray()).map(x=>x.toFixed(3)).join(',')).join('|'));}
   }
  }
  result.simulation={seconds:120,steps:7200,largestStep};

@@ -7,7 +7,7 @@ window.AnimalMovement={create(surface,definition){
  if(definition.medium==='land')surface.placements.push(p);
  let index=0,direction=1,target=points[1],heading=Math.atan2(target[0]-p.x,target[1]-p.z),arrived=false;
  const validate=q=>definition.medium==='water'?surface.validateWater(q):surface.validate(q);
- function next(reverse=false){if(reverse)direction=-1;else if(index===points.length-1)direction=-1;else if(index===0)direction=1;target=points[index+direction];arrived=false;return !!target;}
+ function next(choice=.5,forceHome=false){if(forceHome)direction=-1;else if(index===points.length-1)direction=-1;else if(index===0)direction=1;else if(choice<.34)direction*=-1;target=points[index+direction];arrived=false;return !!target;}
  function update(dt,speed,rotation){
   if(!target||arrived||!speed)return {distance:0,heading,arrived};
   const dx=target[0]-p.x,dz=target[1]-p.z,d=Math.hypot(dx,dz);heading=Math.atan2(dx,dz);

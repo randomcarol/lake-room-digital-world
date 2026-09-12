@@ -31,11 +31,11 @@ window.OutdoorEnvironment={create(scene,lights){
   for(let i=0;i<p.count;i++)p.setY(i,surface.mountainLayerHeight(p.getX(i),p.getZ(i),layer));
   g.computeVertexNormals();const vertexColors=[];for(let i=0;i<p.count;i++){const v=.78+.13*Math.sin(p.getX(i)*.41+p.getZ(i)*.13)*Math.sin(p.getY(i)*.9)+.09*g.attributes.normal.getY(i);vertexColors.push(v,v,v);}g.setAttribute('color',new T.Float32BufferAttribute(vertexColors,3));const m=new T.MeshStandardMaterial({color:'#777e73',vertexColors:true,roughness:.96,side:T.DoubleSide});surfaceShader(m,'mountain');const mesh=new T.Mesh(g,m);mesh.name='folded-rock-massif-'+layer;root.add(mesh);mountains.push(m);
  }
- const waterMat=new T.ShaderMaterial({uniforms,transparent:true,depthWrite:false,vertexShader:`varying vec3 world;void main(){world=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`,fragmentShader:`uniform float time,night,dusk,villageLight;uniform vec3 sky,waterColor,sunDirection,sunColor;varying vec3 world;${noise}${surface.glsl}${skyGLSL}
+ const waterMat=new T.ShaderMaterial({uniforms,transparent:true,depthWrite:false,vertexShader:`uniform float time;varying vec3 world;${surface.glsl}void main(){world=(modelMatrix*vec4(position,1.)).xyz;float depth=-shoreDistance(world.xz),edge=smoothstep(.7,4.,depth);world.y+=edge*(sin(world.x*.32+world.z*.51+time*.18)*.075+sin(world.x*1.07-world.z*.76-time*.13)*.04);gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`,fragmentShader:`uniform float time,night,dusk,villageLight;uniform vec3 sky,waterColor,sunDirection,sunColor;varying vec3 world;${noise}${surface.glsl}${skyGLSL}
  void main(){vec2 p=world.xz;float depth=-shoreDistance(p);if(depth<0.)discard;
  // Analytic derivatives of three repeating waves are the water normal (no flat colour-only ripples).
- float w1=p.x*.83+p.y*1.31+time*.65,w2=p.x*2.17-p.y*1.8-time*.42+noise(p*.4)*3.,w3=p.x*5.7+p.y*4.3+time*.8;
- vec3 n=normalize(vec3(cos(w1)*.018+cos(w2)*.014+cos(w3)*.006,1.,cos(w1)*.028-cos(w2)*.018+cos(w3)*.006));
+ float w1=p.x*.32+p.y*.51+time*.18,w2=p.x*1.07-p.y*.76-time*.13,w3=p.x*4.7+p.y*3.3+time*.35;
+ vec3 n=normalize(vec3(-cos(w1)*.024-cos(w2)*.043+cos(w3)*.005,1.,-cos(w1)*.038+cos(w2)*.030+cos(w3)*.005));
  vec3 view=normalize(cameraPosition-world),reflected=reflect(-view,n);float fresnel=.035+.80*pow(1.-max(dot(view,n),0.),4.);
  vec3 base=mix(vec3(.075,.30,.29),waterColor,smoothstep(0.,12.,depth));base=mix(base,vec3(.009,.029,.055),night*.9);
  vec3 col=mix(base,skyAt(normalize(reflected+vec3(0.,.28,0.))),fresnel*.38);
@@ -44,7 +44,7 @@ window.OutdoorEnvironment={create(scene,lights){
  float foam=(1.-smoothstep(.15,1.1,depth))*(.4+.6*noise(p*3.+time*.1));col=mix(col,vec3(.54,.66,.63),foam*.25);
  float distantGlow=exp(-pow((p.x+49.+sin(p.y*3.+time)*.7)/19.,2.))*exp(-pow((p.y+93.)/5.,2.));col+=vec3(.17,.072,.016)*distantGlow*villageLight*noise(p*vec2(2.,9.));
  gl_FragColor=vec4(col,smoothstep(0.,.65,depth));\n#include <tonemapping_fragment>\n#include <encodings_fragment>\n}`});
- const water=new T.Mesh(new T.PlaneGeometry(270,112),waterMat);water.rotation.x=-Math.PI/2;water.position.set(-10,surface.waterLevel,-59);water.name='shore-clipped-blue-lake';root.add(water);
+ const water=new T.Mesh(new T.PlaneGeometry(270,112,120,52),waterMat);water.rotation.x=-Math.PI/2;water.position.set(-10,surface.waterLevel,-59);water.name='shore-clipped-blue-lake';root.add(water);
  const barkMat=new T.MeshStandardMaterial({color:'#65503b',map:A.bark(),roughness:1});
  const pineMat=new T.MeshStandardMaterial({color:'#244d3c',roughness:1});surfaceShader(pineMat,'foliage');
  const leafMats=['#427839','#649342','#83a348'].map(color=>{const m=new T.MeshStandardMaterial({color,roughness:1});surfaceShader(m,'foliage');return m;});

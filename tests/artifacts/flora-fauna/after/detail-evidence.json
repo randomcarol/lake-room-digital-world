@@ -1,0 +1,74 @@
+{
+  "rabbit-idle": {
+    "state": "idle",
+    "position": [
+      -3,
+      -0.08255229561,
+      -4.5
+    ],
+    "clip": "Armature|Sitting.000",
+    "clipTime": 0.39999999999999997
+  },
+  "rabbit-hop-215": {
+    "state": "hop",
+    "position": [
+      -2.9947559917353748,
+      -0.0825881465721236,
+      -4.502622004132313
+    ],
+    "clip": "Armature|Jump",
+    "clipTime": 0.15
+  },
+  "rabbit-hop-240": {
+    "state": "hop",
+    "position": [
+      -2.7770021907808333,
+      -0.08407683287394725,
+      -4.611498904609582
+    ],
+    "clip": "Armature|Jump",
+    "clipTime": 0.39999999999999997
+  },
+  "rabbit-hop-262": {
+    "state": "hop",
+    "position": [
+      -2.5444071057397832,
+      -0.08566698246239887,
+      -4.727796447130107
+    ],
+    "clip": "Armature|Jump",
+    "clipTime": 0.6200000000000004
+  },
+  "rabbit-hop-292": {
+    "state": "hop",
+    "position": [
+      -2.508478411638929,
+      -0.08591261103244427,
+      -4.745760794180534
+    ],
+    "clip": "Armature|Jump",
+    "clipTime": 0.9200000000000012
+  },
+  "fox-encounter": {
+    "state": "walk",
+    "position": [
+      -10.525857723280861,
+      -0.05059159237850937,
+      -6.508619241093657
+    ],
+    "clip": "Walk",
+    "clipTime": 0.7000000397361077
+  },
+  "blockers": [
+    {
+      "id": "swan",
+      "status": "disabled",
+      "reason": "未取得同时具备明确授权、可下载文件和 idle/swim 动画的合格天鹅资产。"
+    },
+    {
+      "id": "fish",
+      "status": "disabled",
+      "reason": "未取得适合淡水湖风格且已通过动画和水下可读性复核的鱼模型。"
+    }
+  ]
+}
