@@ -1,99 +1,126 @@
-# 春夏花卉与动画动物：实测交付
+# 春夏花卉、动画动物与缓慢湖浪：实际交付
 
-2026-09-12 完成。保留上一轮湖泊、远山、小镇、Sun Rig、四季主体和 desktop/mobile QA 相机。本报告中的数量、动画和性能来自真实页面、模型文件解析、固定机位截图与 120 秒浏览器模拟。
+2026-09-12。承接上一轮湖泊、远山、小镇、Sun Rig 和四季，按后续要求扩大花卉分布、动物数量与活动范围，并加入缓慢湖浪。预览：[本机 3D Room](http://127.0.0.1:8940/)。[截图对比与特写](../tests/artifacts/flora-fauna/gallery.html)。
 
-## 1. 实际修改文件
+## 1. 诊断与修改文件
 
-| 文件 | 职责 |
+原来花丛集中在近岸，兔子与狐狸各一条较短路线，动画与位移速度偏慢；天鹅与鱼仍因外部资产条件停用；水面只有法线波纹、没有网格起伏。本轮新增资产和数量后，还在实际截图中发现窗玻璃与水面排序冲突，在真实销毁测试中发现 r128 不支持的 removeFromParent 调用，两者均已修复。
+
+| 文件 | 本轮职责 |
 |---|---|
-| `room-preview/world-state.js` | 四季独立 flower preset：开关、数量、调色板、物种、缩放、花丛、风和 bloom |
-| `room-preview/world-surface.js` | 房间、道路、石板、码头、岩石、房屋、花丛核心的避障；陆地/水域动物完整路径采样 |
-| `room-preview/flower-system.js` | 4 种近景立体花、交叉面中景花、确定性花丛、实例化、风动和质量档 |
-| `room-preview/animal-manifest.js` | 资产来源、作者、许可、文件、原生 clip、比例、贴图、校验和与 blocker |
-| `animal-loader.js` / `animal-animation.js` | GLTFLoader Promise 缓存、独立骨架克隆、失败回收、AnimationMixer 与 crossfade |
-| `animal-movement.js` / `animal-actor.js` / `animal-system.js` | 路径控制、状态机、原生步态同步、隐藏拾取、交互故事、生命周期 facade |
-| `environment.js` / `index.html` | 花与动物接入、debug 图层、质量和阴影更新、脚本依赖顺序 |
-| `room-preview/models/animals/` | 本地 Rabbit.glb、Fox.glb、许可与转换记录 |
-| `tools/animal-import/` | 可复现的 Rabbit FBX → GLB 离线转换工具及 Three.js r128 MIT 辅助文件 |
-| `tests/flora-fauna-*.cjs`、`animal-assets.cjs` | 固定相机、性能、空间、120 秒状态、资源、加载失败、截图与资产文件验证 |
-| `tests/personal-world-visual.cjs`、`tahoe-browser.cjs`、`environment-contract.cjs`、`static-check.py` | 将旧的“动物必须为 0”合同更新为 GLTF-only 合同 |
+| room-preview/world-state.js | 独立春夏花卉配置 |
+| room-preview/flower-system.js | 四种花型、房屋四周种植、实例化、颜色与风动 |
+| room-preview/world-surface.js | 干地/水域、障碍物、完整路线与花丛 footprint 审计；水波采样 |
+| room-preview/animal-manifest.js | 四类资产出处/许可/校验和；13 个实例、统一栖息地、速度和质量配置 |
+| room-preview/animal-loader.js | GLTFLoader 缓存、几何材质共享、独立骨架、引用计数与释放 |
+| room-preview/animal-animation.js | AnimationMixer、clip 映射、crossfade、动画与水平速度同步 |
+| room-preview/animal-movement.js | 分段路线、安全采样、先转向后移动、随机折返与注销 |
+| room-preview/animal-actor.js | 步态、停留、夜间隐藏、独立随机种子、随波高度、r128 生命周期 |
+| room-preview/animal-system.js | 13 只动物加载/更新/拾取/质量与销毁 facade |
+| room-preview/bird-system.js | 9 只原创远景翼形剪影，共用动态缓冲区、1 次绘制 |
+| room-preview/environment.js、index.html | 湖面网格、统一波场与法线、透明排序、飞鸟/动物接入、debug |
+| room-preview/models/animals/ | Rabbit、Fox、原创 Swan、LakeFish GLB 及各自来源记录 |
+| tools/animal-import/ | Rabbit FBX 转换；原创水生动物生成器；r128 MIT 导出辅助代码 |
+| tests/flora-fauna-*.cjs、animal-assets.cjs | 空间、动画、生命周期、性能预算、固定机位与特写验证 |
+| tests/environment-contract.cjs、world-surface.cjs、static-check.py | 原有地表、季节、光照与交互回归 |
+| docs/ENVIRONMENT-ASSETS.md | 将历史资产 blocker 更新为当前状态 |
 
 ## 2. 春季花卉
 
-高质量模式为 **216 株、8 个花丛**；低质量模式 108 株。四个近景花型为 `daisy`、`buttercup`、`campanula`、`lavender`，中景使用无矩形底色的交叉双平面。颜色为乳白、奶黄、浅粉、淡紫和少量浅蓝；缩放 0.78–1.13，bloom 0.86，轻风强度 0.016。
+288 株、12 丛，花丛半径 1.48 m；低画质 144 株。乳白、奶黄、浅粉、淡紫、少量浅蓝，缩放 0.78–1.13，bloom 0.86，风幅 0.016。房间四边均有种植：左 5、右 4、前 3、后 6 个花丛中心（角部同时属于两边）。既有湖旁花丛，也有侧墙旁和房间前方花丛。
 
 ## 3. 夏季花卉
 
-高质量模式为 **132 株、6 个花丛**；低质量模式 66 株。保留四个花型但以白、暖黄、橙粉和少量蓝紫重新配色；花冠更饱满、茎色更深。缩放 0.88–1.25，bloom 1.06，风强度 0.013。它与春季使用不同确定性种子、中心和实例，而非仅切换颜色。
+198 株、9 丛，半径 1.38 m；低画质 99 株。乳白、暖黄、橙粉、蓝紫，缩放 0.88–1.25，bloom 1.06，风幅 0.013。左 5、右 2、前 3、后 4 个中心。春夏不同种子、数量、中心、配色、尺寸与花冠饱满度；秋冬不保留盛开的春夏花。
 
-## 4. Geometry、材质、实例化与风
+## 4. 花型、材质与分布
 
-近景每株有五边柱花茎、低面数叶片和独立花冠。四类花按几何批为 4 个 InstancedMesh；中景全部进入第 5 个 InstancedMesh。花材质接受 Standard 场景光，不发光、不投实时阴影；每实例使用颜色、旋转、缩放和小倾角。顶点着色器复用环境 `time` uniform，以世界位置错相轻摆。季节切换只调整 count、矩阵、颜色和 uniform，不创建新 geometry/material/texture。
+近景 daisy / buttercup / campanula / lavender 均有实体花茎、叶片和花冠；四种几何分成 4 个 InstancedMesh，中景完整花形图集使用第 5 批交叉面。花丛内部非整齐网格，每株有尺度、方向、颜色和轻微倾角差异。保持道路和码头通畅，四周留有草地间隔，避免花铺满地面抢走房间。花冠颜色与茎色分开，接受真实场景光，不添加悬空发光球。
 
-## 5. WorldSurface 花卉验证
+季节切换只更新实例缓冲和 uniform；低画质实例数减半，不在切换时反复创建材质或贴图。
 
-登记了 348 个春夏实例和 14 个花丛中心。所有 footprint 使用 17 点圆周/中心检查；花根相对实际渲染地形三角面的最大误差为 **0.000000014 m**。最终 audit 为 730 个陆地放置，invalid 0；水中、岸线安全带、房间、房屋地基、道路、码头、石板、岸石与动物预留走廊冲突均为 0。
+## 5. WorldSurface 验证
 
-## 6. 动物资产、许可与本地文件
+登记 486 株春夏花、21 个完整花丛 footprint，随季节选择显示；它们不是同时全部渲染。所有花/花丛使用 17 点 footprint 检查，避开水域、岸线禁种带、房间、房屋、石头、道路、码头及预留动物走廊。
 
-| 动物 | 来源、作者、许可 | 本地文件与处理 |
+花根对实际渲染三角地形的最大误差 2.878e-8 m。最终审计 878 个陆地登记物件、8 只水生动物、所有道路/动物路线与预留走廊，invalid 为 0。动物路线每段采样间隔不超过 0.1 m；不以“有一个山对象”或“无页面错误”替代空间验证。
+
+## 6. 模型、贴图来源与许可
+
+| 资产 | 作者、原始来源、许可 | 文件与压缩 |
 |---|---|---|
-| Rabbit | [OpenGameArt 原始页](https://opengameart.org/content/rabbit-0)；Čestmír Dammer（CDmir），页面列 TinyWorlds 为 collaborator，原包写 idea by Rick Hoppmann & Keppu；CC0 1.0 | `models/animals/rabbit/Rabbit.glb`，2,361,252 B，SHA-256 `aa7abb...90d1c`；作者 FBX 离线转换，3 张 PNG 从 1024 压至 512，移除无用 clip，无 Draco |
-| Fox | [Khronos glTF Sample Assets 原始页](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/Fox)；模型 PixelMannen（CC0），绑定动画 tomkranis（CC BY 4.0），glTF 转换 @AsoboStudio / @scurest（CC BY 4.0） | `models/animals/fox/Fox.glb`，162,852 B，SHA-256 `d97044...471f7`；原始 GLB、内嵌 1024 PNG、无 Draco |
-| Swan | **停用**：未找到同时有明确许可、可下载文件和原生 idle/swim 的合格天鹅 | 不加载、不产生 mesh 或 pickable |
-| Fish | **停用**：没有通过淡水风格、动画和水下可读性复核的模型 | 不加载、不以旧 primitive 或海鱼替代 |
+| Rabbit | Čestmír Dammer / CDmir；TinyWorlds 为页面 collaborator；idea by Rick Hoppmann & Keppu。[原始页](https://opengameart.org/content/rabbit-0)、[原包](https://opengameart.org/sites/default/files/rabbit-FBX.7z)。CC0 1.0 | Rabbit.glb，2,361,252 B，2,640 三角形；FBX 转 GLB，3 张 PNG 降至 512，保留 4 个 clip，无 Draco |
+| Fox | PixelMannen 模型 CC0；tomkranis 绑定动画 CC BY 4.0；@AsoboStudio / @scurest 转换 CC BY 4.0。[原始页](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/Fox)、[GLB](https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Fox/glTF-Binary/Fox.glb) | Fox.glb，162,852 B，576 三角形；保留原 GLB、1 张 1024 PNG，无 Draco。SOURCE.md 保留署名 |
+| Swan | 按用户后续允许自行建模的要求，本项目原创；无第三方模型或动画数据。[原始生成源码](../tools/animal-import/build-water-wildlife.cjs) | Swan.glb，56,636 B，282 三角形，1 skin、0 贴图；GLB、顶点颜色、无 Draco；5 个实例共享资产 |
+| LakeFish | 本项目原创，无第三方模型或动画数据；同一生成源码 | LakeFish.glb，23,260 B，110 三角形，1 skin、0 贴图；GLB、顶点颜色、无 Draco；3 个实例共享资产 |
+| 花卉、花形图集、飞鸟和波场 | 项目原创代码；flower-system.js / bird-system.js / environment.js | 花图集 128×256 Canvas；飞鸟无贴图；水波无外部 normal map，使用解析波场法线 |
+| 离线工具 | Three.js r128 GLTFExporter / FBXLoader 及配套辅助代码，保留 vendor/THREE-LICENSE 和源码许可头 | 不升级运行时，不加载最新 module 示例 |
 
-Fox 的 CC BY 署名原文与本地副本在 `models/animals/fox/SOURCE.md`；Rabbit 原包许可在 `models/animals/rabbit/LICENSE.txt`。完整、机器可检验的数据在 `animal-manifest.js`。
+原创资产未代替用户额外声明 CC0 等对外再许可。完整 SHA-256、文件长度和 clip 校验结果见 [assets.json](../tests/artifacts/flora-fauna/assets.json)；元数据在 animal-manifest.js，原始署名和处理说明在各模型 SOURCE.md。
 
-## 7. 实际 AnimationClip
+## 7. 实际动画
 
-- Rabbit：`Armature|Jump`、`Armature|Running`、`Armature|Guarding`、`Armature|Sitting.000`。MVP 使用 Sitting 待机、Guarding 观察、Jump 跳跃；Running 保留在资产中但不用于假装跳跃。
-- Fox：`Survey`、`Walk`、`Run`。MVP 使用 Survey 待机/观察、Walk 行走/离场；Run 当前不用。
+Rabbit：Sitting.000 待机、Guarding 观察、Jump 跳跃（均带 Armature| 前缀）；Running 保留但不使用。狐狸：Survey 待机/观察、Walk 行走/离开；Run 保留。天鹅：Idle 与 Swim，Preen 在文件中保留但暂不用于状态机。鱼：Idle、Swim 尾部摆动。四类均为实际 GLB skin + AnimationMixer，13 个实例各有独立骨架；未恢复旧的运行时 primitive 拼装动物。
 
-`animal-assets.cjs` 直接解析 GLB JSON chunk 验证这些名称，并断言文件长度、SHA-256、skin、贴图尺寸和无 Draco 要求。
+## 8. 数量、速度与随机活动
 
-## 8. 状态机与路径
+3 只兔子，分别沿窗后、房间西侧、东侧活动；主要兔子的路线由约 8.3 m 扩至约 13.8 m，另外两条约 11–12 m。Jump 动画速率 1.6，步幅 0.65 m，移动周期平均 1.04 m/s，仅在原生起跳区间推进水平位置。狐狸动画速率 1.35、步幅 0.60 m；近岸路线长约 24 m，增加对岸小镇边缘狐狸。
 
-Rabbit 在四点近岸草地走廊中按 `idle → hop → idle/lookAround` 活动。水平速度由 Jump clip duration 和 0.55 m stride 得出，只有原生起跳区间推进位置，落地阶段停住，因此不会贴地匀速滑行。Fox 沿树林边缘四点短路径 `lookAround → walk → leave`，回到入口后隐藏 22–38 秒再出现，形成偶遇感。
+5 只天鹅分散在近湖和对岸水域；3 条鱼沿近岸安全深水路线活动；天空有 9 只远景飞鸟。天鹅水域范围与路线明显扩大，每只使用独立随机种子和停留时长，内部节点有概率折返，不同步整齐往返。地面动物夜间隐藏；天鹅、鱼保留。低画质保留核心兔子、狐狸、天鹅、鱼，隐藏额外实例，飞鸟从 9 减至 4。
 
-每段路线按不大于 0.1 m 的间隔验证完整 footprint。转向超过 0.12 rad 时先原地转身再前进。夜间或狐狸离场时同步移出 pickables。`describe()` 保留名称、当前中文状态和故事。
+随机活动限制在已验证的折线路线上，不是 navmesh 任意漫游。转向时停止水平位移；兔子落地后再开始停留。隐藏动物立即移出拾取数组。
 
-## 9. 已完成与停用项
+## 9. 湖浪与完成状态
 
-Rabbit 和 Fox 已完成本地 GLB、原生骨骼动画、AnimationMixer、路径、状态、交互、隐藏和资源回收。Swan 与 Fish 按资产规则停用；loader、water path、深度、岸线和码头避让合同已实现并通过正反例测试。没有恢复任何 Sphere/Cylinder/Cone primitive 动物。
+水面从单一平面细分至 6,413 顶点、12,480 三角形；两组高度波的振幅为 0.075 / 0.04 m，时间周期约 35 / 48 秒，岸边逐渐归零。water shader 和水生动物使用同一 waveHeight 公式；保留 Fresnel、天空反射、日夜统一方向和暖色碎光。60 秒采样振幅范围 -0.115 至 0.107 m。水波随时间连续变化，不通过整体平移水面伪造。
 
-## 10. 测试与结果
+本轮请求的四类动物均启用，无资产 blocker。水下鱼采用蓝绿色透明轮廓，是风格化可见度处理，不是物理折射。没有添加高精度水生模型或 4K 贴图。
 
-```sh
-node tests/animal-assets.cjs
-node tests/world-surface.cjs
-node tests/flora-fauna-contract.cjs
-node tests/flora-fauna-qa.cjs
-node tests/flora-fauna-detail.cjs
-node tests/environment-contract.cjs
-python3 tests/static-check.py
-```
+## 10. 测试与验收
 
-核心合同结果：`fail: []`，页面错误 0；Rabbit 65 种腿部骨骼姿态，Fox 197 种；模拟 120 秒 / 7,200 步，最大单帧位移 0.023213 m；没有 NaN、越界、瞬移、idle 滑动或重复 actor。32 次季节/日夜/质量切换前后 GPU memory 均为 185 geometries / 79 textures；缺失 GLB 测试进入 `failed`，动物数与 pickables 均为 0。
+| 项目 | 结果 | 可核验证据 |
+|---|---|---|
+| 所有陆地物件和树在干地，花丛/路线无冲突 | PASS | contracts.json 的 audit.invalid=[]；debug-surface.png |
+| 四周花卉颜色和疏密 | PASS | flowers-spring-all-sides.png、flowers-summer-all-sides.png；四边覆盖断言 |
+| 兔狐更快、更大范围、不同步随机停走 | PASS | manifest 参数、120 秒位移/状态、rabbit-motion-0…3.png |
+| 5 天鹅、3 鱼、对岸动物、9 飞鸟 | PASS（远景 MVP） | 13 ready，四类实际骨骼姿态；swan-detail、fish-detail、opposite-bank-wildlife、flying-birds.png |
+| 缓慢几何湖浪、暖色波光 | PASS | 波场范围/6,413 顶点断言；lake-waves-0/8/16.png 同机位序列 |
+| 房间仍为主体、湖—小镇—山关系 | PASS | desktop-summer-day.png；mobile-summer-day.png；固定 camera 不变 |
+| 山体纹理与体积、干净岸线 | PASS（上一轮保留） | 默认夏日截图及 lake-waves-8.png 可见山脊/谷线、层纹、稀疏森林 |
+| 暖阳与真实近景阴影 | PASS | 房间地板窗框影、近树/石/兔狐影；environment-contract 日夜方向与即时更新断言 |
+| 秋天覆盖近远树、草坡、小镇；冬雪 | PASS | desktop-autumn-day / desktop-winter-day.png；季节参数实际值 |
+| 生命周期、资源和资产失败 | PASS | 32 次季节/日夜/画质切换无增长；独立骨架/共享缓存；三次真实创建销毁；缺失 GLB 不生成动物 |
+| 原有交互不回归 | PASS | environment-contract 桌面/手机各 6 个交互入口全部通过 |
+| 性能预算 | PASS | performance-budget.json；同设备、同机位、同等待时间 |
 
-## 11. 固定相机截图
+连续模拟 120 秒 / 7,200 步，最大水平单帧位移 0.043908 m；阈值由 clip 时长、步幅与步态峰值推导，没有简单放宽成固定大阈值。未出现 NaN、违法路径、待机滑动或隐藏拾取。兔子原生腿部姿态 161–168 种；狐狸 303–460 种；天鹅颈翼、鱼尾同样验证实际骨骼变化。32 次切换前后均 201 geometries / 96 textures（该测试场景与性能拍摄时可见物件不同，绝对数不用于跨场景比较）。
 
-`tests/artifacts/flora-fauna/before/` 与 `after/` 保存 desktop summer/spring day、spring dusk、autumn/winter day、mobile summer/spring day。`after/flowers-{spring,summer}-detail.png` 是花型特写；`rabbit-idle.png` 与 `rabbit-hop-{215,240,262,292}.png` 是实际状态连续证据；`fox-encounter.png` 是实际路径上的 Walk；`debug-near-surface-paths.png` 和 `debug-surface.png` 显示花丛、道路、动物走廊、岸线与阴影 frustum。Swan 截图因资产 blocker 明确缺失，没有伪造。
+已运行：animal-assets.cjs、world-surface.cjs、flora-fauna-contract.cjs、flora-fauna-qa.cjs、flora-fauna-detail.cjs、flora-fauna-budget.cjs、environment-contract.cjs、static-check.py。
 
-## 12. 性能对比
+## 11. Before / after 证据
 
-同一 Apple M2 / Chrome / ANGLE Metal、1280 × 900 DPR1、固定 desktop camera、等待 3.2 秒、采样 4 秒：
+本轮原始基线保留在 [before/](../tests/artifacts/flora-fauna/before/)，最终画面在 [after/](../tests/artifacts/flora-fauna/after/)。七组相同机位对比为 desktop summer/spring day、spring dusk、autumn/winter day、mobile summer/spring day。本轮额外增加 summer dusk/night 最终画面；其上一轮历史图在 tests/artifacts/environment/after/，未伪装为本轮新拍的 before。
 
-| summer/day | before | after | 变化 |
+固定桌面相机 position [10.7,3.9,11.7] / target [4,1.75,2.8] / FOV 45；手机 [13,6.5,24] / 同 target / FOV 53。特写使用独立相机，不拿来替代默认构图验收。图集列出本轮实际使用的特写和动作帧，不使用目录中遗留旧特写冒充当前版本。
+
+## 12. 性能前后
+
+Apple M2、Chrome / ANGLE Metal，1280×900、DPR 1；同相机，资源完成后等 3.2 秒、采样 4 秒。FPS 是本机单次测量，不保证所有设备。
+
+| summer/day | Before | After | 变化 |
 |---|---:|---:|---:|
-| draw calls | 426 | 434 | +1.88% |
-| triangles | 844,048 | 863,638 | +2.32% |
-| textures | 76 | 84 | +8 |
-| geometries | 222 | 229 | +7 |
-| FPS | 60.11 | 60.22 | 维持 60 Hz |
+| draw calls | 426 | 448 | +5.16% |
+| triangles | 844048 | 890408 | +5.49% |
+| textures（含骨骼数据纹理） | 76 | 97 | +21 |
+| geometries | 222 | 233 | +11 |
+| 平均 FPS | 60.11 | 60.17 | 保持约 60 |
+| app ready | 950.8 ms | 1256.0 ms | +305.2 ms |
+| 资源/动物 ready | 1085.0 ms | 1843.4 ms | +758.4 ms |
 
-Spring/day after 为 435 calls、871,438 triangles、84 textures、60.17 FPS。均明显低于 +12% calls / +20% triangles 预算，FPS 高于 55。低质量花量减半，动物 mixer 以 30 Hz 更新，但 Rabbit 和 Fox 仍保留。
+Spring：428 → 449 calls（+4.91%），844,080 → 903,484 triangles（+7.04%），60.05 → 60.10 FPS。两季均通过 +12% calls、+20% triangles、≥55 FPS 预算。新增资源增加了初始加载时间，主要成本来自 Rabbit 的本地模型与独立骨架；同种动物不会重复下载模型。4 份模型缓存由 13 个动物引用。
 
-## 13. 已知限制与下一轮
+## 13. MVP 边界与下一轮
 
-当前花型是风格化低多边形，近距离仍可看出有限瓣数；这符合房间默认视角和性能边界。Rabbit 的源模型比场景低模树更写实，已通过尺寸、贴图和阴影融入，但下一轮可制作经许可的低模重拓扑版本。动物没有 navmesh，使用经逐段验证的短路线，符合本轮 MVP。下一轮优先取得有真实 swim/preen 的低面数 Swan GLB，再加入水面高度、航向和点击验收；Fish 仅在水体透明度与模型可读性一并解决后接入。
+天鹅和鱼是用户允许的低面数远景自建 GLB，近看仍明显风格化；鱼用透明色层显示水下轮廓，没有折射、焦散或浑浊体积。天鹅随采样波高升降，没有复杂浮力或尾流。飞鸟为原创翼形剪影，没有复杂鸟类行为。动物沿已验证路径随机停走与折返，没有自由 navmesh。
+
+下一轮若要近距离观察水生动物，优先细化天鹅羽翼、梳羽状态与鱼尾/眼部、加入局部尾流和更自然的水下衰减；兔子可考虑统一低模风格的重拓扑。当前任务不依赖这些后续内容，且没有升级 Three.js、改后台/内容/地图/手账/照片墙/音乐或部署。

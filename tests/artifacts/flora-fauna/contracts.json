@@ -2,12 +2,12 @@
   "fail": [],
   "flowers": {
     "spring": {
-      "count": 216,
-      "clusters": 8
+      "count": 288,
+      "clusters": 12
     },
     "summer": {
-      "count": 132,
-      "clusters": 6
+      "count": 198,
+      "clusters": 9
     },
     "autumn": {
       "count": 0,
@@ -19,15 +19,140 @@
     }
   },
   "animals": {
+    "swan": {
+      "states": [
+        "idle",
+        "swim"
+      ],
+      "nativeBonePoses": 100,
+      "distance": 68.53355972630466,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-west": {
+      "states": [
+        "idle",
+        "swim"
+      ],
+      "nativeBonePoses": 61,
+      "distance": 73.24406029074835,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-pair": {
+      "states": [
+        "idle",
+        "swim"
+      ],
+      "nativeBonePoses": 97,
+      "distance": 68.51728556374523,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-far": {
+      "states": [
+        "idle",
+        "swim"
+      ],
+      "nativeBonePoses": 101,
+      "distance": 67.67772052809163,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-far-west": {
+      "states": [
+        "idle",
+        "swim"
+      ],
+      "nativeBonePoses": 101,
+      "distance": 65.33213335587038,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "fish": {
+      "states": [
+        "swim",
+        "idle"
+      ],
+      "nativeBonePoses": 56,
+      "distance": 80.7769639326413,
+      "clips": [
+        "Idle",
+        "Swim"
+      ],
+      "footOffset": -0.18
+    },
+    "fish-west": {
+      "states": [
+        "idle",
+        "swim"
+      ],
+      "nativeBonePoses": 60,
+      "distance": 81.12821641787886,
+      "clips": [
+        "Idle",
+        "Swim"
+      ],
+      "footOffset": -0.18
+    },
+    "fish-east": {
+      "states": [
+        "idle",
+        "swim"
+      ],
+      "nativeBonePoses": 49,
+      "distance": 84.94671288943638,
+      "clips": [
+        "Idle",
+        "Swim"
+      ],
+      "footOffset": -0.18
+    },
     "fox": {
       "states": [
-        "lookAround",
-        "walk",
         "idle",
+        "walk",
+        "lookAround",
         "leave"
       ],
-      "nativeBonePoses": 197,
-      "distance": 43.56373824499598,
+      "nativeBonePoses": 460,
+      "distance": 104.20360268042421,
+      "clips": [
+        "Survey",
+        "Walk",
+        "Run"
+      ],
+      "footOffset": 0.001339192435145378
+    },
+    "fox-village": {
+      "states": [
+        "idle",
+        "walk",
+        "lookAround",
+        "leave"
+      ],
+      "nativeBonePoses": 303,
+      "distance": 66.83281572999687,
       "clips": [
         "Survey",
         "Walk",
@@ -38,10 +163,43 @@
     "rabbit": {
       "states": [
         "idle",
-        "hop"
+        "hop",
+        "lookAround"
       ],
-      "nativeBonePoses": 65,
-      "distance": 49.313336035607485,
+      "nativeBonePoses": 166,
+      "distance": 81.51336395890205,
+      "clips": [
+        "Armature|Jump",
+        "Armature|Running",
+        "Armature|Guarding",
+        "Armature|Sitting.000"
+      ],
+      "footOffset": 0.01808087628354806
+    },
+    "rabbit-west": {
+      "states": [
+        "idle",
+        "hop",
+        "lookAround"
+      ],
+      "nativeBonePoses": 168,
+      "distance": 83.88219840555765,
+      "clips": [
+        "Armature|Jump",
+        "Armature|Running",
+        "Armature|Guarding",
+        "Armature|Sitting.000"
+      ],
+      "footOffset": 0.01808087628354806
+    },
+    "rabbit-east": {
+      "states": [
+        "idle",
+        "hop",
+        "lookAround"
+      ],
+      "nativeBonePoses": 161,
+      "distance": 78.20726274353292,
       "clips": [
         "Armature|Jump",
         "Armature|Running",
@@ -52,24 +210,44 @@
     }
   },
   "three": "128",
-  "flowerRootMaxError": 1.3940707921378248e-8,
+  "flowerRootMaxError": 2.877742252826998e-8,
   "simulation": {
     "seconds": 120,
     "steps": 7200,
-    "largestStep": 0.023213150802846326
+    "largestStep": 0.04390847213238558
   },
   "memory": {
     "before": {
-      "geometries": 185,
-      "textures": 79
+      "geometries": 201,
+      "textures": 96
     },
     "after": {
-      "geometries": 185,
-      "textures": 79
+      "geometries": 201,
+      "textures": 96
     }
   },
+  "coverage": {
+    "spring": {
+      "left": 5,
+      "right": 4,
+      "front": 3,
+      "back": 6
+    },
+    "summer": {
+      "left": 5,
+      "right": 2,
+      "front": 3,
+      "back": 4
+    }
+  },
+  "waves": {
+    "min": -0.11467772370756582,
+    "max": 0.1068648042678306,
+    "vertices": 6413
+  },
   "audit": {
-    "total": 730,
+    "total": 878,
+    "waterAnimals": 8,
     "counts": {
       "tree": 201,
       "rock": 18,
@@ -79,9 +257,9 @@
       "house": 8,
       "fence": 12,
       "person": 3,
-      "flower-cluster": 14,
-      "flower": 348,
-      "land-animal": 2
+      "flower-cluster": 21,
+      "flower": 486,
+      "land-animal": 5
     },
     "invalid": [],
     "paths": [
@@ -104,6 +282,58 @@
       {
         "id": "inhabitant-2",
         "samples": 492
+      },
+      {
+        "id": "swan-route",
+        "samples": 287
+      },
+      {
+        "id": "swan-west-route",
+        "samples": 378
+      },
+      {
+        "id": "swan-pair-route",
+        "samples": 277
+      },
+      {
+        "id": "swan-far-route",
+        "samples": 332
+      },
+      {
+        "id": "swan-far-west-route",
+        "samples": 212
+      },
+      {
+        "id": "fish-route",
+        "samples": 140
+      },
+      {
+        "id": "fish-west-route",
+        "samples": 209
+      },
+      {
+        "id": "fish-east-route",
+        "samples": 207
+      },
+      {
+        "id": "fox-route",
+        "samples": 245
+      },
+      {
+        "id": "fox-village-route",
+        "samples": 97
+      },
+      {
+        "id": "rabbit-route",
+        "samples": 145
+      },
+      {
+        "id": "rabbit-west-route",
+        "samples": 127
+      },
+      {
+        "id": "rabbit-east-route",
+        "samples": 114
       }
     ],
     "crossings": [
@@ -140,10 +370,12 @@
     "shoreSafeBand": 1.8
   },
   "cache": {
-    "entries": 2,
-    "requests": 2,
-    "refs": 2,
+    "entries": 4,
+    "requests": 4,
+    "refs": 13,
     "states": [
+      "ready",
+      "ready",
       "ready",
       "ready"
     ]

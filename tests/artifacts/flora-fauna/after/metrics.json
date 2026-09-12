@@ -1,7 +1,7 @@
 {
   "phase": "after",
-  "readyMs": 814.5,
-  "resourcesReadyMs": 1491.0999999940395,
+  "readyMs": 1256,
+  "resourcesReadyMs": 1843.4000000357628,
   "settleMs": 3200,
   "measureMs": 4000,
   "errors": [],
@@ -9,6 +9,8 @@
     "desktop-summer-day",
     "desktop-spring-day",
     "desktop-spring-dusk",
+    "desktop-summer-dusk",
+    "desktop-summer-night",
     "desktop-autumn-day",
     "desktop-winter-day",
     "mobile-summer-day",
@@ -16,11 +18,11 @@
   ],
   "performance": {
     "summer": {
-      "calls": 434,
-      "triangles": 863638,
-      "textures": 84,
-      "geometries": 229,
-      "fps": 60.21688071578578,
+      "calls": 448,
+      "triangles": 890408,
+      "textures": 97,
+      "geometries": 233,
+      "fps": 60.16576792454702,
       "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)",
       "camera": {
         "position": [
@@ -37,11 +39,11 @@
       }
     },
     "spring": {
-      "calls": 435,
-      "triangles": 871438,
-      "textures": 84,
-      "geometries": 230,
-      "fps": 60.17478152309613,
+      "calls": 449,
+      "triangles": 903484,
+      "textures": 97,
+      "geometries": 234,
+      "fps": 60.10124940807325,
       "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)",
       "camera": {
         "position": [
@@ -59,7 +61,8 @@
     }
   },
   "surface": {
-    "total": 730,
+    "total": 878,
+    "waterAnimals": 8,
     "counts": {
       "tree": 201,
       "rock": 18,
@@ -69,9 +72,9 @@
       "house": 8,
       "fence": 12,
       "person": 3,
-      "flower-cluster": 14,
-      "flower": 348,
-      "land-animal": 2
+      "flower-cluster": 21,
+      "flower": 486,
+      "land-animal": 5
     },
     "invalid": [],
     "paths": [
@@ -94,6 +97,58 @@
       {
         "id": "inhabitant-2",
         "samples": 492
+      },
+      {
+        "id": "swan-route",
+        "samples": 287
+      },
+      {
+        "id": "swan-west-route",
+        "samples": 378
+      },
+      {
+        "id": "swan-pair-route",
+        "samples": 277
+      },
+      {
+        "id": "swan-far-route",
+        "samples": 332
+      },
+      {
+        "id": "swan-far-west-route",
+        "samples": 212
+      },
+      {
+        "id": "fish-route",
+        "samples": 140
+      },
+      {
+        "id": "fish-west-route",
+        "samples": 209
+      },
+      {
+        "id": "fish-east-route",
+        "samples": 207
+      },
+      {
+        "id": "fox-route",
+        "samples": 245
+      },
+      {
+        "id": "fox-village-route",
+        "samples": 97
+      },
+      {
+        "id": "rabbit-route",
+        "samples": 145
+      },
+      {
+        "id": "rabbit-west-route",
+        "samples": 127
+      },
+      {
+        "id": "rabbit-east-route",
+        "samples": 114
       }
     ],
     "crossings": [

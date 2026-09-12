@@ -36,7 +36,10 @@ window.WorldSurface=(()=>{
  const inZone=(x,z,name)=>!name||!!zones[name]&&x>=zones[name].x[0]&&x<=zones[name].x[1]&&z>=zones[name].z[0]&&z<=zones[name].z[1];
  const glsl=`float shoreNear(float x){return -14.-2.2*sin(x*.043)-abs(x+5.)*.018;}float shoreFar(float x){return -100.+3.2*sin(x*.039+1.2);}float shoreDistance(vec2 p){return max(max(p.y-shoreNear(p.x),shoreFar(p.x)-p.y),abs(p.x+10.)-(108.+12.*sin((p.y+100.)/86.*3.14159265)));}`;
  function create(){
-  const placements=[],paths=[],crossings=[],reserves=[],flowerCores=[],animalPaths=[];
+  const placements=[],paths=[],crossings=[],reserves=[],flowerCores=[],animalPaths=[],waterPlacements=[];
+  const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+  const waveHeight=(x,z,time)=>smooth(.7,4,-distanceToShore(x,z))*(Math.sin(x*.32+z*.51+time*.18)*.075+Math.sin(x*1.07-z*.76-time*.13)*.04);
+  const waveGLSL=`float waveHeight(vec2 p,float t){return smoothstep(.7,4.,-shoreDistance(p))*(sin(p.x*.32+p.y*.51+t*.18)*.075+sin(p.x*1.07-p.y*.76-t*.13)*.04);}`;
   const segmentDistance=(x,z,a,b)=>{const dx=b[0]-a[0],dz=b[1]-a[1],l=dx*dx+dz*dz,t=l?Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/l)):0;return Math.hypot(x-a[0]-t*dx,z-a[1]-t*dz);};
   function corridorHit(p,points,width){for(let i=1;i<points.length;i++)if(segmentDistance(p.x,p.z,points[i-1],points[i])<p.radius+width)return true;return false;}
   function obstacleErrors(p){
@@ -79,7 +82,7 @@ window.WorldSurface=(()=>{
    if(surfaceType(...start)!=='land'||surfaceType(...end)!=='water'||deckY<waterLevel+.15)throw new Error('Invalid shoreline crossing '+id);
    const c={id,kind:'shoreline-crossing',start,end,width,deckY};crossings.push(c);return c;
   }
-  function audit(){const invalid=placements.flatMap(p=>validate(p).map(reason=>({id:p.id,reason})));for(const route of paths)for(const p of route.samples)for(const reason of validate(p))invalid.push({id:route.id,reason});return {total:placements.length,counts:placements.reduce((a,p)=>(a[p.kind]=(a[p.kind]||0)+1,a),{}),invalid,paths:paths.map(p=>({id:p.id,samples:p.samples.length})),crossings,waterLevel,shoreSafeBand};}
+  function audit(){const invalid=placements.flatMap(p=>validate(p).map(reason=>({id:p.id,reason})));for(const p of waterPlacements)for(const reason of validateWater(p))invalid.push({id:p.id,reason});for(const route of [...paths,...animalPaths,...reserves])for(const p of route.samples)for(const reason of (route.medium==='water'?validateWater(p):validate(p)))invalid.push({id:route.id,reason});return {total:placements.length,waterAnimals:waterPlacements.length,counts:placements.reduce((a,p)=>(a[p.kind]=(a[p.kind]||0)+1,a),{}),invalid,paths:[...paths,...animalPaths].map(p=>({id:p.id,samples:p.samples.length})),crossings,waterLevel,shoreSafeBand};}
   function validateWater(p){
    if(![p.x,p.z,p.baseY,p.radius].every(Number.isFinite))return ['non-finite water placement'];
    const errors=[],band=p.shoreClearance??2.5;
@@ -95,7 +98,7 @@ window.WorldSurface=(()=>{
    return {id,points:points.map(p=>p.slice()),samples,valid:true,medium:options.medium||'land',radius:options.radius||.3};
   }
   function reserve(id,points,radius){const route=motionPath(id,points,{radius});if(!route.valid)throw new Error(id+': '+route.errors);reserves.push({...route,radius});return route;}
-  return {waterLevel,shoreSafeBand,nearShore,farShore,halfWidth,baseTerrainHeight,mountainLayerHeight,terrainHeight,distanceToShore,surfaceType,zones,placements,paths,crossings,reserves,flowerCores,animalPaths,validate,validateWater,obstacleErrors,motionPath,reserve,place,sample,path,crossing,audit,glsl};
+  return {waterLevel,waveHeight,waveGLSL,shoreSafeBand,nearShore,farShore,halfWidth,baseTerrainHeight,mountainLayerHeight,terrainHeight,distanceToShore,surfaceType,zones,placements,waterPlacements,paths,crossings,reserves,flowerCores,animalPaths,validate,validateWater,obstacleErrors,motionPath,reserve,place,sample,path,crossing,audit,glsl};
  }
  return {create,waterLevel,nearShore,farShore,terrainHeight,distanceToShore,surfaceType,glsl};
 })();

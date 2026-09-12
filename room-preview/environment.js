@@ -31,7 +31,7 @@ window.OutdoorEnvironment={create(scene,lights){
   for(let i=0;i<p.count;i++)p.setY(i,surface.mountainLayerHeight(p.getX(i),p.getZ(i),layer));
   g.computeVertexNormals();const vertexColors=[];for(let i=0;i<p.count;i++){const v=.78+.13*Math.sin(p.getX(i)*.41+p.getZ(i)*.13)*Math.sin(p.getY(i)*.9)+.09*g.attributes.normal.getY(i);vertexColors.push(v,v,v);}g.setAttribute('color',new T.Float32BufferAttribute(vertexColors,3));const m=new T.MeshStandardMaterial({color:'#777e73',vertexColors:true,roughness:.96,side:T.DoubleSide});surfaceShader(m,'mountain');const mesh=new T.Mesh(g,m);mesh.name='folded-rock-massif-'+layer;root.add(mesh);mountains.push(m);
  }
- const waterMat=new T.ShaderMaterial({uniforms,transparent:true,depthWrite:false,vertexShader:`uniform float time;varying vec3 world;${surface.glsl}void main(){world=(modelMatrix*vec4(position,1.)).xyz;float depth=-shoreDistance(world.xz),edge=smoothstep(.7,4.,depth);world.y+=edge*(sin(world.x*.32+world.z*.51+time*.18)*.075+sin(world.x*1.07-world.z*.76-time*.13)*.04);gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`,fragmentShader:`uniform float time,night,dusk,villageLight;uniform vec3 sky,waterColor,sunDirection,sunColor;varying vec3 world;${noise}${surface.glsl}${skyGLSL}
+ const waterMat=new T.ShaderMaterial({uniforms,transparent:true,depthWrite:false,vertexShader:`uniform float time;varying vec3 world;${surface.glsl}${surface.waveGLSL}void main(){world=(modelMatrix*vec4(position,1.)).xyz;world.y+=waveHeight(world.xz,time);gl_Position=projectionMatrix*viewMatrix*vec4(world,1.);}`,fragmentShader:`uniform float time,night,dusk,villageLight;uniform vec3 sky,waterColor,sunDirection,sunColor;varying vec3 world;${noise}${surface.glsl}${skyGLSL}
  void main(){vec2 p=world.xz;float depth=-shoreDistance(p);if(depth<0.)discard;
  // Analytic derivatives of three repeating waves are the water normal (no flat colour-only ripples).
  float w1=p.x*.32+p.y*.51+time*.18,w2=p.x*1.07-p.y*.76-time*.13,w3=p.x*4.7+p.y*3.3+time*.35;
@@ -44,7 +44,7 @@ window.OutdoorEnvironment={create(scene,lights){
  float foam=(1.-smoothstep(.15,1.1,depth))*(.4+.6*noise(p*3.+time*.1));col=mix(col,vec3(.54,.66,.63),foam*.25);
  float distantGlow=exp(-pow((p.x+49.+sin(p.y*3.+time)*.7)/19.,2.))*exp(-pow((p.y+93.)/5.,2.));col+=vec3(.17,.072,.016)*distantGlow*villageLight*noise(p*vec2(2.,9.));
  gl_FragColor=vec4(col,smoothstep(0.,.65,depth));\n#include <tonemapping_fragment>\n#include <encodings_fragment>\n}`});
- const water=new T.Mesh(new T.PlaneGeometry(270,112,120,52),waterMat);water.rotation.x=-Math.PI/2;water.position.set(-10,surface.waterLevel,-59);water.name='shore-clipped-blue-lake';root.add(water);
+ const water=new T.Mesh(new T.PlaneGeometry(270,112,120,52),waterMat);water.rotation.x=-Math.PI/2;water.position.set(-10,surface.waterLevel,-59);water.name='shore-clipped-blue-lake';water.renderOrder=0;root.add(water);
  const barkMat=new T.MeshStandardMaterial({color:'#65503b',map:A.bark(),roughness:1});
  const pineMat=new T.MeshStandardMaterial({color:'#244d3c',roughness:1});surfaceShader(pineMat,'foliage');
  const leafMats=['#427839','#649342','#83a348'].map(color=>{const m=new T.MeshStandardMaterial({color,roughness:1});surfaceShader(m,'foliage');return m;});
@@ -90,7 +90,7 @@ window.OutdoorEnvironment={create(scene,lights){
  const pathPts=[[8.7,-.5],[11.5,-4],[14,-8],[16,sz+4.5]];surface.path('room-to-pier',pathPts,.5);
  const steps=[];for(let i=0;i<9;i++){const x=8.7+i*.8,z=-.5-i*1.2;steps.push({p:surface.place('path-stone',x,z,{radius:.6}),h:.65,rot:.07*Math.sin(i)});}instance(new T.BoxGeometry(1.4,.12,.9).translate(0,.06,0),rockMat,steps,'grounded-path-stones',true);
  const village=LakesideVillage.create(scene,surface,uniforms);
- const flowers=FlowerSystem.create(root,surface,uniforms);
+ const flowers=FlowerSystem.create(root,surface,uniforms),birds=BirdSystem.create(root);
  const starsGeo=new T.BufferGeometry(),starPos=[];for(let i=0;i<220;i++){const a=rand()*6.28,e=.15+rand()*1.25;starPos.push(Math.cos(a)*Math.cos(e)*300,Math.sin(e)*300,Math.sin(a)*Math.cos(e)*300);}starsGeo.setAttribute('position',new T.Float32BufferAttribute(starPos,3));const stars=new T.Points(starsGeo,new T.PointsMaterial({color:'#bcd1eb',size:.32,transparent:true,opacity:0,depthWrite:false}));root.add(stars);
  const moon=new T.Mesh(new T.SphereGeometry(2.5,16,12),new T.MeshBasicMaterial({color:'#dbe5e0'}));moon.name='moon';moon.position.set(-105,83,-205);root.add(moon);
  const particlePos=new Float32Array(64*3);for(let i=0;i<64;i++){particlePos[i*3]=(rand()-.5)*45;particlePos[i*3+1]=rand()*15;particlePos[i*3+2]=-8-rand()*25;}const pg=new T.BufferGeometry();pg.setAttribute('position',new T.BufferAttribute(particlePos,3));const particles=new T.Points(pg,new T.PointsMaterial({color:'#e9eeee',size:.045,transparent:true,opacity:.65,depthWrite:false}));root.add(particles);
@@ -106,7 +106,7 @@ window.OutdoorEnvironment={create(scene,lights){
    const pointsGeo=new T.BufferGeometry().setFromPoints(surface.placements.map(p=>new T.Vector3(p.x,p.baseY+.6,p.z)));const points=new T.Points(pointsGeo,new T.PointsMaterial({color:'#f26faf',size:3,sizeAttenuation:false,depthTest:false}));points.renderOrder=110;debug.add(points);
    const v=surface.zones.village;line([[v.x[0],1,v.z[0]],[v.x[1],1,v.z[0]],[v.x[1],1,v.z[1]],[v.x[0],1,v.z[1]]],'#d8a0ff',true);
    surface.paths.forEach(p=>line(p.samples.map(p=>[p.x,p.baseY+.3,p.z]),'#ffffff'));
-   surface.reserves.forEach(p=>line(p.samples.map(p=>[p.x,p.baseY+.32,p.z]),'#65e6b3'));
+   surface.reserves.forEach(p=>line(p.samples.map(p=>[p.x,p.baseY+.32,p.z]),'#65e6b3'));surface.animalPaths.filter(p=>p.medium==='water').forEach(p=>line(p.samples.map(q=>[q.x,q.baseY+.35,q.z]),'#75bbff'));
    for(const c of flowers.clusters){const ring=[];for(let i=0;i<40;i++){const a=i*Math.PI/20;ring.push([c.x+Math.cos(a)*c.radius,c.baseY+.16,c.z+Math.sin(a)*c.radius]);}line(ring,c.season==='spring'?'#ffb8ed':'#ffe47c',true);}
    const helper=new T.CameraHelper(lights.sun.shadow.camera);helper.material.depthTest=false;helper.renderOrder=105;debug.add(helper);debug.userData.shadowHelper=helper;
    const arrow=new T.ArrowHelper(rig.direction.clone().negate(),lights.sun.position,32,0xffd265,3,2);debug.add(arrow);debug.userData.sunArrow=arrow;
@@ -119,7 +119,7 @@ window.OutdoorEnvironment={create(scene,lights){
   scene.fog.color.set('#9bb6bd').lerp(new T.Color('#15263c'),sample.night);scene.fog.density=rig.config.fogDensity;stars.material.opacity=sample.night*.8;moon.visible=sample.night>.5;moon.position.copy(rig.direction).multiplyScalar(280);lamp.intensity=sample.night*1.9+sample.dusk*.7;
   village.update(t,season,sample.night,sample.dusk);
   flowers.apply(state.season);
-  animals.update(dt,t,sample);
+  animals.update(dt,t,sample);birds.update(t,sample.night);
   animalShadowTime+=dt;if(animalShadowTime>=(quality==='low'?.25:.12)){animalShadowTime=0;if(animals.animals.some(a=>a.group.visible))lights.renderer.shadowMap.needsUpdate=true;}
   const n=quality==='low'?Math.min(24,season.particles.count):season.particles.count;particles.visible=n>0;pg.setDrawRange(0,n);particles.material.color.set(season.particles.kind==='leaves'?'#b76b33':season.particles.kind==='petals'?'#ddbbb7':'#eef3f3');particles.material.size=season.particles.kind==='leaves'?.065:.035;
   for(let i=0;i<n;i++){particlePos[i*3]+=Math.sin(t*.2+i)*dt*.05;particlePos[i*3+1]-=Math.min(dt,.1)*.4;if(particlePos[i*3+1]<0)particlePos[i*3+1]=15;}if(n)pg.attributes.position.needsUpdate=true;
@@ -127,9 +127,9 @@ window.OutdoorEnvironment={create(scene,lights){
  }
  update(0,0);
  if(dev&&new URLSearchParams(location.search).get('debug')==='surface')setDebug(true);
- return {state,surface,water,uniforms,rig,village,flowers,animals,birds:[],root,setDebug,
+ return {state,surface,water,uniforms,rig,village,flowers,animals,birds,root,setDebug,
   setNight(v){this.setMode(v?'night':'day');},get isNight(){return state.sample().night>.5;},setMode(v){state.setMode(v);rig.invalidate();update(0,uniforms.time.value);},setSeason(v){state.setSeason(v);rig.invalidate();update(0,uniforms.time.value);},
-  setQuality(v){quality=v;far.count=v==='low'?36:farEntries.length;flowers.setQuality(v);animals.setQuality(v);lights.renderer.setPixelRatio(Math.min(devicePixelRatio,v==='low'?1:1.6));},async setVolume(){},update,
+  setQuality(v){quality=v;far.count=v==='low'?36:farEntries.length;flowers.setQuality(v);animals.setQuality(v);birds.setQuality(v);lights.renderer.setPixelRatio(Math.min(devicePixelRatio,v==='low'?1:1.6));},async setVolume(){},update,
   dispose(){
    const geometries=new Set(),materials=new Set(),textures=new Set();
    [root,village.root,debug].filter(Boolean).forEach(group=>group.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}));

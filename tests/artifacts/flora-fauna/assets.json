@@ -27,6 +27,19 @@
     "checksum": "aa7abb1b0e731041e4354471a836eb1fabd213b7a789c0ebfe6e3ca7bee90d1c"
   },
   {
+    "id": "swan",
+    "fileSize": 56636,
+    "triangles": 282,
+    "skins": 1,
+    "textures": [],
+    "clips": [
+      "Idle",
+      "Swim",
+      "Preen"
+    ],
+    "checksum": "0ca1219a0ca9c17754e196f43968810d2a49dba909655b0d98eb435e7a8cd9cf"
+  },
+  {
     "id": "fox",
     "fileSize": 162852,
     "triangles": 576,
@@ -43,5 +56,17 @@
       "Run"
     ],
     "checksum": "d97044e701822bac5a62696459b27d7b375aada5de8574ed4362edbba94771f7"
+  },
+  {
+    "id": "fish",
+    "fileSize": 23260,
+    "triangles": 110,
+    "skins": 1,
+    "textures": [],
+    "clips": [
+      "Idle",
+      "Swim"
+    ],
+    "checksum": "ea9c6557bbd1f297a1a2534377dd81e010a6f7304dc7b9a8718f83df319116cd"
   }
 ]

@@ -28,18 +28,15 @@ window.FlowerSystem=(()=>{
    s.vertexShader=s.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>\nflowerColor=mix(flowerStem,instanceBloom,petalMask);transformed.xz*=mix(1.,flowerBloom,petalMask);float phase=instanceMatrix[3].x*2.7+instanceMatrix[3].z*1.9;transformed.x+=sin(flowerTime*.85+phase)*flowerWind*pow(position.y/.6,2.);`);
    s.fragmentShader='varying vec3 flowerColor;\n'+s.fragmentShader;s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\ndiffuseColor.rgb*=flowerColor;');
   };material.customProgramCacheKey=()=> 'grounded-flowers-r128-v1';
-  // Reserve two short habitat corridors before placing flower cores or individual plants.
-  surface.reserve('rabbit-meadow-a',[[-3,-4.5],[-1,-5.5],[2,-6.2],[5,-6.2]],.34);
-  surface.reserve('rabbit-meadow-b',[[-12,9],[-10,5],[-9,1],[-7,-2]],.34);
-  surface.reserve('rabbit-meadow-c',[[12,12],[14,9],[16,6],[18,3]],.34);
-  surface.reserve('fox-forest-edge',[[-24,4],[-21,0],[-18,-4],[-14,-7],[-10,-5],[-8,-9]],.48);
+  for(const h of AnimalHabitats)if(AnimalSpecies[h.species].medium==='land')surface.reserve(h.id,h.route,AnimalSpecies[h.species].radius);
   const seeds=[[-8,-3],[-4,-9],[1,-9],[5,-9],[10,-8],[13,-3],[13,4],[12,10],[6,12],[0,12],[-4,8],[-4,3]];
   for(const season of ['spring','summer']){
    const cfg=WorldState.seasons[season].flower,rand=A.random(season==='spring'?7331:9441);entries[season]=[];
    for(let c=0;c<cfg.clusterCount;c++){
     let core=null;
     for(let attempt=0;attempt<1800&&!core;attempt++){
-     const x=seeds[c][0]+(rand()-.5)*3.2,z=seeds[c][1]+(rand()-.5)*2.8;
+     const seed=seeds[season==='summer'?[0,1,3,5,6,8,9,10,11][c]:c];
+     const x=seed[0]+(rand()-.5)*4.4,z=seed[1]+(rand()-.5)*4.4;
      const p={id:`flower-cluster-${season}-${c}`,kind:'flower-cluster',season,x,z,baseY:surface.terrainHeight(x,z),radius:cfg.clusterRadius,clearance:.12};
      if(surface.validate(p).length||clusters.some(q=>q.season===season&&Math.hypot(x-q.x,z-q.z)<cfg.clusterRadius+q.radius+.45))continue;
      core=surface.place('flower-cluster',x,z,p);core.coreRadius=.85;core.tier=c===0||c===7?'middle':'near';clusters.push(core);surface.flowerCores.push(core);

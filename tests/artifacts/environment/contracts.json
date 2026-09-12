@@ -8,7 +8,7 @@
     ],
     "seasons": {
       "summer": {
-        "appliedMs": 0.30000001192092896,
+        "appliedMs": 0.19999998807907104,
         "snow": 0,
         "conifer": "04120b",
         "deciduous": "0d2f0a",
@@ -16,7 +16,7 @@
         "roof": "121715"
       },
       "autumn": {
-        "appliedMs": 0.09999999403953552,
+        "appliedMs": 0.19999998807907104,
         "snow": 0,
         "conifer": "04110c",
         "deciduous": "630c05",
@@ -32,7 +32,7 @@
         "roof": "c3cdc7"
       },
       "spring": {
-        "appliedMs": 0.09999999403953552,
+        "appliedMs": 0.3999999761581421,
         "snow": 0.08,
         "conifer": "05160c",
         "deciduous": "235d11",
@@ -67,17 +67,20 @@
       }
     },
     "audit": {
-      "total": 382,
+      "total": 878,
+      "waterAnimals": 8,
       "counts": {
         "tree": 201,
         "rock": 18,
         "shrub": 25,
         "grass": 90,
-        "flower": 16,
         "path-stone": 9,
         "house": 8,
         "fence": 12,
-        "person": 3
+        "person": 3,
+        "flower-cluster": 21,
+        "flower": 486,
+        "land-animal": 5
       },
       "invalid": [],
       "paths": [
@@ -100,6 +103,58 @@
         {
           "id": "inhabitant-2",
           "samples": 492
+        },
+        {
+          "id": "swan-route",
+          "samples": 287
+        },
+        {
+          "id": "swan-west-route",
+          "samples": 378
+        },
+        {
+          "id": "swan-pair-route",
+          "samples": 277
+        },
+        {
+          "id": "swan-far-route",
+          "samples": 332
+        },
+        {
+          "id": "swan-far-west-route",
+          "samples": 212
+        },
+        {
+          "id": "fish-route",
+          "samples": 140
+        },
+        {
+          "id": "fish-west-route",
+          "samples": 209
+        },
+        {
+          "id": "fish-east-route",
+          "samples": 207
+        },
+        {
+          "id": "fox-route",
+          "samples": 245
+        },
+        {
+          "id": "fox-village-route",
+          "samples": 97
+        },
+        {
+          "id": "rabbit-route",
+          "samples": 145
+        },
+        {
+          "id": "rabbit-west-route",
+          "samples": 127
+        },
+        {
+          "id": "rabbit-east-route",
+          "samples": 114
         }
       ],
       "crossings": [

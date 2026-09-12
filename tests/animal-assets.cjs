@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),crypto=require('crypto');
-const context={window:{}};vm.createContext(context);vm.runInContext(fs.readFileSync('room-preview/animal-manifest.js','utf8'),context);
+const context={};context.window=context;vm.createContext(context);vm.runInContext(fs.readFileSync('room-preview/animal-manifest.js','utf8'),context);
 const report=[];
 for(const d of context.window.AnimalManifest){if(!d.enabled){assert.ok(d.blocker);continue;}for(const key of ['sourceURL','author','license','localFile','fileSize','textureSize','defaultScale','checksum'])assert.ok(d[key],d.id+' '+key);if(d.attributionRequired)assert.ok(d.attribution);
  const b=fs.readFileSync('room-preview/'+d.localFile);assert.equal(b.length,d.fileSize);assert.equal(b.readUInt32LE(0),0x46546c67);assert.equal(b.readUInt32LE(8),b.length);assert.equal(crypto.createHash('sha256').update(b).digest('hex'),d.checksum);
