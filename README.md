@@ -1,6 +1,12 @@
 # Lake Room · Personal Digital World
 
+中文名：湖畔 3D 个人数字世界
+
 沿用原生 Three.js 房间，加入湖岸、松林、湖面、层叠远山、真实时间与四季配置、完整水平环绕，以及可持续管理内容的 Owner Studio。
+
+![Lake Room 夏季白天全景](tests/artifacts/flora-fauna/after/desktop-summer-day.png)
+
+这是一个 AI 辅助迭代的 3D 产品工程项目。作者负责体验方向、素材许可、场景约束和验收；AI 用于加速代码探索、视觉迭代与自动化测试。场景运行时由 Three.js、程序化环境系统和本地内容后端驱动，并非生成式 AI 渲染。
 
 ## 启动
 
@@ -23,6 +29,8 @@
 - room-preview/admin/：登录、上传、编辑、排序、公开／私有。
 
 [当前环境重构与实测验收](docs/ENVIRONMENT-REFACTOR.md) · [历史视觉参考与产品架构判断](docs/TAHOE-IMPLEMENTATION.md) · [未来产品方向](docs/future-ideas.md) · [当前 Owner 与权限说明](docs/OWNER-SETUP.md)。旧 docs/CONTENT-AND-SECURITY.md 记录前一次静态版审计，当前后端实现以上述说明为准。
+
+[版本演进](DEVELOPMENT_HISTORY.md) · [AI 协作与能力边界](docs/AI-DEVELOPMENT.md) · [素材来源与许可](docs/ASSET-LICENSES.md)
 
 ## 验证
 
