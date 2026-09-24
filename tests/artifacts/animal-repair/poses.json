@@ -1,0 +1,47 @@
+[
+  {
+    "state": "idle",
+    "position": [
+      8,
+      -0.18419104807920111,
+      -7.6
+    ],
+    "groundCorrection": 0
+  },
+  {
+    "state": "hop",
+    "position": [
+      7.443051197851735,
+      -0.18106718933195695,
+      -7.340090558997476
+    ],
+    "groundCorrection": 0
+  },
+  {
+    "state": "lookAround",
+    "position": [
+      -12,
+      -0.1659656759585635,
+      9
+    ],
+    "groundCorrection": 0
+  },
+  {
+    "state": "walk",
+    "position": [
+      -7.930241796922857,
+      -0.1407739371496085,
+      16.005813183589794
+    ],
+    "groundCorrection": 0
+  },
+  {
+    "state": "graze",
+    "position": [
+      18,
+      -0.12042921013678469,
+      3
+    ],
+    "groundCorrection": 0.019197185501965457
+  }
+]

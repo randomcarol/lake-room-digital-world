@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "sceneId": "concert",
+  "version": "0.1.0",
+  "coordinates": {
+    "units": "metres",
+    "up": "+Y",
+    "forward": "+Z",
+    "handedness": "right"
+  },
+  "runtime": {
+    "family": "three",
+    "requiredRevision": "128",
+    "ownsRenderer": true
+  },
+  "assets": [
+    {
+      "id": "concert.html",
+      "uri": "concert.html",
+      "sha256": "3fce3b802f954d235fb25f3e42829e7c79a05b21722e56cf7ce5982e00c57311",
+      "bytes": 1120,
+      "format": "html",
+      "license": {
+        "status": "project-owned",
+        "identifier": "Project-owned; distribution license not assigned",
+        "author": "3D Room project original, authored with Codex",
+        "source": "standalone-demos/concert.html",
+        "attribution": "Original architectural study for this project",
+        "attributionRequired": false,
+        "permittedUses": [
+          "preview",
+          "adaptation"
+        ],
+        "evidencePath": "README.md",
+        "reviewedAt": "2026-09-14"
+      },
+      "required": true,
+      "compression": "None; runtime meshes use shared geometry and instancing",
+      "dependencies": [
+        "concert.js",
+        "common.js",
+        "demo.css",
+        "vendor/three.min.js",
+        "vendor/OrbitControls.js",
+        "vendor/THREE-LICENSE"
+      ],
+      "maxTextureDimension": 0
+    },
+    {
+      "id": "concert.js",
+      "uri": "concert.js",
+      "sha256": "b4f46ea259e199322230a901b85ba73b0113725965dd98089f7be557886d927c",
+      "bytes": 5467,
+      "format": "procedural-js",
+      "license": {
+        "status": "project-owned",
+        "identifier": "Project-owned; distribution license not assigned",
+        "author": "3D Room project original, authored with Codex",
+        "source": "standalone-demos/concert.js",
+        "attribution": "Original architectural study for this project",
+        "attributionRequired": false,
+        "permittedUses": [
+          "preview",
+          "adaptation"
+        ],
+        "evidencePath": "README.md",
+        "reviewedAt": "2026-09-14"
+      },
+      "required": true,
+      "compression": "None; runtime meshes use shared geometry and instancing",
+      "dependencies": [
+        "vendor/three.min.js",
+        "common.js"
+      ],
+      "maxTextureDimension": 0
+    },
+    {
+      "id": "common.js",
+      "uri": "common.js",
+      "sha256": "80e1597001b91a6ce013de92b2fee5979783fed629f15587c142817f80a669af",
+      "bytes": 4755,
+      "format": "procedural-js",
+      "license": {
+        "status": "project-owned",
+        "identifier": "Project-owned; distribution license not assigned",
+        "author": "3D Room project original, authored with Codex",
+        "source": "standalone-demos/common.js",
+        "attribution": "Original architectural study for this project",
+        "attributionRequired": false,
+        "permittedUses": [
+          "preview",
+          "adaptation"
+        ],
+        "evidencePath": "README.md",
+        "reviewedAt": "2026-09-14"
+      },
+      "required": true,
+      "compression": "None; runtime meshes use shared geometry and instancing",
+      "dependencies": [
+        "vendor/three.min.js",
+        "vendor/OrbitControls.js"
+      ],
+      "maxTextureDimension": 1024
+    },
+    {
+      "id": "demo.css",
+      "uri": "demo.css",
+      "sha256": "70771dbecb3575a6ee6724b0d4154e5be5f85a5ddb50cb96d3ff8aec70b3ccb6",
+      "bytes": 1633,
+      "format": "css",
+      "license": {
+        "status": "project-owned",
+        "identifier": "Project-owned; distribution license not assigned",
+        "author": "3D Room project original, authored with Codex",
+        "source": "standalone-demos/demo.css",
+        "attribution": "Original architectural study for this project",
+        "attributionRequired": false,
+        "permittedUses": [
+          "preview",
+          "adaptation"
+        ],
+        "evidencePath": "README.md",
+        "reviewedAt": "2026-09-14"
+      },
+      "required": true,
+      "compression": "None; runtime meshes use shared geometry and instancing",
+      "dependencies": [],
+      "maxTextureDimension": 0
+    },
+    {
+      "id": "vendor/three.min.js",
+      "uri": "vendor/three.min.js",
+      "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2",
+      "bytes": 603445,
+      "format": "javascript",
+      "license": {
+        "status": "reviewed",
+        "identifier": "MIT",
+        "author": "Three.js contributors",
+        "source": "Existing project r128 vendor copy",
+        "attribution": "Copyright Three.js authors. MIT license retained.",
+        "attributionRequired": true,
+        "permittedUses": [
+          "preview",
+          "redistribution",
+          "adaptation",
+          "commercial"
+        ],
+        "evidencePath": "vendor/THREE-LICENSE",
+        "reviewedAt": "2026-09-14",
+        "originalURL": "https://github.com/mrdoob/three.js/tree/r128"
+      },
+      "required": true,
+      "compression": "Upstream minified JavaScript",
+      "dependencies": [],
+      "maxTextureDimension": 0
+    },
+    {
+      "id": "vendor/OrbitControls.js",
+      "uri": "vendor/OrbitControls.js",
+      "sha256": "02bb4ade710f3e607329e37a21f098bc3ac70eb6e33daf8a65e79f4db785e7b2",
+      "bytes": 26375,
+      "format": "javascript",
+      "license": {
+        "status": "reviewed",
+        "identifier": "MIT",
+        "author": "Three.js contributors",
+        "source": "Existing project r128 vendor copy",
+        "attribution": "Copyright Three.js authors. MIT license retained.",
+        "attributionRequired": true,
+        "permittedUses": [
+          "preview",
+          "redistribution",
+          "adaptation",
+          "commercial"
+        ],
+        "evidencePath": "vendor/THREE-LICENSE",
+        "reviewedAt": "2026-09-14",
+        "originalURL": "https://github.com/mrdoob/three.js/tree/r128"
+      },
+      "required": true,
+      "compression": "None; runtime meshes use shared geometry and instancing",
+      "dependencies": [
+        "vendor/three.min.js"
+      ],
+      "maxTextureDimension": 0
+    },
+    {
+      "id": "vendor/THREE-LICENSE",
+      "uri": "vendor/THREE-LICENSE",
+      "sha256": "7dddf7c5b8fd10ee654db8857d75d104b5557889aa5a91fc4ca545ea7c07062f",
+      "bytes": 1081,
+      "format": "text",
+      "license": {
+        "status": "reviewed",
+        "identifier": "MIT",
+        "author": "Three.js contributors",
+        "source": "Existing project r128 vendor copy",
+        "attribution": "Copyright Three.js authors. MIT license retained.",
+        "attributionRequired": true,
+        "permittedUses": [
+          "preview",
+          "redistribution",
+          "adaptation",
+          "commercial"
+        ],
+        "evidencePath": "vendor/THREE-LICENSE",
+        "reviewedAt": "2026-09-14",
+        "originalURL": "https://github.com/mrdoob/three.js/tree/r128"
+      },
+      "required": true,
+      "compression": "None; runtime meshes use shared geometry and instancing",
+      "dependencies": [],
+      "maxTextureDimension": 0
+    }
+  ]
+}

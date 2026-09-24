@@ -1,0 +1,260 @@
+{
+  "date": "2026-09-14",
+  "scope": "Completion of this repair/review/demo/design round only. Integration implementation waits for user direction.",
+  "requirements": [
+    {
+      "requirement": "fish",
+      "status": "pass",
+      "inspectedEvidence": "只偶发跃出；起落与整段合法水域；配置/低质量/无交互；首分钟 5 次实跑",
+      "files": [
+        {
+          "path": "room-preview/animal-system.js",
+          "sha256": "711446ab351c4e33153ca8373c7b01b176caeadf7b2be38241325fa4fc5d3b43"
+        },
+        {
+          "path": "room-preview/animal-manifest.js",
+          "sha256": "2222a699d056b8d57da13feb0936aaa0393019562a36dc948664441d5a9a6557"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/contracts.json",
+          "sha256": "8364194b3e8b58a3aefdace188aa663c6cd02d1710ded51a6897954ecfe945b8"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/visual-live.json",
+          "sha256": "994895924b67bfaece503f2171133bd85b9d29abe0e79de3a378366560924b55"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/wildlife-and-turn.webm",
+          "sha256": "402400c0b37a0e08d33a18ff23bfee74b19f67051767d0c8ae4dca0e1f2b2f19"
+        }
+      ]
+    },
+    {
+      "requirement": "rabbit",
+      "status": "pass",
+      "inspectedEvidence": "1 actor/1 mesh；三片区域连通；五状态；地面/转向/重复初始化；派生步态及低头实图",
+      "files": [
+        {
+          "path": "room-preview/animal-actor.js",
+          "sha256": "2f60171c547d6c8d92141148fd1c07b788ee6ae447ca201e3ad38876110aff90"
+        },
+        {
+          "path": "room-preview/animal-animation.js",
+          "sha256": "d12ca2901feb076082d473d63445a88e5303b1c700a12f341466b7f3dd404eef"
+        },
+        {
+          "path": "room-preview/animal-movement.js",
+          "sha256": "b77eeb02ae7bdd823b2f71913fdf19be4812078647ce772ab9e3a1f51a5fbb2c"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/diagnosis-before.json",
+          "sha256": "e1051b9b218c8ea381cab5e16c14261958beacb8d5e9fe23c35d39e21bd8f3cc"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/contracts.json",
+          "sha256": "8364194b3e8b58a3aefdace188aa663c6cd02d1710ded51a6897954ecfe945b8"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/rabbit-state-walk.png",
+          "sha256": "4e8bd72a2c6d07f8ec719a40a48058d8ab71ad16d017450d696a33df326ec5cc"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/rabbit-state-graze.png",
+          "sha256": "a07922278535e726cc09def2f794efc208be7940c5be5e753bfdf6ab39dc9fd6"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/rabbit-turn-45.png",
+          "sha256": "6e895543a554a44e5a001c3fa0d612f6eef7f76a7a5e97f1bae9ee0ee0b13358"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/merged-routes-debug.png",
+          "sha256": "cf187b614ac86c5691b8356e618b432fb896c44239903d8fb091b1b0757197ec"
+        }
+      ]
+    },
+    {
+      "requirement": "fox",
+      "status": "pass",
+      "inspectedEvidence": "120 秒实跑左右覆盖，分段路径障碍验证，低频休息离场",
+      "files": [
+        {
+          "path": "room-preview/animal-manifest.js",
+          "sha256": "2222a699d056b8d57da13feb0936aaa0393019562a36dc948664441d5a9a6557"
+        },
+        {
+          "path": "room-preview/animal-movement.js",
+          "sha256": "b77eeb02ae7bdd823b2f71913fdf19be4812078647ce772ab9e3a1f51a5fbb2c"
+        },
+        {
+          "path": "room-preview/animal-actor.js",
+          "sha256": "2f60171c547d6c8d92141148fd1c07b788ee6ae447ca201e3ad38876110aff90"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/visual-live.json",
+          "sha256": "994895924b67bfaece503f2171133bd85b9d29abe0e79de3a378366560924b55"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/contracts.json",
+          "sha256": "8364194b3e8b58a3aefdace188aa663c6cd02d1710ded51a6897954ecfe945b8"
+        }
+      ]
+    },
+    {
+      "requirement": "projects",
+      "status": "pass",
+      "inspectedEvidence": "三个真实路径、栈/版本/入口/资产/身份/保存/构建/动态加载/整合比较与缺证据项",
+      "files": [
+        {
+          "path": "docs/THREE-PROJECT-REVIEW.md",
+          "sha256": "d86aacfd0e154664202375c5f0b2d16b655f28fd1a62efc74df9f2022898af16"
+        },
+        {
+          "path": "tests/artifacts/integration/project-evidence.json",
+          "sha256": "375b8f0df91e2a644da80a164d4dca521fdc42d072741b3435d37fc9854becd0"
+        }
+      ]
+    },
+    {
+      "requirement": "school",
+      "status": "pass",
+      "inspectedEvidence": "独立外观、校名/门厅、教室/实验室/庭院、入口返回标记、尺寸/材质/许可/后续资产",
+      "files": [
+        {
+          "path": "standalone-demos/school.html",
+          "sha256": "1d03057d1d1b41d3b765335131d5d0b36938e285407065da57b255f234e1ecb3"
+        },
+        {
+          "path": "standalone-demos/school.js",
+          "sha256": "52395e2fc51343bb13e5ac168371c063021a58ca34b105f1de81b3e055cc3d1a"
+        },
+        {
+          "path": "standalone-demos/README.md",
+          "sha256": "89011f717b2b7819a1beeb0cf2086af700bcce5b936b9d64fb3368e140a854eb"
+        },
+        {
+          "path": "standalone-demos/school.manifest.json",
+          "sha256": "86bcfe6faa4eb74f285a38ca0ca8f5be8af1f296eda51d2d16d71df2a82e479c"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/school-exterior.png",
+          "sha256": "9ce27993037c006e8599c2bb1d605b7745962b632cc9d29fc2ee6c38c6403901"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/school-classroom.png",
+          "sha256": "fd3560ceaeaa4e0041b438b78b55e29d08e3c4ee350dd6a07f7d962b03698222"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/school-courtyard.png",
+          "sha256": "e0fd479a747aaf31388aeafefdc2ac77d5990be41380cf96ce3f64fec775ee07"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/qa.json",
+          "sha256": "f07cfc6e0069d779a64fc2248ddbaa5e9b256a5a30b84094d5b4170d6b20a713"
+        }
+      ]
+    },
+    {
+      "requirement": "concert",
+      "status": "pass",
+      "inspectedEvidence": "独立木拱外观/入口、24 站位/80 席/舞台灯光、排练钢琴/谱架、音频仅预留位置",
+      "files": [
+        {
+          "path": "standalone-demos/concert.html",
+          "sha256": "3fce3b802f954d235fb25f3e42829e7c79a05b21722e56cf7ce5982e00c57311"
+        },
+        {
+          "path": "standalone-demos/concert.js",
+          "sha256": "b4f46ea259e199322230a901b85ba73b0113725965dd98089f7be557886d927c"
+        },
+        {
+          "path": "standalone-demos/README.md",
+          "sha256": "89011f717b2b7819a1beeb0cf2086af700bcce5b936b9d64fb3368e140a854eb"
+        },
+        {
+          "path": "standalone-demos/concert.manifest.json",
+          "sha256": "9ef75e701d5c03615f811f0eefd987284e2efdc9b42f9779fd4c810f6bfe040a"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/concert-exterior.png",
+          "sha256": "a05283d28d07b0a929c6ae17ccc901f227e6700eef89d1ecd96fd9f3203efabf"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/concert-hall.png",
+          "sha256": "40e48b4322848c1f806d06e7bc72d2537f5d5e6c17509ac0886d2c07a2d062bf"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/concert-rehearsal.png",
+          "sha256": "1804447cba0983068fde5abe1297c1a9aa748e99813e9a7ed841d1d5c66813f8"
+        }
+      ]
+    },
+    {
+      "requirement": "interfaces",
+      "status": "pass",
+      "inspectedEvidence": "三接口、独立页/同页入口出口、身份及结果、幂等奖励、存档迁移、manifest/许可/错误；strict TS 通过",
+      "files": [
+        {
+          "path": "integration/contracts.ts",
+          "sha256": "19831ac1efbe6876bb9a430f41cca3ac3d6958e0569e8df9c5ee6a153d674eea"
+        },
+        {
+          "path": "integration/PROTOCOL.md",
+          "sha256": "0a50d29595b60e1393a10c15219cecca1ada2373c3815cff1c7a8f42f8f4739b"
+        }
+      ]
+    },
+    {
+      "requirement": "future-activities",
+      "status": "pass",
+      "inspectedEvidence": "咖啡 ActivityModule 全步骤映射；湖与雪山资产只读可行性、尺度/碰撞缺口；无新游戏",
+      "files": [
+        {
+          "path": "integration/ACTIVITY-PREVIEW.md",
+          "sha256": "07454fba6188caf3c5caa48455c91b9042527e2e10ec08ae0f974cbc91c82dec"
+        }
+      ]
+    },
+    {
+      "requirement": "scope-and-handoff",
+      "status": "pass",
+      "inspectedEvidence": "受保护 12 文件逐项哈希相同、独立 demo 无房间依赖；交付后等待视觉及整合方向确认",
+      "files": [
+        {
+          "path": "tests/artifacts/animal-repair/protected-before.json",
+          "sha256": "6cb33d8ea34b44d600628681beb86952d536d71161512ba79e489924894684cb"
+        },
+        {
+          "path": "tests/artifacts/animal-repair/contracts.json",
+          "sha256": "8364194b3e8b58a3aefdace188aa663c6cd02d1710ded51a6897954ecfe945b8"
+        },
+        {
+          "path": "tests/artifacts/standalone-demos/qa.json",
+          "sha256": "f07cfc6e0069d779a64fc2248ddbaa5e9b256a5a30b84094d5b4170d6b20a713"
+        },
+        {
+          "path": "docs/ANIMAL-REPAIR-AND-INTEGRATION.md",
+          "sha256": "3e7d8551dd9d3478b692dd93e269835bde312af6b7b8ef59aa23b909c464e3fa"
+        }
+      ]
+    }
+  ],
+  "visualReview": "Actual screenshots reviewed for both buildings, room fish stages, stable rabbit turns and authored walk/graze; videos are real-time canvas recordings.",
+  "remainingForLater": [
+    "Owner approval of architecture visual direction",
+    "Real shared identity/results service",
+    "Legacy interior and school media license dossiers",
+    "Persisted audio files and save validation",
+    "Playable building collisions and low-end physical-device profiling"
+  ],
+  "previewHTTP": {
+    "room": 200,
+    "school": 200,
+    "concert": 200
+  },
+  "runtime": {
+    "fps": 59.855332282364095,
+    "calls": 442,
+    "triangles": 884098,
+    "maxTextures": 89
+  }
+}

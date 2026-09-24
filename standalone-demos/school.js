@@ -1,0 +1,20 @@
+(()=>{const D=ArchDemo.create('school'),{box,mat,mesh,text,tree,marker,feature}=D,T=THREE,cream='#ded8c6',white='#f1eee2',teal='#42766d',wood='#b48e62',dark='#35554e',glass=new T.MeshStandardMaterial({color:'#bcd9d5',roughness:.12,transparent:true,opacity:.16,depthWrite:false});
+ box('#c7cfb7',0,-.25,4,42,.5,36,'landscape');box('#e2dfcf',0,.01,12,5,.05,15,'landscape');box('#e2dfcf',0,.015,6,30,.06,4,'landscape');box('#b6c1a1',-13,.02,13,9,.08,9,'landscape');
+ box(cream,0,.25,0,21,.5,13);box(white,0,4.25,0,20,.32,12);box(cream,0,2,-6,20,3.5,.32);box(cream,0,6.2,-6,20,3.5,.32);box(cream,-10,4,0,.35,8,12);box(cream,10,4,0,.35,8,12);box(white,0,8.3,0,21,.35,13,'roof');box(teal,-6,8.6,-1,7,.14,6,'roof');
+ // Open, glazed front bays reveal two complete learning spaces.
+ for(const level of [0,4]){box(white,0,level+.65,6,20,.7,.3,'facade');box(white,0,level+3.8,6,20,.4,.35,'facade');for(const x of [-10,-3.3,3.3,10])box(cream,x,level+2.2,6,.32,3.1,.4,'facade');for(const x of [-6.65,6.65]){box(glass,x,level+2.2,6.04,6.3,2.7,.05,'glazing');for(let k=0;k<5;k++)box(teal,x-3+k*1.5,level+2.2,6.1,.065,2.7,.1,'facade');}}
+ box(teal,0,4.8,6.3,6.4,1.45,.5,'facade');text('AI INTERNATIONAL SCHOOL',0,4.8,6.57,6.05,1.1);box(white,0,3.45,7.1,7.1,.18,2.5,'facade');for(const x of [-3,3])box(wood,x,1.9,7.7,.15,3.1,.15,'facade');box(glass,0,1.85,6.15,2.5,2.9,.1,'glazing');box(teal,0,1.85,6.24,.08,2.9,.12,'facade');box('#c8b894',0,.14,7.3,6,.22,2.7);box(wood,0,1.1,2.4,3.2,1.1,.7,'interior');text('WELCOME / 探索从这里开始',0,2.4,3.1,3.5,.8,dark,white,'interior');
+ for(const x of [-9.3,-8.8,-8.3,8.3,8.8,9.3])box(wood,x,6.15,6.25,.18,3.5,.25,'facade');
+ // Ground-floor classroom, desks, chairs, teaching wall and ceiling luminaires.
+ for(let row=0;row<3;row++)for(let col=0;col<2;col++){const x=-8.4+col*2.5,z=3.8-row*2;box(wood,x,1.04,z,1.65,.13,.85,'interior');for(const dx of [-.63,.63])box('#6b7d73',x+dx,.65,z,.07,.75,.07,'interior');box(teal,x,.6,z+ .7,.64,.14,.58,'interior');box(teal,x,.96,z+1,.64,.65,.1,'interior');box('#efeee7',x,1.12,z,.46,.02,.32,'interior');}
+ text('THINK / MAKE / DISCOVER',-6.6,2.25,-5.79,5.4,1.5,'#edf0df',dark,'interior');box(cream,-3.35,1.85,-1,.16,3.2,9.6,'interior');
+ // Lab on the right: shared island benches, screens and identifiable work equipment.
+ for(const z of [2.7,-.6]){box(white,6.6,1.1,z,5.5,.2,1.1,'interior');box(teal,6.6,.58,z,5.1,.95,.85,'interior');for(const x of [4.8,6.6,8.4]){box(dark,x,1.48,z-.25,.7,.48,.08,'interior');box('#79b5b7',x,1.48,z-.19,.6,.36,.02,'interior');box('#6c8b82',x,.52,z+.95,.55,.15,.55,'interior');}}
+ text('AI + ROBOTICS LAB',6.6,2.4,-5.79,5.3,1.3,'#e5f2ef',teal,'interior');for(const x of [-7,7])for(const z of [-2,3])box('#fff7ce',x,3.92,z,3,.035,.28,'interior');
+ // Upper-floor library shelves and reading tables can be seen through the glazing.
+ for(let i=0;i<11;i++){box(wood,-8.8+i*.55,5.2,-4.8,.4,1.5,.5,'interior');box(['#708e85','#cfa878','#849dad'][i%3],-8.8+i*.55,5.25,-4.46,.27,1.05,.09,'interior');}for(const x of [-6,6]){box(wood,x,5.25,2.6,3,.14,1.3,'interior');box(teal,x,4.7,3.7,2.7,.25,.5,'interior');}
+ // A courtyard reading pergola with planting rather than a second competing building.
+ for(const x of [-17,-11])for(const z of [10,16])box(wood,x,1.65,z,.18,3.3,.18,'landscape');for(let i=0;i<10;i++)box(wood,-17+i*.67,3.35,13,.18,.15,6.8,'landscape');box(wood,-14,.55,14.7,4,.18,.75,'landscape');box(wood,-14,.55,11.3,4,.18,.75,'landscape');
+ for(const [x,z,s]of [[-16,-5,1.3],[16,-5,1.3],[-18,4,1],[17,8,1.2],[17,17,1],[-7,18,.85]])tree(x,z,s);for(let i=0;i<7;i++)box('#91a17d',11+i*.9,.3,17,.65,.6,1.8,'landscape');
+ marker('school-entry',0,10,'#467e74');marker('school-return',4,17,'#b88253');feature('main-building','20 × 12 m，双层教学楼，门厅及校名区域');feature('classroom','实体课桌、座椅、教学墙，透过前窗可见');feature('laboratory','实验台、显示器及工作凳');feature('courtyard','步道、阅读廊架与庭院植栽');
+ D.finish({exterior:{position:[29,20,32],target:[0,2.5,3]},classroom:{position:[13,5,23],target:[0,1.6,0]},courtyard:{position:[-26,13,30],target:[-8,1.3,7]}},(view,g)=>{if(g.roof)g.roof.visible=view!=='classroom';});})();

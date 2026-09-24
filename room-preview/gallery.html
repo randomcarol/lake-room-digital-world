@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>模型挑选 · 3D 预览</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;font-family:-apple-system,"PingFang SC",sans-serif;background:#f4ede1;}
+#app{display:flex;height:100%;}
+#side{width:290px;min-width:290px;overflow-y:auto;background:#fffdf8;border-right:1px solid #e3d7c2;padding:12px;}
+#side h1{font-size:15px;margin:4px 4px 10px;color:#4a3f33;}
+.slot{font-size:12px;font-weight:700;color:#a08a6c;margin:12px 4px 6px;}
+.item{display:block;width:100%;text-align:left;border:1px solid #e8dcc8;background:#fbf6ec;border-radius:10px;padding:8px 10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#3d3429;}
+.item:hover{border-color:#c1593f;}
+.item.active{border-color:#c1593f;background:#f7e8dd;box-shadow:0 0 0 1px #c1593f;}
+.item .tag{float:right;font-size:10px;color:#fff;background:#b9a27f;border-radius:6px;padding:1px 6px;margin-left:6px;}
+.item .tag.ph{background:#7f9a6e;}
+.item.picked::after{content:"✓ 已选";color:#c1593f;font-weight:700;margin-left:6px;font-size:11px;}
+</style>
+<style>
+#main{flex:1;position:relative;}
+#view{position:absolute;inset:0;}
+#info{position:absolute;left:16px;top:16px;background:rgba(255,253,248,.93);border:1px solid #e3d7c2;border-radius:12px;padding:12px 16px;max-width:430px;z-index:3;}
+#info h2{margin:0 0 4px;font-size:17px;color:#3d3429;}
+#info p{margin:2px 0;font-size:12px;color:#7a6a55;}
+#pick{margin-top:8px;border:none;background:#c1593f;color:#fff;font-size:13px;padding:7px 16px;border-radius:999px;cursor:pointer;}
+#pick.off{background:#b9a27f;}
+#bar{position:absolute;right:16px;top:16px;z-index:3;text-align:right;}
+#exportBtn{border:1px solid #c1593f;background:#fffdf8;color:#c1593f;font-size:12px;padding:6px 14px;border-radius:999px;cursor:pointer;}
+#jsonBox{display:none;margin-top:8px;width:340px;height:180px;font-size:10px;font-family:Menlo,monospace;border:1px solid #e3d7c2;border-radius:8px;padding:6px;background:#fffdf8;}
+#tip{position:absolute;left:16px;bottom:14px;font-size:12px;color:#8a7a66;background:rgba(255,253,248,.8);padding:5px 10px;border-radius:8px;z-index:3;}
+#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#a08a6c;z-index:2;pointer-events:none;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side"><h1>模型挑选（点击左侧名字，右侧 3D 查看）</h1></div>
+  <div id="main">
+    <div id="view"></div>
+    <div id="loading">加载中…</div>
+    <div id="info"></div>
+    <div id="bar"><button id="exportBtn" type="button">导出我的选择</button><textarea id="jsonBox" readonly></textarea></div>
+    <div id="tip">拖拽旋转 · 滚轮缩放 · 右键平移</div>
+  </div>
+</div>
+<script src="./three.min.js"></script>
+<script src="./OrbitControls.js"></script>
+<script src="./libs/DRACOLoader.js"></script>
+<script src="./libs/GLTFLoader.js"></script>
+<script>
+var MODELS = [
+ {id:'bike',n:'自行车',slot:'东墙 · 公路车',src:'卡通'},
+ {id:'turntable',n:'黑胶唱机',slot:'唱机矮柜',src:'卡通'},
+ {id:'office-chair',n:'办公椅 A',slot:'书桌前',src:'卡通'},
+ {id:'sofa',n:'沙发 A',slot:'阅读角候选',src:'卡通'},
+ {id:'table',n:'木桌 A',slot:'书桌候选',src:'卡通'},
+ {id:'mechanical-keyboard',n:'机械键盘',slot:'桌面',src:'卡通'},
+ {id:'mug',n:'马克杯',slot:'桌面',src:'卡通'},
+ {id:'plant',n:'绿植 A',slot:'窗边',src:'卡通'},
+ {id:'cactus',n:'仙人掌',slot:'窗边/桌面',src:'卡通'},
+ {id:'guitar',n:'吉他',slot:'可选',src:'卡通'},
+ {id:'library-large',n:'书架',slot:'可选',src:'卡通'},
+ {id:'tree-big',n:'大树(窗外)',slot:'窗外',src:'卡通'},
+ {id:'pillow',n:'抱枕',slot:'沙发/飘窗',src:'卡通'},
+ {id:'nes',n:'红白机',slot:'桌面摆件(可选)',src:'卡通'},
+ {id:'headphones',n:'耳机',slot:'桌面摆件(可选)',src:'卡通'}
+];
+</script>
+<script>
+var PH = [
+ {id:'desk_lamp_arm_01',n:'折叠台灯',slot:'书桌'},
+ {id:'book_encyclopedia_set_01',n:'一摞书',slot:'飘窗/桌面'},
+ {id:'modern_wooden_cabinet',n:'现代木柜',slot:'唱机矮柜候选'},
+ {id:'hanging_picture_frame_01',n:'挂画框',slot:'墙面'},
+ {id:'potted_plant_01',n:'盆栽 A',slot:'窗边'},
+ {id:'potted_plant_02',n:'盆栽 B',slot:'窗边'},
+ {id:'WoodenTable_02',n:'木桌 B',slot:'书桌候选'},
+ {id:'WoodenTable_03',n:'木桌 C',slot:'书桌候选'},
+ {id:'mid_century_lounge_chair',n:'休闲椅',slot:'阅读角候选'},
+ {id:'modern_arm_chair_01',n:'扶手椅',slot:'阅读角候选'},
+ {id:'Sofa_01',n:'长沙发',slot:'阅读角候选'}
+];
+PH.forEach(function(m){ m.src='写实'; });
+var ALL = MODELS.concat(PH);
+</script>
+<script>
+var view = document.getElementById('view');
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf4ede1);
+var camera = new THREE.PerspectiveCamera(45, 1, 0.01, 200);
+var renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+view.appendChild(renderer.domElement);
+var controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+function resize(){
+  var w = view.clientWidth, h = view.clientHeight;
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+addEventListener('resize', resize);
+</script>
+<script>
+scene.add(new THREE.HemisphereLight(0xfff6e8, 0x9a8a72, 0.85));
+var key = new THREE.DirectionalLight(0xfff0dd, 1.1);
+key.position.set(3, 5, 4); key.castShadow = true;
+key.shadow.mapSize.set(1024,1024);
+key.shadow.camera.left=-4; key.shadow.camera.right=4;
+key.shadow.camera.top=4; key.shadow.camera.bottom=-4;
+scene.add(key);
+var rim = new THREE.DirectionalLight(0xdfe8ff, 0.35);
+rim.position.set(-4, 3, -3); scene.add(rim);
+var ground = new THREE.Mesh(new THREE.CircleGeometry(6, 48),
+  new THREE.MeshStandardMaterial({color:0xe9dfc9, roughness:1}));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
+scene.add(ground);
+var grid = new THREE.PolarGridHelper(6, 12, 6, 48, 0xcbb996, 0xdccfb4);
+grid.position.y = 0.002; scene.add(grid);
+var draco = new THREE.DRACOLoader();
+draco.setDecoderPath('./libs/draco/');
+var loader = new THREE.GLTFLoader();
+loader.setDRACOLoader(draco);
+</script>
+<script>
+var current = null, currentObj = null, picked = {};
+var infoEl = document.getElementById('info');
+var loadingEl = document.getElementById('loading');
+function showModel(m){
+  if (currentObj){ scene.remove(currentObj); currentObj = null; }
+  current = m;
+  loadingEl.style.display = 'flex';
+  infoEl.innerHTML = '<h2>' + m.n + '</h2><p>加载中…</p>';
+  loader.load('./models/' + m.id + '/model.gltf', function(g){
+    var obj = g.scene;
+    obj.traverse(function(o){ if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } });
+    var box3 = new THREE.Box3().setFromObject(obj);
+    var size = box3.getSize(new THREE.Vector3());
+    var center = box3.getCenter(new THREE.Vector3());
+    obj.position.sub(center); obj.position.y += size.y/2;
+    scene.add(obj); currentObj = obj;
+    var maxDim = Math.max(size.x, size.y, size.z) || 1;
+    var dist = maxDim * 1.9 + 0.4;
+    camera.position.set(dist*0.8, maxDim*0.75 + size.y*0.3, dist);
+    controls.target.set(0, size.y/2, 0);
+    controls.update();
+    loadingEl.style.display = 'none';
+    renderInfo(m, size);
+  }, undefined, function(){
+    loadingEl.style.display = 'none';
+    infoEl.innerHTML = '<h2>' + m.n + '</h2><p>加载失败</p>';
+  });
+}
+</script>
+<script>
+function fmt(x){ return (Math.round(x*100)/100).toFixed(2); }
+function renderInfo(m, size){
+  var isPicked = !!picked[m.id];
+  infoEl.innerHTML = '<h2>' + m.n + '</h2>'
+    + '<p>用途:' + m.slot + ' · 风格:' + m.src + ' · 许可:CC0 可商用</p>'
+    + '<p>实际尺寸:宽 ' + fmt(size.x) + 'm × 深 ' + fmt(size.z) + 'm × 高 ' + fmt(size.y) + 'm</p>'
+    + '<button id="pick" type="button" class="' + (isPicked?'off':'') + '">' + (isPicked?'取消选择':'用这个 ✓') + '</button>';
+  document.getElementById('pick').onclick = function(){
+    if (picked[m.id]) delete picked[m.id]; else picked[m.id] = {slot:m.slot, name:m.n, id:m.id};
+    renderInfo(m, size); refreshSide();
+  };
+}
+var side = document.getElementById('side');
+function refreshSide(){
+  side.querySelectorAll('.item').forEach(function(b){
+    b.classList.toggle('picked', !!picked[b.dataset.id]);
+    b.classList.toggle('active', current && b.dataset.id === current.id);
+  });
+}
+</script>
+<script>
+var lastSlot = null;
+ALL.forEach(function(m){
+  if (m.slot !== lastSlot){
+    lastSlot = m.slot;
+    var h = document.createElement('div');
+    h.className = 'slot'; h.textContent = m.slot;
+    side.appendChild(h);
+  }
+  var b = document.createElement('button');
+  b.type = 'button'; b.className = 'item'; b.dataset.id = m.id;
+  b.innerHTML = '<span class="tag' + (m.src==='写实'?' ph':'') + '">' + m.src + '</span>' + m.n;
+  b.onclick = function(){ showModel(m); refreshSide(); };
+  side.appendChild(b);
+});
+document.getElementById('exportBtn').onclick = function(){
+  var box = document.getElementById('jsonBox');
+  box.style.display = box.style.display === 'block' ? 'none' : 'block';
+  box.value = JSON.stringify(picked, null, 1);
+  box.focus(); box.select();
+};
+(function tick(){ requestAnimationFrame(tick); controls.update(); renderer.render(scene, camera); })();
+resize();
+showModel(ALL[0]); refreshSide();
+</script>
+</body>
+</html>

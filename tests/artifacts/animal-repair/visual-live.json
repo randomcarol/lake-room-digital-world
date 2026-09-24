@@ -1,0 +1,259 @@
+{
+  "start": 1712.4000000357628,
+  "frames": 7195,
+  "loadReadyMs": 1712.4000000357628,
+  "maxCalls": 442,
+  "maxTriangles": 884098,
+  "maxTextures": 89,
+  "foxMinX": -24,
+  "foxMaxX": 27,
+  "elapsedMs": 120206.5,
+  "events": [
+    {
+      "id": "fish-jump-0",
+      "at": 3.0054000000357584,
+      "start": [
+        -3.97050540195778,
+        -25.565429997630417
+      ],
+      "end": [
+        -6.004946168370667,
+        -26.345942157233
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-1",
+      "at": 15.654400000035904,
+      "start": [
+        4.348457305459306,
+        -27.269712866283953
+      ],
+      "end": [
+        5.258976410883056,
+        -26.185018147464717
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-2",
+      "at": 30.203800000011636,
+      "start": [
+        4.5542095464188606,
+        -28.39071284327656
+      ],
+      "end": [
+        4.798155485715867,
+        -29.87068088669689
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-3",
+      "at": 42.23656666670159,
+      "start": [
+        12.56839508539997,
+        -29.71723010740243
+      ],
+      "end": [
+        10.457949567548843,
+        -29.91537497265621
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-4",
+      "at": 53.869999999998655,
+      "start": [
+        6.316996402805671,
+        -25.845032532233745
+      ],
+      "end": [
+        7.415988708900657,
+        -23.99165220545669
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-5",
+      "at": 67.136100000022,
+      "start": [
+        11.738217250211164,
+        -30.167595126433298
+      ],
+      "end": [
+        9.278830428346334,
+        -30.65463660799643
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-6",
+      "at": 80.9355666667002,
+      "start": [
+        11.284816407132894,
+        -29.477740158559754
+      ],
+      "end": [
+        12.687292905401481,
+        -30.962446063150992
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-7",
+      "at": 92.38499999999763,
+      "start": [
+        13.470485617406666,
+        -30.147868684027344
+      ],
+      "end": [
+        13.704233030593064,
+        -31.582761625306375
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-8",
+      "at": 102.71806666669968,
+      "start": [
+        -4.429196552373469,
+        -24.524982226546854
+      ],
+      "end": [
+        -2.165090772252429,
+        -24.641811278516
+      ],
+      "completed": true,
+      "invalid": 0
+    },
+    {
+      "id": "fish-jump-9",
+      "at": 113.95030000000887,
+      "start": [
+        5.152489087311551,
+        -27.913341545965523
+      ],
+      "end": [
+        4.210197568558632,
+        -26.651399066621632
+      ],
+      "completed": true,
+      "invalid": 0
+    }
+  ],
+  "audit": {
+    "total": 876,
+    "waterAnimals": 5,
+    "counts": {
+      "tree": 201,
+      "rock": 18,
+      "shrub": 25,
+      "grass": 90,
+      "path-stone": 9,
+      "house": 8,
+      "fence": 12,
+      "person": 3,
+      "flower-cluster": 21,
+      "flower": 486,
+      "land-animal": 3
+    },
+    "invalid": [],
+    "paths": [
+      {
+        "id": "room-to-pier",
+        "samples": 123
+      },
+      {
+        "id": "village-lane",
+        "samples": 1312
+      },
+      {
+        "id": "inhabitant-0",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-1",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-2",
+        "samples": 492
+      },
+      {
+        "id": "swan-route",
+        "samples": 287
+      },
+      {
+        "id": "swan-west-route",
+        "samples": 378
+      },
+      {
+        "id": "swan-pair-route",
+        "samples": 277
+      },
+      {
+        "id": "swan-far-route",
+        "samples": 332
+      },
+      {
+        "id": "swan-far-west-route",
+        "samples": 212
+      },
+      {
+        "id": "fox-route",
+        "samples": 765
+      },
+      {
+        "id": "fox-village-route",
+        "samples": 97
+      },
+      {
+        "id": "rabbit-route",
+        "samples": 714
+      }
+    ],
+    "crossings": [
+      {
+        "id": "near-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          16,
+          -12.274985519921996
+        ],
+        "end": [
+          16,
+          -19.774985519921998
+        ],
+        "width": 2.8,
+        "deckY": 0.02
+      },
+      {
+        "id": "village-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          -46,
+          -105.29097704282744
+        ],
+        "end": [
+          -46,
+          -94.79097704282744
+        ],
+        "width": 2.2,
+        "deckY": 0.28
+      }
+    ],
+    "waterLevel": -0.47,
+    "shoreSafeBand": 1.8
+  },
+  "errors": [],
+  "fps": 59.855332282364095
+}

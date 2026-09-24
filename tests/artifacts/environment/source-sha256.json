@@ -1,0 +1,12 @@
+{
+  "room-preview/environment.js": "7d312785258d7e9747d428a83b74a7c8159b9b28997240c66ca286315f022106",
+  "room-preview/world-surface.js": "cb982263757a9964c2fcdda130d2ef0fe73327937d123f13d74ee37c1f1caf9e",
+  "room-preview/world-state.js": "1ee5b6061f374f5b65e42097166d04d1426cf97ab34a39f00480085d6c23e3e5",
+  "room-preview/sun-rig.js": "09e7b8aa0026615d8b9434b511991293b5d0afd1b4d6d3983db7c5b46b488004",
+  "room-preview/village.js": "868578dd83a326a9acca9c1f2658b8a73c57481b8f91fce1e6370cc20d781406",
+  "room-preview/landscape-assets.js": "f6c363d67e8ecb296dd201c2fb4947a7212f63d7ccb74ec966453b662c42b439",
+  "room-preview/animal-system.js": "176817e137b5180cecf1e7656f8e5fba6aa7234d7f1cd02360b8a7eb730f5d32",
+  "room-preview/room.js": "0120586dcf2b092278e78c92c6f3cb015b03ec17e3ac11093a091c1e7dd6f7c6",
+  "room-preview/camera-controller.js": "6f680aba9329de7d12e7c7cb2de9023ffd1038762f72b1e9818043ebe229d1d4",
+  "room-preview/index.html": "af8a61e055c3d84846879c2a3fb54b11c8a34b8da62d83ddc77fead790efa7e5"
+}

@@ -1,0 +1,12 @@
+{
+  "spring": {
+    "callsPercent": 4.90654205607477,
+    "trianglesPercent": 7.037721542981701,
+    "fps": 60.10124940807325
+  },
+  "summer": {
+    "callsPercent": 5.164319248826299,
+    "trianglesPercent": 5.492578621121069,
+    "fps": 60.16576792454702
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "phase": "before",
+  "device": "local Chrome / ANGLE SwiftShader",
+  "viewport": "1280x900 DPR1",
+  "readyMs": 13577.5,
+  "resourcesReadyMs": 13587.199999988079,
+  "settleMs": 3200,
+  "measureMs": 4000,
+  "cases": [
+    "desktop-summer-day",
+    "desktop-summer-dusk",
+    "desktop-summer-night",
+    "desktop-autumn-day",
+    "desktop-autumn-dusk",
+    "desktop-autumn-night",
+    "desktop-winter-day",
+    "desktop-winter-dusk",
+    "desktop-winter-night",
+    "mobile-summer-day",
+    "mobile-summer-dusk",
+    "mobile-summer-night",
+    "mobile-autumn-day",
+    "mobile-autumn-dusk",
+    "mobile-autumn-night",
+    "mobile-winter-day",
+    "mobile-winter-dusk",
+    "mobile-winter-night"
+  ],
+  "errors": [],
+  "performance": {
+    "fps": 0.9024049090778516,
+    "calls": 428,
+    "triangles": 741080,
+    "textures": 74,
+    "geometries": 220,
+    "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "camera": {
+      "position": [
+        10.7,
+        4.7,
+        11.7
+      ],
+      "target": [
+        4,
+        1.75,
+        2.8
+      ],
+      "fov": 45
+    }
+  }
+}

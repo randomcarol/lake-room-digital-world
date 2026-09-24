@@ -1,0 +1,51 @@
+{
+  "phase": "before",
+  "device": "local Chrome / ANGLE metal",
+  "viewport": "1280x900 DPR1",
+  "readyMs": 2245.5,
+  "resourcesReadyMs": 2368.9000000059605,
+  "settleMs": 3200,
+  "measureMs": 4000,
+  "cases": [
+    "desktop-summer-day",
+    "desktop-summer-dusk",
+    "desktop-summer-night",
+    "desktop-autumn-day",
+    "desktop-autumn-dusk",
+    "desktop-autumn-night",
+    "desktop-winter-day",
+    "desktop-winter-dusk",
+    "desktop-winter-night",
+    "mobile-summer-day",
+    "mobile-summer-dusk",
+    "mobile-summer-night",
+    "mobile-autumn-day",
+    "mobile-autumn-dusk",
+    "mobile-autumn-night",
+    "mobile-winter-day",
+    "mobile-winter-dusk",
+    "mobile-winter-night"
+  ],
+  "errors": [],
+  "performance": {
+    "fps": 60.050332643780465,
+    "calls": 431,
+    "triangles": 741289,
+    "textures": 74,
+    "geometries": 223,
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)",
+    "camera": {
+      "position": [
+        10.7,
+        3.9,
+        11.7
+      ],
+      "target": [
+        4,
+        1.75,
+        2.8
+      ],
+      "fov": 45
+    }
+  }
+}

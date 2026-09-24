@@ -1,0 +1,156 @@
+[
+  {
+    "kind": "school",
+    "features": [
+      {
+        "id": "main-building",
+        "description": "20 × 12 m，双层教学楼，门厅及校名区域"
+      },
+      {
+        "id": "classroom",
+        "description": "实体课桌、座椅、教学墙，透过前窗可见"
+      },
+      {
+        "id": "laboratory",
+        "description": "实验台、显示器及工作凳"
+      },
+      {
+        "id": "courtyard",
+        "description": "步道、阅读廊架与庭院植栽"
+      }
+    ],
+    "spawn": [
+      {
+        "id": "school-entry",
+        "position": [
+          0,
+          0.1,
+          10
+        ],
+        "yaw": 3.141592653589793
+      },
+      {
+        "id": "school-return",
+        "position": [
+          4,
+          0.1,
+          17
+        ],
+        "yaw": 3.141592653589793
+      }
+    ],
+    "calls": 52,
+    "triangles": 3516,
+    "textures": 7,
+    "three": "128",
+    "roomLoaded": false,
+    "scripts": [
+      "vendor/three.min.js",
+      "vendor/OrbitControls.js",
+      "common.js",
+      "school.js"
+    ],
+    "views": [
+      {
+        "view": "exterior",
+        "calls": 55,
+        "triangles": 3756,
+        "textures": 7
+      },
+      {
+        "view": "classroom",
+        "calls": 41,
+        "triangles": 2772,
+        "textures": 7
+      },
+      {
+        "view": "courtyard",
+        "calls": 52,
+        "triangles": 3516,
+        "textures": 7
+      }
+    ],
+    "errors": []
+  },
+  {
+    "kind": "concert",
+    "features": [
+      {
+        "id": "facade",
+        "description": "木质半拱顶、玻璃门厅与音乐厅名称"
+      },
+      {
+        "id": "stage",
+        "description": "20 × 9 m 舞台，三层合唱台阶及指挥位"
+      },
+      {
+        "id": "choir",
+        "description": "24 个清晰站位"
+      },
+      {
+        "id": "audience",
+        "description": "80 个座席及中央过道"
+      },
+      {
+        "id": "rehearsal",
+        "description": "独立排练室、钢琴、谱架与座位"
+      },
+      {
+        "id": "audio-reserved",
+        "description": "播放、歌词、节拍与录音位置预留，不实现音频功能"
+      }
+    ],
+    "spawn": [
+      {
+        "id": "hall-entry",
+        "position": [
+          0,
+          0.1,
+          18
+        ],
+        "yaw": 3.141592653589793
+      },
+      {
+        "id": "hall-return",
+        "position": [
+          -8,
+          0.1,
+          22
+        ],
+        "yaw": 3.141592653589793
+      }
+    ],
+    "calls": 58,
+    "triangles": 6546,
+    "textures": 8,
+    "three": "128",
+    "roomLoaded": false,
+    "scripts": [
+      "vendor/three.min.js",
+      "vendor/OrbitControls.js",
+      "common.js",
+      "concert.js"
+    ],
+    "views": [
+      {
+        "view": "exterior",
+        "calls": 93,
+        "triangles": 15735,
+        "textures": 8
+      },
+      {
+        "view": "hall",
+        "calls": 66,
+        "triangles": 6768,
+        "textures": 8
+      },
+      {
+        "view": "rehearsal",
+        "calls": 58,
+        "triangles": 6546,
+        "textures": 8
+      }
+    ],
+    "errors": []
+  }
+]

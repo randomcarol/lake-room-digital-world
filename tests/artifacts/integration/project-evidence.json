@@ -1,0 +1,465 @@
+{
+  "recordedAt": "2026-09-14",
+  "scope": "Read-only original projects; builds and test outputs in temporary copies. Commands below completed in this task; this file summarizes their observed results, not a captured shell transcript.",
+  "projects": {
+    "school": {
+      "originalPath": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app",
+      "buildDirectory": "/tmp/room-integration-review/school",
+      "installedVersions": {
+        "react": "19.2.6",
+        "react-dom": "19.2.6",
+        "next": "16.2.6",
+        "vinext": "1.0.0-beta.5",
+        "vite": "8.0.13",
+        "typescript": "5.9.3"
+      },
+      "commands": [
+        {
+          "command": "node scripts/run-framework.mjs build",
+          "exitCode": 0,
+          "note": "Vinext client/RSC/SSR completed; route / static classification unknown"
+        },
+        {
+          "command": "node scripts/run-tests.mjs",
+          "exitCode": 0,
+          "passed": 7
+        }
+      ],
+      "sources": [
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/package.json",
+          "sha256": "89ff726b7dc7f06e6950cbab7e8910fdf01b3571a8364b9d5d8700abe1fc9b25",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/app/page.tsx",
+          "sha256": "d2cab441567f8662a9c0072266c6ab95c0de77b888f650bc95625b663a20b9db",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/app/chatgpt-auth.ts",
+          "sha256": "4265a2e7c2dcb3a6f4b7026f762bf5b6e4caec76cc13c0a45987ee9a9f2e42cc",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/components/learning-app.tsx",
+          "sha256": "50fd23eb9b5646d7c8cc502f6141b224c4c454d061499917ac4eef519f7c62e8",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/lib/learning/repository.ts",
+          "sha256": "2695491224bc819783762be2cf6c3fa78d11edd6c7278382038bf7c6cbde625f",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/lib/learning/scoring.ts",
+          "sha256": "ac5ef3dc404029a0c5c4f4a7b20008b00bdf5bf2cc9804f6e96e2b0a61df4107",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/lib/learning/types.ts",
+          "sha256": "553cabeb43a550e8af4feeed23ba101ee0c8753295eead3c72eb495fd2139c24",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/vite.config.ts",
+          "sha256": "4b9d8a6b14fd155328847bc6cd063c6bf44c58c64de8d46911cdf0ede611e367",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/ai国际学校/school-app/db/schema.ts",
+          "sha256": "13ddacbf0be50e054d450a6c642b7fdc1aa943fd6b99084711e07e58b600390d",
+          "temporarySourceMatches": true
+        }
+      ],
+      "buildFiles": [
+        {
+          "path": "dist/server/vinext-server.json",
+          "bytes": 86
+        },
+        {
+          "path": "dist/server/wrangler.json",
+          "bytes": 1190
+        },
+        {
+          "path": "dist/server/vinext-externals.json",
+          "bytes": 3
+        },
+        {
+          "path": "dist/server/index.js",
+          "bytes": 196976
+        },
+        {
+          "path": "dist/server/BUILD_ID",
+          "bytes": 36
+        },
+        {
+          "path": "dist/server/vinext-client-assets.js",
+          "bytes": 2137
+        },
+        {
+          "path": "dist/server/__vite_rsc_assets_manifest.js",
+          "bytes": 2313
+        },
+        {
+          "path": "dist/.openai/hosting.json",
+          "bytes": 31
+        },
+        {
+          "path": "dist/client/file.svg",
+          "bytes": 392
+        },
+        {
+          "path": "dist/client/_headers",
+          "bytes": 131
+        },
+        {
+          "path": "dist/client/.assetsignore",
+          "bytes": 30
+        },
+        {
+          "path": "dist/client/vinext-client-entry-manifest.json",
+          "bytes": 65
+        },
+        {
+          "path": "dist/client/globe.svg",
+          "bytes": 1036
+        },
+        {
+          "path": "dist/client/window.svg",
+          "bytes": 386
+        },
+        {
+          "path": "dist/client/favicon.svg",
+          "bytes": 712
+        },
+        {
+          "path": "dist/client/audio/segment-8.wav",
+          "bytes": 591874
+        },
+        {
+          "path": "dist/client/audio/segment-1.wav",
+          "bytes": 388098
+        },
+        {
+          "path": "dist/client/audio/segment-2.wav",
+          "bytes": 419842
+        },
+        {
+          "path": "dist/client/audio/segment-3.wav",
+          "bytes": 454658
+        },
+        {
+          "path": "dist/client/audio/segment-7.wav",
+          "bytes": 447490
+        },
+        {
+          "path": "dist/client/audio/segment-6.wav",
+          "bytes": 499714
+        },
+        {
+          "path": "dist/client/audio/segment-4.wav",
+          "bytes": 451586
+        },
+        {
+          "path": "dist/client/audio/segment-5.wav",
+          "bytes": 405506
+        },
+        {
+          "path": "dist/client/assets/campus.png",
+          "bytes": 3507088
+        },
+        {
+          "path": "dist/client/assets/courtyard.png",
+          "bytes": 2800802
+        },
+        {
+          "path": "dist/client/assets/classroom.png",
+          "bytes": 2114988
+        },
+        {
+          "path": "dist/client/.vite/manifest.json",
+          "bytes": 4276
+        },
+        {
+          "path": "dist/client/_next/static/css/index.IaWosHwW.css",
+          "bytes": 180743
+        },
+        {
+          "path": "dist/client/_next/static/bb507b95-f532-4430-968b-394b93d1ae89/_ssgManifest.js",
+          "bytes": 76
+        },
+        {
+          "path": "dist/client/_next/static/bb507b95-f532-4430-968b-394b93d1ae89/_buildManifest.js",
+          "bytes": 159
+        },
+        {
+          "path": "dist/client/_next/static/chunks/framework-D_rUT4EX.js",
+          "bytes": 190152
+        },
+        {
+          "path": "dist/client/_next/static/chunks/rolldown-runtime-C60lm6uB.js",
+          "bytes": 694
+        },
+        {
+          "path": "dist/client/_next/static/chunks/streamed-icons-DNogeH_Z.js",
+          "bytes": 772
+        },
+        {
+          "path": "dist/client/_next/static/chunks/index-C70RgSpn.js",
+          "bytes": 192343
+        },
+        {
+          "path": "dist/client/_next/static/chunks/layout-segment-context-Chkl63fO.js",
+          "bytes": 494
+        },
+        {
+          "path": "dist/client/_next/static/chunks/app-route-prefetch-policy-BNHgl3p-.js",
+          "bytes": 937
+        },
+        {
+          "path": "dist/client/_next/static/chunks/learning-app-3eogRP7K.js",
+          "bytes": 183358
+        },
+        {
+          "path": "dist/.openai/drizzle/meta/_journal.json",
+          "bytes": 61
+        },
+        {
+          "path": "dist/server/ssr/vinext-server.json",
+          "bytes": 86
+        },
+        {
+          "path": "dist/server/ssr/index.js",
+          "bytes": 278342
+        },
+        {
+          "path": "dist/server/ssr/vinext-client-assets.js",
+          "bytes": 2137
+        },
+        {
+          "path": "dist/server/ssr/__vite_rsc_assets_manifest.js",
+          "bytes": 2313
+        },
+        {
+          "path": "dist/server/.vite/manifest.json",
+          "bytes": 11617
+        },
+        {
+          "path": "dist/server/ssr/_next/static/learning-app-BzICAm7x.js",
+          "bytes": 182522
+        },
+        {
+          "path": "dist/server/ssr/_next/static/error-boundary-QNQTNTsY.js",
+          "bytes": 5399
+        },
+        {
+          "path": "dist/server/ssr/_next/static/app-router-scroll-B9MMcM1B.js",
+          "bytes": 2543
+        },
+        {
+          "path": "dist/server/ssr/_next/static/app-prefetch-fetch-queue-BTKEsFpn.js",
+          "bytes": 0
+        },
+        {
+          "path": "dist/server/ssr/_next/static/layout-segment-context-BmbWBbth.js",
+          "bytes": 381
+        },
+        {
+          "path": "dist/server/ssr/_next/static/streamed-icons-kqcsEIdU.js",
+          "bytes": 691
+        },
+        {
+          "path": "dist/server/ssr/_next/static/static.edge-B0ObDTP3.js",
+          "bytes": 168
+        },
+        {
+          "path": "dist/server/_next/static/rolldown-runtime-DUnMT5BP.js",
+          "bytes": 694
+        },
+        {
+          "path": "dist/server/_next/static/page-CCFmRYcQ.js",
+          "bytes": 351
+        },
+        {
+          "path": "dist/server/_next/static/text-stream-DC8e-HHy.js",
+          "bytes": 19413
+        },
+        {
+          "path": "dist/server/_next/static/app-page-cache-render-P9HE_0_Z.js",
+          "bytes": 1916
+        },
+        {
+          "path": "dist/server/_next/static/record-Crmk5sem.js",
+          "bytes": 4966
+        },
+        {
+          "path": "dist/server/_next/static/app-prerender-static-params-B1qD0gKS.js",
+          "bytes": 170
+        },
+        {
+          "path": "dist/server/_next/static/app-route-handler-dispatch-CS1fptz9.js",
+          "bytes": 26099
+        },
+        {
+          "path": "dist/server/_next/static/framework~index~page~app-route-handler-dispatch-BFs8kTgA.js",
+          "bytes": 56613
+        },
+        {
+          "path": "dist/server/_next/static/app-static-generation-Cx_Ws-2H.js",
+          "bytes": 916
+        },
+        {
+          "path": "dist/server/_next/static/implicit-tags-XJssXGu9.js",
+          "bytes": 1667
+        },
+        {
+          "path": "dist/server/_next/static/isr-cache-Bqw-Qo_c.js",
+          "bytes": 4925
+        },
+        {
+          "path": "dist/server/_next/static/app-page-stream-6itRovbp.js",
+          "bytes": 9924
+        },
+        {
+          "path": "dist/server/_next/static/framework~index-D_kpRvkH.js",
+          "bytes": 190
+        },
+        {
+          "path": "dist/server/_next/static/app-page-cache-BEKgU7dD.js",
+          "bytes": 5193
+        },
+        {
+          "path": "dist/server/_next/static/rsc-DMhk7x8B.js",
+          "bytes": 725
+        },
+        {
+          "path": "dist/server/_next/static/root-params-0DVgYa50.js",
+          "bytes": 1243
+        },
+        {
+          "path": "dist/server/_next/static/framework~index~app-page-cache-render~app-page-cache~layout~page~app-route-handler-dispatch-BLazt2kU.js",
+          "bytes": 6125
+        },
+        {
+          "path": "dist/server/_next/static/app-prerender-endpoints-C5xXeBTc.js",
+          "bytes": 2012
+        },
+        {
+          "path": "dist/server/_next/static/app-page-cache-finalizer-aYGoRkiS.js",
+          "bytes": 3479
+        },
+        {
+          "path": "dist/server/_next/static/app-segment-config-XGFqj-Fo.js",
+          "bytes": 14921
+        },
+        {
+          "path": "dist/server/_next/static/cache-headers-EaOJUmIq.js",
+          "bytes": 48174
+        },
+        {
+          "path": "dist/server/_next/static/navigation-runtime-pHsBdWDI.js",
+          "bytes": 803
+        },
+        {
+          "path": "dist/server/_next/static/css/index.IaWosHwW.css",
+          "bytes": 180743
+        }
+      ]
+    },
+    "choir": {
+      "originalPath": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团",
+      "buildDirectory": "/tmp/room-integration-review/choir",
+      "installedVersions": {
+        "react": "19.3.0",
+        "react-dom": "19.3.0",
+        "vite": "8.3.0",
+        "typescript": "7.0.2",
+        "vitest": "5.0.0",
+        "pitchy": "4.1.0",
+        "@tonejs/midi": "2.0.28"
+      },
+      "commands": [
+        {
+          "command": "node node_modules/typescript/bin/tsc -b --pretty false",
+          "exitCode": 0
+        },
+        {
+          "command": "node node_modules/vite/bin/vite.js build --configLoader runner",
+          "exitCode": 0,
+          "modules": 55
+        },
+        {
+          "command": "node node_modules/vitest/vitest.mjs run",
+          "exitCode": 0,
+          "testFiles": 8,
+          "passed": 18
+        }
+      ],
+      "sources": [
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/package.json",
+          "sha256": "1b06cd908268f96af75267eaf8ff9c0058a07f921003188c364bac2d418c63fd",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/src/main.tsx",
+          "sha256": "77aaa85d0a532963cd63d1c6171a833f73b608dd83b4085f855b279dbe922939",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/src/App.tsx",
+          "sha256": "83440b9d311051ce46134c8b9ec7ce721ffe084031230899bc38b995efba869b",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/src/state/projectState.ts",
+          "sha256": "0af27a77be0bdddd8fd4c01e3ef8f0d80479aed030bda197ef9c57f5eef6b2af",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/src/audio/audioContext.ts",
+          "sha256": "d1b276dcffce82f93a14c3580dcc92842d9a7bd8edf5b7425cf9fb970f406455",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/src/audio/recordingManager.ts",
+          "sha256": "ec2a4ea65ae1eb1fd9c2d430736d2f1c1a6d90f044f880003b70424e89faf255",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/src/data/songLibrary.ts",
+          "sha256": "82703f37079b0fed5da5ead093233e5b3a4d3c2d5e8cce71282c693a00b8e670",
+          "temporarySourceMatches": true
+        },
+        {
+          "path": "/Users/dengzhilei/Documents/ChatGPT/一人合唱团/public/licensed-audio/README.md",
+          "sha256": "794ad2b429bcee9b10c2bd1b5b4f3a2379be4b6c7648b701bb845e2bba69e7f2",
+          "temporarySourceMatches": true
+        }
+      ],
+      "buildFiles": [
+        {
+          "path": "dist/index.html",
+          "bytes": 631
+        },
+        {
+          "path": "dist/favicon.svg",
+          "bytes": 290
+        },
+        {
+          "path": "dist/assets/index-D1VhKXgs.css",
+          "bytes": 26525
+        },
+        {
+          "path": "dist/assets/index-CezCjvo9.js",
+          "bytes": 307053
+        },
+        {
+          "path": "dist/licensed-audio/README.md",
+          "bytes": 871
+        }
+      ]
+    }
+  }
+}

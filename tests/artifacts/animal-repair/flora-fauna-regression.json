@@ -1,0 +1,307 @@
+{
+  "fail": [],
+  "flowers": {
+    "spring": {
+      "count": 288,
+      "clusters": 12
+    },
+    "summer": {
+      "count": 198,
+      "clusters": 9
+    },
+    "autumn": {
+      "count": 0,
+      "clusters": 0
+    },
+    "winter": {
+      "count": 0,
+      "clusters": 0
+    }
+  },
+  "animals": {
+    "swan": {
+      "states": [
+        "idle",
+        "swim",
+        "lookAround"
+      ],
+      "nativeBonePoses": 81,
+      "distance": 66.74080584269682,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-west": {
+      "states": [
+        "idle",
+        "swim",
+        "lookAround"
+      ],
+      "nativeBonePoses": 91,
+      "distance": 73.23322695741501,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-pair": {
+      "states": [
+        "idle",
+        "swim",
+        "lookAround"
+      ],
+      "nativeBonePoses": 110,
+      "distance": 64.96137229204827,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-far": {
+      "states": [
+        "idle",
+        "swim",
+        "lookAround"
+      ],
+      "nativeBonePoses": 89,
+      "distance": 72.3644519362192,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "swan-far-west": {
+      "states": [
+        "idle",
+        "swim",
+        "lookAround"
+      ],
+      "nativeBonePoses": 95,
+      "distance": 66.49623452804407,
+      "clips": [
+        "Idle",
+        "Swim",
+        "Preen"
+      ],
+      "footOffset": -0.22
+    },
+    "fox": {
+      "states": [
+        "idle",
+        "walk",
+        "lookAround"
+      ],
+      "nativeBonePoses": 548,
+      "distance": 111.11483597146821,
+      "clips": [
+        "Survey",
+        "Walk",
+        "Run"
+      ],
+      "footOffset": 0.001339192435145378
+    },
+    "fox-village": {
+      "states": [
+        "idle",
+        "walk",
+        "lookAround"
+      ],
+      "nativeBonePoses": 384,
+      "distance": 66.83281572999687,
+      "clips": [
+        "Survey",
+        "Walk",
+        "Run"
+      ],
+      "footOffset": 0.001339192435145378
+    },
+    "rabbit": {
+      "states": [
+        "idle",
+        "hop",
+        "lookAround",
+        "walk",
+        "graze"
+      ],
+      "nativeBonePoses": 168,
+      "distance": 43.49872883293001,
+      "clips": [
+        "Armature|Jump",
+        "Armature|Running",
+        "Armature|Guarding",
+        "Armature|Sitting.000"
+      ],
+      "footOffset": 0.01808087628354806
+    }
+  },
+  "three": "128",
+  "flowerRootMaxError": 2.877742252826998e-8,
+  "simulation": {
+    "seconds": 120,
+    "steps": 7200,
+    "largestStep": 0.04390847213238558
+  },
+  "memory": {
+    "before": {
+      "geometries": 232,
+      "textures": 87
+    },
+    "after": {
+      "geometries": 232,
+      "textures": 87
+    }
+  },
+  "coverage": {
+    "spring": {
+      "left": 5,
+      "right": 4,
+      "front": 3,
+      "back": 6
+    },
+    "summer": {
+      "left": 5,
+      "right": 2,
+      "front": 3,
+      "back": 4
+    }
+  },
+  "waves": {
+    "min": -0.11467772370756582,
+    "max": 0.1068648042678306,
+    "vertices": 6413
+  },
+  "audit": {
+    "total": 876,
+    "waterAnimals": 5,
+    "counts": {
+      "tree": 201,
+      "rock": 18,
+      "shrub": 25,
+      "grass": 90,
+      "path-stone": 9,
+      "house": 8,
+      "fence": 12,
+      "person": 3,
+      "flower-cluster": 21,
+      "flower": 486,
+      "land-animal": 3
+    },
+    "invalid": [],
+    "paths": [
+      {
+        "id": "room-to-pier",
+        "samples": 123
+      },
+      {
+        "id": "village-lane",
+        "samples": 1312
+      },
+      {
+        "id": "inhabitant-0",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-1",
+        "samples": 492
+      },
+      {
+        "id": "inhabitant-2",
+        "samples": 492
+      },
+      {
+        "id": "swan-route",
+        "samples": 287
+      },
+      {
+        "id": "swan-west-route",
+        "samples": 378
+      },
+      {
+        "id": "swan-pair-route",
+        "samples": 277
+      },
+      {
+        "id": "swan-far-route",
+        "samples": 332
+      },
+      {
+        "id": "swan-far-west-route",
+        "samples": 212
+      },
+      {
+        "id": "fox-route",
+        "samples": 765
+      },
+      {
+        "id": "fox-village-route",
+        "samples": 97
+      },
+      {
+        "id": "rabbit-route",
+        "samples": 714
+      }
+    ],
+    "crossings": [
+      {
+        "id": "near-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          16,
+          -12.274985519921996
+        ],
+        "end": [
+          16,
+          -19.774985519921998
+        ],
+        "width": 2.8,
+        "deckY": 0.02
+      },
+      {
+        "id": "village-pier",
+        "kind": "shoreline-crossing",
+        "start": [
+          -46,
+          -105.29097704282744
+        ],
+        "end": [
+          -46,
+          -94.79097704282744
+        ],
+        "width": 2.2,
+        "deckY": 0.28
+      }
+    ],
+    "waterLevel": -0.47,
+    "shoreSafeBand": 1.8
+  },
+  "cache": {
+    "entries": 4,
+    "requests": 4,
+    "refs": 9,
+    "states": [
+      "ready",
+      "ready",
+      "ready",
+      "ready"
+    ]
+  },
+  "failure": {
+    "status": {
+      "id": "missing",
+      "status": "failed",
+      "reason": "GLTF load failed missing: [object ProgressEvent]"
+    },
+    "count": 0,
+    "pickables": 0
+  },
+  "errors": []
+}
