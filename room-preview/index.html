@@ -17,6 +17,6 @@ const content=await ContentStore.load();
 const mobile=innerWidth<700;
 const preset=RoomQACameras[mobile?'mobile':'desktop'];
 const app=RoomBuilder.build(document.getElementById('scene'),RoomBuilder.loadLayout(),{fov:preset.fov,camPos:preset.position,target:preset.target,maxDistance:mobile?25:16});
-window.__ROOM_APP__=app;Interactions.init(app,content);window.__ROOM_BUILD__=await WorldBuildMode.init(app);document.getElementById('status').hidden=true;
+window.__ROOM_APP__=app;Interactions.init(app,content);window.__ROOM_BUILD__=await WorldBuildMode.init(app,{mode:ContentStore.mode});document.getElementById('status').hidden=true;
 }catch(error){document.getElementById('status').textContent='房间暂时无法打开，请刷新重试。';console.error(error);}})();
 </script></body></html>

@@ -26,6 +26,13 @@ class ContentSecurityTest(unittest.TestCase):
   self.assertEqual(self.req('/api/password','POST',{'password':'a-better-test-password'},cookie,csrf)[0],200)
   self.assertEqual(self.req('/api/collections',cookie=cookie)[0],401)
   status,s,h=self.req('/api/login','POST',{'password':'a-better-test-password'});self.assertEqual(status,200);cookie=h['Set-Cookie'].split(';')[0];csrf=s['csrf']
+  world=self.req('/api/world')[1];self.assertEqual(world['revision'],0);self.assertEqual(world['objects'],[])
+  world_object={'id':'test-flower','assetId':'flower-wild-daisy','assetVersion':'1.0.0','position':[12,.1,-8],'rotationY':0,'scale':1,'state':{'growthStage':'bloom'},'createdAt':'2026-09-24T00:00:00Z','updatedAt':'2026-09-24T00:00:00Z','revision':1}
+  self.assertEqual(self.req('/api/world','PUT',{'expectedRevision':0,'save':{'schema':'personal-world-build','saveVersion':1,'objects':[world_object]}})[0],401)
+  invalid={**world_object,'assetId':'unknown-asset'};self.assertEqual(self.req('/api/world','PUT',{'expectedRevision':0,'save':{'schema':'personal-world-build','saveVersion':1,'objects':[invalid]}},cookie,csrf)[0],400)
+  status,saved,_=self.req('/api/world','PUT',{'expectedRevision':0,'save':{'schema':'personal-world-build','saveVersion':1,'objects':[world_object]}},cookie,csrf);self.assertEqual(status,200);self.assertEqual(saved['revision'],1)
+  self.assertEqual(self.req('/api/world')[1]['objects'][0]['id'],'test-flower')
+  self.assertEqual(self.req('/api/world','PUT',{'expectedRevision':0,'save':{'schema':'personal-world-build','saveVersion':1,'objects':[]}},cookie,csrf)[0],409)
   png=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=')
   status,map_media,_=self.req('/api/media','POST',png,cookie,csrf,{'X-File-Name':'map.png'});self.assertEqual(status,201)
   map_image={'collection_id':'map','kind':'image','title':'Custom map','description':'','body':'','url':'','media_id':map_media['id'],'published':False,'position':0,'metadata':{'role':'map-image'}}

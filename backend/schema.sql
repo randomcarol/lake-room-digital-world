@@ -8,3 +8,5 @@ CREATE TABLE IF NOT EXISTS items (id TEXT PRIMARY KEY, collection_id TEXT NOT NU
 CREATE INDEX IF NOT EXISTS published_items ON items(collection_id,published,position);
 CREATE TABLE IF NOT EXISTS revisions (id INTEGER PRIMARY KEY CHECK(id=1), value INTEGER NOT NULL);
 INSERT OR IGNORE INTO revisions VALUES(1,0);
+CREATE TABLE IF NOT EXISTS world_saves (id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, payload TEXT NOT NULL, updated REAL NOT NULL);
+INSERT OR IGNORE INTO world_saves VALUES(1,0,'{"schema":"personal-world-build","saveVersion":1,"objects":[]}',0);

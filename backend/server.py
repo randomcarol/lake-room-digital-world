@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Single-owner content service. SQLite/files are outside the published static directory."""
-import argparse, hashlib, hmac, http.cookies, json, mimetypes, os, secrets, sqlite3, ssl, threading, time
+import argparse, hashlib, hmac, http.cookies, json, math, mimetypes, os, secrets, sqlite3, ssl, threading, time
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
@@ -8,6 +8,7 @@ from urllib.parse import urlsplit, unquote
 ROOT=Path(__file__).resolve().parents[1]
 COLLECTIONS={'monitor':'Computer','notebook':'Notebook','turntable':'Record Player','map':'World Map','photoWall':'Photo Wall','books':'Bookshelf'}
 MAX_UPLOAD=64*1024*1024
+ASSET_CATALOG={item['id']:item for item in json.loads((ROOT/'room-preview/assets/catalog.json').read_text())['assets']}
 
 def password_hash(password,salt):
     return hashlib.pbkdf2_hmac('sha256',password.encode(),bytes.fromhex(salt),600_000).hex()
@@ -118,6 +119,18 @@ class Handler(BaseHTTPRequestHandler):
                 db.execute('INSERT INTO sessions VALUES(?,?,?)',(hashlib.sha256(token.encode()).hexdigest(),csrf,time.time()+43200))
             with self.server.rate_lock:self.server.attempts.pop(ip,None)
             return self.json(200,{'authenticated':True,'csrf':csrf,'mustChangePassword':bool(owner['must_change'])},{'Set-Cookie':self.cookie(token)})
+        if path=='/api/world' and method in ('GET','HEAD'):
+            with self.db() as db:row=db.execute('SELECT revision,payload,updated FROM world_saves WHERE id=1').fetchone()
+            save=json.loads(row['payload']);save['revision']=row['revision'];save['updatedAt']=row['updated']
+            return self.json(200,save)
+        if path=='/api/world' and method=='PUT':
+            self.require_write();data=self.read_json();expected=data.get('expectedRevision');save=self.validate_world(data.get('save'))
+            if not isinstance(expected,int) or isinstance(expected,bool) or expected<0:raise APIError(400,'世界存档版本无效')
+            with self.db() as db:
+                db.execute('BEGIN IMMEDIATE');row=db.execute('SELECT revision FROM world_saves WHERE id=1').fetchone()
+                if row['revision']!=expected:raise APIError(409,'世界已在其他页面更新，请刷新后重试')
+                revision=expected+1;updated=time.time();db.execute('UPDATE world_saves SET revision=?,payload=?,updated=? WHERE id=1',(revision,json.dumps(save,ensure_ascii=False,separators=(',',':')),updated))
+            save['revision']=revision;save['updatedAt']=updated;return self.json(200,save)
         if path=='/api/logout' and method=='POST':
             session=self.session(write=True)
             with self.db() as db:db.execute('DELETE FROM sessions WHERE token_hash=?',(session['token_hash'],))
@@ -237,6 +250,26 @@ class Handler(BaseHTTPRequestHandler):
         return (collection,kind,*fields,media_id,int(data.get('published',False)),position,json.dumps(metadata,ensure_ascii=False))
     def check_media(self,db,item):
         if item[6] and not db.execute('SELECT 1 FROM media WHERE id=?',(item[6],)).fetchone():raise APIError(400,'关联文件不存在')
+    def validate_world(self,save):
+        if not isinstance(save,dict) or save.get('schema')!='personal-world-build' or save.get('saveVersion')!=1:raise APIError(400,'世界存档格式无效')
+        objects=save.get('objects');
+        if not isinstance(objects,list) or len(objects)>300:raise APIError(400,'世界对象数量无效')
+        clean=[];ids=set()
+        for item in objects:
+            if not isinstance(item,dict):raise APIError(400,'世界对象格式无效')
+            object_id=item.get('id');asset_id=item.get('assetId');asset=ASSET_CATALOG.get(asset_id);position=item.get('position');rotation=item.get('rotationY',0);scale=item.get('scale',1)
+            if not isinstance(object_id,str) or not 1<=len(object_id)<=120 or object_id in ids:raise APIError(400,'世界对象标识无效')
+            if not asset:raise APIError(400,'世界资产不存在')
+            if not isinstance(position,list) or len(position)!=3 or not all(isinstance(v,(int,float)) and not isinstance(v,bool) and math.isfinite(v) for v in position):raise APIError(400,'世界对象坐标无效')
+            if not (-300<=position[0]<=300 and -50<=position[1]<=200 and -350<=position[2]<=50):raise APIError(400,'世界对象超出边界')
+            if not isinstance(rotation,(int,float)) or isinstance(rotation,bool) or not math.isfinite(rotation):raise APIError(400,'世界对象旋转无效')
+            limits=asset['placement']['scaleRange']
+            if not isinstance(scale,(int,float)) or isinstance(scale,bool) or not math.isfinite(scale) or not limits[0]<=scale<=limits[1]:raise APIError(400,'世界对象缩放无效')
+            state=item.get('state',{});object_revision=item.get('revision',1)
+            if not isinstance(state,dict) or len(json.dumps(state,ensure_ascii=False))>4000:raise APIError(400,'世界对象状态无效')
+            if not isinstance(object_revision,int) or isinstance(object_revision,bool) or not 1<=object_revision<=1_000_000:raise APIError(400,'世界对象版本无效')
+            ids.add(object_id);clean.append({'id':object_id,'assetId':asset_id,'assetVersion':str(item.get('assetVersion') or asset['version'])[:40],'position':[round(float(v),5) for v in position],'rotationY':round(float(rotation),6),'scale':round(float(scale),4),'state':state,'createdAt':str(item.get('createdAt',''))[:80],'updatedAt':str(item.get('updatedAt',''))[:80],'revision':object_revision})
+        return {'schema':'personal-world-build','saveVersion':1,'objects':clean}
     def serialize(self,row):
         item=dict(row);item['metadata']=json.loads(item['metadata']);item['published']=bool(item['published']);item['media_url']='api/media/'+item['media_id'] if item['media_id'] else ''
         return item
