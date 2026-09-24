@@ -10,13 +10,13 @@
 <p id="status" role="status">正在打开房间…</p>
 <script src="three.min.js"></script><script src="OrbitControls.js"></script><script src="libs/GLTFLoader.js"></script><script src="libs/DRACOLoader.js"></script>
 <script src="animal-manifest.js"></script><script src="animal-loader.js"></script><script src="animal-animation.js"></script><script src="animal-movement.js"></script><script src="animal-actor.js"></script>
-<script src="world-state.js"></script><script src="landscape-assets.js"></script><script src="animal-system.js"></script><script src="world-surface.js"></script><script src="sun-rig.js"></script><script src="village.js"></script><script src="flower-system.js"></script><script src="bird-system.js"></script><script src="environment.js"></script><script src="room.js"></script><script src="content-schema.js"></script><script src="content-store.js"></script><script src="camera-controller.js"></script><script src="interaction-bubble.js"></script><script src="experiences.js"></script><script src="interactions.js"></script>
+<script src="world-state.js"></script><script src="landscape-assets.js"></script><script src="animal-system.js"></script><script src="world-surface.js"></script><script src="sun-rig.js"></script><script src="village.js"></script><script src="flower-system.js"></script><script src="bird-system.js"></script><script src="environment.js"></script><script src="room.js"></script><script src="asset-library.js"></script><script src="build-mode.js"></script><script src="content-schema.js"></script><script src="content-store.js"></script><script src="camera-controller.js"></script><script src="interaction-bubble.js"></script><script src="experiences.js"></script><script src="interactions.js"></script>
 <script>
 (async()=>{try{
 const content=await ContentStore.load();
 const mobile=innerWidth<700;
 const preset=RoomQACameras[mobile?'mobile':'desktop'];
 const app=RoomBuilder.build(document.getElementById('scene'),RoomBuilder.loadLayout(),{fov:preset.fov,camPos:preset.position,target:preset.target,maxDistance:mobile?25:16});
-window.__ROOM_APP__=app;Interactions.init(app,content);document.getElementById('status').hidden=true;
+window.__ROOM_APP__=app;Interactions.init(app,content);window.__ROOM_BUILD__=await WorldBuildMode.init(app);document.getElementById('status').hidden=true;
 }catch(error){document.getElementById('status').textContent='房间暂时无法打开，请刷新重试。';console.error(error);}})();
 </script></body></html>

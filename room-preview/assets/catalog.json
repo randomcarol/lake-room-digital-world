@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "1.0.0",
+  "coordinates": { "units": "metres", "up": "+Y", "forward": "+Z" },
+  "assets": [
+    {
+      "id": "flower-wild-daisy",
+      "version": "1.0.0",
+      "category": "flower",
+      "displayName": "湖畔雏菊",
+      "renderer": "procedural-flower",
+      "source": { "kind": "project-owned", "license": "Project-owned", "attribution": "Original procedural asset" },
+      "bounds": { "footprintRadius": 0.22, "height": 0.46, "anchor": "ground-centre" },
+      "placement": { "allowedZones": ["near", "middle"], "allowedSurface": "land", "shoreClearance": 2.2, "maxSlope": 0.35, "rotationStep": 0.261799, "scaleRange": [0.8, 1.25], "snap": 0.25, "blocksNavigation": false, "clearance": 0.08 },
+      "seasonVariants": { "spring": "bloom", "summer": "bloom", "autumn": "dormant", "winter": "hidden" },
+      "growthStages": ["seed", "sprout", "bloom"],
+      "economy": { "cost": 4, "sellValue": 2, "unlockRule": "starter" },
+      "budget": { "maxInstances": 200, "trianglesPerInstance": 180, "maxTextureDimension": 0 }
+    },
+    {
+      "id": "tree-pine-young",
+      "version": "1.0.0",
+      "category": "tree",
+      "displayName": "年轻松树",
+      "renderer": "procedural-pine",
+      "source": { "kind": "project-owned", "license": "Project-owned", "attribution": "Original procedural asset" },
+      "bounds": { "footprintRadius": 0.9, "height": 5.8, "anchor": "trunk-base" },
+      "placement": { "allowedZones": ["near", "middle"], "allowedSurface": "land", "shoreClearance": 3.0, "maxSlope": 0.55, "rotationStep": 0.261799, "scaleRange": [0.8, 1.25], "snap": 0.5, "blocksNavigation": true, "clearance": 0.35 },
+      "seasonVariants": { "spring": "fresh", "summer": "green", "autumn": "deep-green", "winter": "snow" },
+      "growthStages": ["sapling", "young", "mature"],
+      "economy": { "cost": 18, "sellValue": 9, "unlockRule": "starter" },
+      "budget": { "maxInstances": 80, "trianglesPerInstance": 420, "maxTextureDimension": 0 }
+    },
+    {
+      "id": "house-lakeside-cottage",
+      "version": "1.0.0",
+      "category": "house",
+      "displayName": "湖畔彩色小屋",
+      "renderer": "procedural-cottage",
+      "source": { "kind": "project-owned", "license": "Project-owned", "attribution": "Original procedural asset" },
+      "bounds": { "footprintRadius": 3.4, "height": 5.2, "anchor": "foundation-centre" },
+      "placement": { "allowedZones": ["middle"], "allowedSurface": "land", "shoreClearance": 4.0, "maxSlope": 0.7, "rotationStep": 0.261799, "scaleRange": [0.85, 1.15], "snap": 1.0, "blocksNavigation": true, "clearance": 1.2 },
+      "seasonVariants": { "spring": "warm", "summer": "warm", "autumn": "lit", "winter": "snow-roof" },
+      "growthStages": ["foundation", "frame", "complete"],
+      "economy": { "cost": 240, "sellValue": 150, "unlockRule": "village-builder" },
+      "budget": { "maxInstances": 20, "trianglesPerInstance": 900, "maxTextureDimension": 0 }
+    }
+  ]
+}
