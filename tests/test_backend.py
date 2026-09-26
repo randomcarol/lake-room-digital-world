@@ -16,6 +16,7 @@ class ContentSecurityTest(unittest.TestCase):
   if isinstance(data,dict):data=json.dumps(data).encode();h['Content-Type']='application/json'
   conn.request(method,path,data,h);r=conn.getresponse();raw=r.read();out=json.loads(raw) if r.getheader('Content-Type','').startswith('application/json') else raw;result=(r.status,out,dict(r.getheaders()));conn.close();return result
  def test_full_owner_and_public_boundary(self):
+  self.assertEqual(self.req('/api/session')[1],{'authenticated':False})
   self.assertEqual(self.req('/api/collections')[0],401)
   self.assertEqual(self.req('/api/items','POST',{})[0],401)
   status,s,h=self.req('/api/login','POST',{'password':'initial-test-password-only'});self.assertEqual(status,200);self.assertTrue(s['mustChangePassword']);cookie=h['Set-Cookie'].split(';')[0];csrf=s['csrf']
@@ -26,6 +27,12 @@ class ContentSecurityTest(unittest.TestCase):
   self.assertEqual(self.req('/api/password','POST',{'password':'a-better-test-password'},cookie,csrf)[0],200)
   self.assertEqual(self.req('/api/collections',cookie=cookie)[0],401)
   status,s,h=self.req('/api/login','POST',{'password':'a-better-test-password'});self.assertEqual(status,200);cookie=h['Set-Cookie'].split(';')[0];csrf=s['csrf']
+  project={'collection_id':'monitor','kind':'link','title':'AI International School','description':'A learning product','body':'A truthful project description','url':'https://github.com/randomcarol/ai-international-school','media_id':None,'published':True,'position':0,'metadata':{'type':'project','category':'LEARNING PRODUCT','status':'MVP','year':'2026','tags':'Next.js, TypeScript','demoUrl':'demos/school.html','demoLabel':'查看校园空间概念','accent':'#3f756f'}}
+  invalid_project={**project,'metadata':{**project['metadata'],'demoUrl':'javascript:alert(1)'}};self.assertEqual(self.req('/api/items','POST',invalid_project,cookie,csrf)[0],400)
+  invalid_project={**project,'metadata':{**project['metadata'],'accent':'red'}};self.assertEqual(self.req('/api/items','POST',invalid_project,cookie,csrf)[0],400)
+  status,created_project,_=self.req('/api/items','POST',project,cookie,csrf);self.assertEqual(status,201)
+  self.assertEqual(self.req('/api/content')[1]['collections'][0]['items'][0]['metadata']['type'],'project')
+  self.assertEqual(self.req('/api/items/'+created_project['id'],'DELETE',cookie=cookie,csrf=csrf)[0],200)
   world=self.req('/api/world')[1];self.assertEqual(world['revision'],0);self.assertEqual(world['objects'],[])
   world_object={'id':'test-flower','assetId':'flower-wild-daisy','assetVersion':'1.0.0','position':[12,.1,-8],'rotationY':0,'scale':1,'state':{'growthStage':'bloom'},'createdAt':'2026-09-24T00:00:00Z','updatedAt':'2026-09-24T00:00:00Z','revision':1}
   self.assertEqual(self.req('/api/world','PUT',{'expectedRevision':0,'save':{'schema':'personal-world-build','saveVersion':1,'objects':[world_object]}})[0],401)
@@ -60,9 +67,12 @@ class ContentSecurityTest(unittest.TestCase):
   self.assertEqual(self.req('/api/items/'+iid,'DELETE',cookie=cookie,csrf=csrf)[0],200)
   self.assertEqual(self.req(url,'DELETE',cookie=cookie,csrf=csrf)[0],200)
   self.assertEqual(self.req('/%2e%2e/backend/server.py')[0],404)
+  self.assertEqual(self.req('/demos/school.html')[0],200)
+  self.assertEqual(self.req('/demos/concert.manifest.json')[0],200)
+  self.assertEqual(self.req('/demos/%2e%2e/backend/server.py')[0],404)
   self.assertEqual(self.req('/.room-data/content.sqlite')[0],404)
   self.assertEqual(self.req('/content.json','POST',{})[0],405)
-  self.assertEqual(self.req('/api/logout','POST',{},cookie,csrf)[0],200);self.assertEqual(self.req('/api/session',cookie=cookie)[0],401)
+  self.assertEqual(self.req('/api/logout','POST',{},cookie,csrf)[0],200);self.assertEqual(self.req('/api/session',cookie=cookie)[1],{'authenticated':False})
   with __import__('sqlite3').connect(Path(self.tmp.name)/'content.sqlite') as db:self.assertEqual(db.execute('SELECT must_change FROM owner').fetchone()[0],0)
   self.assertEqual((Path(self.tmp.name)/'content.sqlite').stat().st_mode & 0o777,0o600)
 

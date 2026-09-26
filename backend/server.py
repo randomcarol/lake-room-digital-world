@@ -100,9 +100,10 @@ class Handler(BaseHTTPRequestHandler):
     def route(self):
         path=self.path_info();method=self.command
         if path=='/site-config.json' and method in ('GET','HEAD'):return self.json(200,{'api':True})
-        if path=='/api/health' and method in ('GET','HEAD'):return self.json(200,{'service':'room-content','version':2,'schema':'object-specific'})
+        if path=='/api/health' and method in ('GET','HEAD'):return self.json(200,{'service':'room-content','version':3,'schema':'object-specific'})
         if path=='/api/session' and method=='GET':
-            session=self.session()
+            session=self.session(required=False)
+            if not session:return self.json(200,{'authenticated':False})
             with self.db() as db:owner=db.execute('SELECT must_change FROM owner').fetchone()
             return self.json(200,{'authenticated':True,'csrf':session['csrf'],'mustChangePassword':bool(owner['must_change'])})
         if path=='/api/login' and method=='POST':
@@ -206,6 +207,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.json(200,{'ok':True})
         if path.startswith('/api/'):raise APIError(404,'接口不存在')
         if method not in ('GET','HEAD'):raise APIError(405,'静态内容只读')
+        if path.startswith('/demos/'):
+            demo_root=(ROOT/'standalone-demos').resolve();target=(demo_root/path.removeprefix('/demos/')).resolve()
+            if not target.is_relative_to(demo_root) or not target.is_file():raise APIError(404,'页面不存在')
+            return self.send_file(target,mimetypes.guess_type(target)[0] or 'application/octet-stream')
         target=(ROOT/'room-preview'/path.lstrip('/')).resolve()
         if not target.is_relative_to((ROOT/'room-preview').resolve()):raise APIError(404,'页面不存在')
         if target.is_dir():target=target/'index.html'
@@ -232,6 +237,22 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(position,int) or not -100000<=position<=100000:raise APIError(400,'排序无效')
         metadata=data.get('metadata',{})
         if not isinstance(metadata,dict) or len(json.dumps(metadata))>12000:raise APIError(400,'扩展字段无效')
+        if collection=='monitor':
+            content_type=metadata.get('type','resume' if kind=='pdf' else 'note')
+            if content_type not in ('project','resume','note'):raise APIError(400,'电脑内容类型无效')
+            for key,limit in [('category',80),('status',80),('year',12),('demoLabel',80)]:
+                value=metadata.get(key,'')
+                if not isinstance(value,str) or len(value)>limit:raise APIError(400,'项目字段超过限制')
+            accent=metadata.get('accent','')
+            if not isinstance(accent,str) or (accent and (len(accent)!=7 or accent[0]!='#' or any(char not in '0123456789abcdefABCDEF' for char in accent[1:]))):raise APIError(400,'项目颜色必须是六位十六进制颜色')
+            tags=metadata.get('tags','')
+            if not isinstance(tags,(str,list)) or isinstance(tags,list) and (len(tags)>24 or any(not isinstance(tag,str) or len(tag)>80 for tag in tags)):raise APIError(400,'项目标签无效')
+            demo_url=metadata.get('demoUrl','')
+            if not isinstance(demo_url,str) or len(demo_url)>2048:raise APIError(400,'项目 demo 链接无效')
+            if demo_url:
+                parsed=urlsplit(demo_url)
+                if parsed.scheme and parsed.scheme not in ('http','https'):raise APIError(400,'项目 demo 链接只允许站内路径或 http / https')
+                if not parsed.scheme and (demo_url.startswith(('/', '//')) or '..' in Path(parsed.path).parts):raise APIError(400,'项目 demo 站内路径无效')
         if collection=='map':
             role=metadata.get('role','pin')
             if role not in ('pin','map-image'):raise APIError(400,'地图内容类型无效')

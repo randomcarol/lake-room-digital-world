@@ -10,7 +10,7 @@ window.WorldBuildMode=(()=>{
   if(mode!=='api')return {mode:'local',editable:true,async load(){return read();},async save(value,expected){const next=deep(value);next.revision=expected+1;write(next);return next;}};
   async function request(path,options={}){const response=await fetch('./api/'+path,{cache:'no-store',credentials:'same-origin',...options});let data={};try{data=await response.json();}catch{}if(!response.ok){const error=Error(data.error||'世界存档请求失败');error.status=response.status;throw error;}return data;}
   let session=null;try{session=await request('session');}catch{}
-  return {mode:'api',editable:!!session&&!session.mustChangePassword,async load(){return request('world');},async save(value,expected){return request('world',{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-Token':session.csrf},body:JSON.stringify({expectedRevision:expected,save:{schema:value.schema,saveVersion:value.saveVersion,objects:value.objects}})});}};
+  return {mode:'api',editable:!!session?.authenticated&&!session.mustChangePassword,async load(){return request('world');},async save(value,expected){return request('world',{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-Token':session.csrf},body:JSON.stringify({expectedRevision:expected,save:{schema:value.schema,saveVersion:value.saveVersion,objects:value.objects}})});}};
  }
  function initUI(catalog){
   const toggle=document.createElement('button');toggle.id='build-toggle';toggle.textContent='🌱 建造';toggle.setAttribute('aria-expanded','false');

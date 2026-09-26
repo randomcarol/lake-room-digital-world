@@ -26,3 +26,4 @@ jobs:
         run: |
           node tests/world-surface.cjs
           node tests/build-mode-contract.cjs
+          node tests/project-portfolio.cjs

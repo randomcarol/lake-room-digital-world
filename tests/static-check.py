@@ -3,15 +3,23 @@ import json, re
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]/'room-preview'
 data=json.loads((root/'content.json').read_text())
-for key in ('notebookPages','tracks','photos','travelPins','books'):
+for key in ('projects','notebookPages','tracks','photos','travelPins','books'):
     assert isinstance(data[key],list),key
+assert len(data['projects'])>=4
+assert len({project['id'] for project in data['projects']})==len(data['projects'])
+for project in data['projects']:
+    assert project['title'] and project['summary'] and project['body']
+    assert project['repoUrl'].startswith('https://github.com/')
+    assert isinstance(project['tags'],list) and project['tags']
+    if project.get('demoUrl','').startswith('demos/'):
+        assert (root.parent/'standalone-demos'/project['demoUrl'].removeprefix('demos/')).is_file()
 for pin in data['travelPins']:
     assert 0<=pin['x']<=1 and 0<=pin['y']<=1
 for file in ('index.html','room.js','interactions.js','content-store.js','content-schema.js','animal-system.js','experiences.js'):
     assert 'localStorage' not in re.sub(r'/\*.*?\*/','',(root/file).read_text(),flags=re.S),file
 for path in re.findall(r'(?:src|href)="([^"]+)"',(root/'index.html').read_text()):
     if path.startswith('data:'):continue
-    assert (root/path).exists(),path
+    assert (root/path.split('?',1)[0]).exists(),path
 for path in root.glob('models/*/model.gltf'):
     doc=json.loads(path.read_text())
     for entry in doc.get('buffers',[])+doc.get('images',[]):
@@ -21,6 +29,9 @@ for path in root.glob('models/*/model.gltf'):
 admin=(root/'admin/index.html').read_text()
 assert 'admin.js' in admin
 assert 'content-schema.js' in admin
+assert 'data-for="monitor"' in admin
+assert "data.projects" in (root/'content-store.js').read_text()
+assert 'project-card' in (root/'experiences.js').read_text()
 environment=(root/'environment.js').read_text()
 assert 'AudioContext' not in environment and 'chirp' not in environment
 assert 'WorldSurface.create' in environment and 'AnimalSystem.create(scene,surface)' in environment

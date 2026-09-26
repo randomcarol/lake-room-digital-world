@@ -2,7 +2,7 @@
 
 沿用原生 Three.js 房间，加入湖岸、松林、湖面、层叠远山、真实时间与四季配置、完整水平环绕，以及可持续管理内容的 Owner Studio。
 
-最新一轮：[动物修复与独立建筑验收](docs/ANIMAL-REPAIR-AND-INTEGRATION.md) · [三项目技术评审](docs/THREE-PROJECT-REVIEW.md) · [独立学校/音乐厅 demo](standalone-demos/README.md)。当前未合并三个项目。
+最新一轮把房间电脑升级为真实项目作品集：内置 Lake Room、AI International School、Solo Choir Studio 与 Commute Combo，Owner Studio 可继续发布项目，学校和音乐厅空间 demo 可从项目详情打开。[动物修复与独立建筑验收](docs/ANIMAL-REPAIR-AND-INTEGRATION.md) · [三项目技术评审](docs/THREE-PROJECT-REVIEW.md) · [独立学校/音乐厅 demo](standalone-demos/README.md)。当前未合并三个项目源码。
 
 ## 启动
 
@@ -20,7 +20,7 @@
 - animal-system.js：当前 1 兔、2 狐、5 天鹅和偶发鱼跃；使用已登记 GLB，鱼不常驻或参与交互。
 - camera-controller.js / interaction-bubble.js / interactions.js：统一物件交互与发布内容更新。
 - experiences.js / experience.css：六类暖色体验，包括竖版手账与 Travel Memory Map 明信片交互。
-- content-schema.js / content-store.js：按物件定义字段，并适配公开 API 与显式静态模式。
+- content-schema.js / content-store.js：按物件定义字段，把静态项目基线与 Owner 发布内容合并，并适配公开 API 与显式静态模式。
 - backend/server.py / schema.sql：真实 Owner 认证、SQLite、受保护媒体与内容 CRUD。
 - room-preview/admin/：登录、上传、编辑、排序、公开／私有。
 

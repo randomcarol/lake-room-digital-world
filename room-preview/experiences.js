@@ -1,6 +1,7 @@
 window.Experiences=(()=>{
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const image=(src,alt,cls='')=>ContentStore.url(src)?`<img class="${cls}" src="${esc(ContentStore.url(src))}" alt="${esc(alt||'')}" loading="lazy">`:'';
+ const color=value=>/^#[0-9a-f]{6}$/i.test(String(value||''))?String(value):'#a85d3d';
  const empty=(title,detail)=>`<div class="empty-state"><span class="eyebrow">A LITTLE SPACE FOR WHAT'S NEXT</span><h2>${title}</h2><p>${detail}</p></div>`;
  function open(type,root,data,app){
   root.className='experience-'+type;root.replaceChildren();
@@ -8,13 +9,23 @@ window.Experiences=(()=>{
   const on=(el,event,fn)=>el.addEventListener(event,fn,{signal});
   let release=()=>{};
   if(type==='monitor'){
-   root.innerHTML=`<section class="desktop"><div class="desktop-bar"><span>My desktop</span><span>PERSONAL FILES</span></div><div class="desktop-files"><button class="pdf-file"><span>PDF</span>Résumé.pdf</button><p>一点经历，一些正在探索的方向。</p></div><div class="pdf-area"></div></section>`;
-   on(root.querySelector('.pdf-file'),'click',()=>{
-    const pane=root.querySelector('.pdf-area'),url=ContentStore.url(data.resume?.pdf);
-    if(!data.resume?.available||!url){pane.innerHTML=empty('简历即将放入这里','PDF 尚未发布。');return;}
-    pane.innerHTML=`<div class="pdf-toolbar"><button class="pdf-back">← 桌面</button><a href="${esc(url)}" target="_blank" rel="noopener">在新窗口阅读 ↗</a></div><iframe title="个人简历 PDF" src="${esc(url)}"></iframe>`;
-    on(pane.querySelector('button'),'click',()=>pane.replaceChildren());
-   });
+   const projects=Array.isArray(data.projects)?data.projects:[];
+   root.innerHTML=`<section class="desktop"><div class="desktop-bar"><span>My desktop</span><span>PROJECTS · PERSONAL FILES</span></div><div class="desktop-home"><header class="desktop-intro"><span class="eyebrow">SELECTED WORK · BUILT IN PUBLIC</span><h1>把想法做成可以验证的东西</h1><p>这里收录正在持续迭代的项目；每个能力边界、代码版本和下一步都尽量保持可追溯。</p></header><div class="desktop-grid"><button class="desktop-card resume-card"><span class="file-icon">PDF</span><strong>个人简历</strong><small>${data.resume?.available?'查看已发布版本':'等待发布 PDF'}</small></button>${projects.map((project,index)=>`<button class="desktop-card project-card" data-project="${index}" style="--project-accent:${color(project.accent)}"><span class="project-monogram">${esc(String(project.title||'P').slice(0,2))}</span><strong>${esc(project.title)}</strong><small>${esc([project.status,project.year].filter(Boolean).join(' · '))}</small></button>`).join('')}</div></div><div class="desktop-pane"></div></section>`;
+   const desktop=root.querySelector('.desktop'),home=root.querySelector('.desktop-home'),pane=root.querySelector('.desktop-pane');
+   function openPane(){desktop.classList.add('pane-open');pane.classList.add('open');home.hidden=true;}
+   function closePane(){pane.replaceChildren();pane.classList.remove('open');desktop.classList.remove('pane-open');home.hidden=false;}
+   function showResume(){
+    openPane();
+    const url=ContentStore.url(data.resume?.pdf);
+    if(!data.resume?.available||!url){pane.innerHTML=`<div class="desktop-pane-toolbar"><button>← 桌面</button></div>${empty('简历即将放入这里','PDF 尚未发布；项目经历可以先从桌面卡片查看。')}`;on(pane.querySelector('button'),'click',closePane);return;}
+    pane.innerHTML=`<div class="desktop-pane-toolbar"><button>← 桌面</button><a href="${esc(url)}" target="_blank" rel="noopener">在新窗口阅读 ↗</a></div><iframe title="个人简历 PDF" src="${esc(url)}"></iframe>`;on(pane.querySelector('button'),'click',closePane);
+   }
+   function showProject(index){
+    const project=projects[index];if(!project)return;openPane();const repo=ContentStore.url(project.repoUrl),demo=ContentStore.url(project.demoUrl),tags=Array.isArray(project.tags)?project.tags:[];
+    pane.innerHTML=`<div class="desktop-pane-toolbar"><button>← 所有项目</button><span>${esc([project.status,project.year].filter(Boolean).join(' · '))}</span></div><article class="project-detail" style="--project-accent:${color(project.accent)}">${image(project.cover,project.title,'project-cover')}<span class="eyebrow">${esc(project.category||'PROJECT')}</span><h1>${esc(project.title)}</h1><p class="project-summary">${esc(project.summary)}</p><div class="project-tags">${tags.map(tag=>`<span>${esc(tag)}</span>`).join('')}</div><p>${esc(project.body)}</p><div class="project-actions">${repo?`<a href="${esc(repo)}" target="_blank" rel="noopener">查看 GitHub ↗</a>`:''}${demo?`<a href="${esc(demo)}" target="_blank" rel="noopener">${esc(project.demoLabel||'查看 demo')} ↗</a>`:''}</div></article>`;
+    on(pane.querySelector('button'),'click',closePane);
+   }
+   on(root.querySelector('.resume-card'),'click',showResume);root.querySelectorAll('.project-card').forEach(button=>on(button,'click',()=>showProject(Number(button.dataset.project))));
   } else if(type==='notebook'){
    let index=0,turning=false;const pages=data.notebookPages;
    root.innerHTML='<div class="notebook-heading"><span class="eyebrow">THOUGHTS, ON PAPER</span><h1>随手记</h1></div><div class="notebook-stage"><div class="notebook-book"><button class="page-edge previous" aria-label="上一页">‹</button><article class="journal-page"></article><button class="page-edge next" aria-label="下一页">›</button></div></div><nav class="page-navigation"><button aria-label="上一页">←</button><span></span><button aria-label="下一页">→</button></nav>';
@@ -70,7 +81,7 @@ window.Experiences=(()=>{
   const collection=data.collections?.find(c=>c.id===type);
   const nativeKinds={monitor:['pdf'],notebook:['text','image'],turntable:['audio','text','link','image'],map:['text','image','link'],photoWall:['image'],books:['text','image','link']};
   let firstPDF=true;
-  const extra=collection?.items.filter(i=>{if(type==='monitor'&&i.kind==='pdf'){if(firstPDF){firstPDF=false;return false;}return true;}return !nativeKinds[type]?.includes(i.kind);})||[];
+  const extra=collection?.items.filter(i=>{if(type==='monitor'&&i.metadata?.type==='project')return false;if(type==='monitor'&&i.kind==='pdf'){if(firstPDF){firstPDF=false;return false;}return true;}return !nativeKinds[type]?.includes(i.kind);})||[];
   if(extra.length){
     const details=document.createElement('details');details.className='collection-extra';details.innerHTML='<summary>更多资料 · '+extra.length+'</summary>'+extra.map(i=>{
       const src=ContentStore.url(i.media_url||i.url);let media='';

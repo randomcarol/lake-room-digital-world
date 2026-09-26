@@ -14,7 +14,12 @@ window.ContentStore=(()=>{
   data.map={...base.map,image:mapImage?source(mapImage):base.map?.image||''};
   data.travelPins=mapItems.filter(i=>i.metadata.role!=='map-image').map(i=>({id:i.id,title:i.title,city:i.metadata.city||i.title,country:i.metadata.country||'',x:i.metadata.x,y:i.metadata.y,caption:i.description,note:i.body||i.description,date:i.metadata.date||'',tags:i.metadata.tags||'',photos:[...(source(i)?[source(i)]:[]),...(Array.isArray(i.metadata.photoUrls)?i.metadata.photoUrls:[])]}));
   data.books=list('books').map(i=>({id:i.id,title:i.title,author:i.metadata.author||'',note:i.body||i.description,tags:i.metadata.tags||'',rating:i.metadata.rating||'',link:i.url,cover:source(i),kind:i.kind}));
-  const pdf=list('monitor').find(i=>i.kind==='pdf');data.resume={...base.resume,pdf:pdf?source(pdf):'',available:!!pdf};
+  const monitorItems=list('monitor'),projectItems=monitorItems.filter(i=>i.metadata.type==='project');
+  const tags=value=>Array.isArray(value)?value:String(value||'').split(',').map(tag=>tag.trim()).filter(Boolean);
+  const projects=new Map((base.projects||[]).map(project=>[project.repoUrl||project.id||project.title,project]));
+  projectItems.forEach(i=>{const project={id:i.id,title:i.title,category:i.metadata.category||'PROJECT',status:i.metadata.status||'',year:i.metadata.year||'',summary:i.description,body:i.body||i.description,tags:tags(i.metadata.tags),repoUrl:i.url,demoUrl:i.metadata.demoUrl||'',demoLabel:i.metadata.demoLabel||'',accent:i.metadata.accent||'',cover:i.kind==='image'?source(i):''};projects.set(project.repoUrl||project.id,project);});
+  data.projects=[...projects.values()];
+  const pdf=monitorItems.find(i=>i.kind==='pdf');data.resume={...base.resume,pdf:pdf?source(pdf):'',available:!!pdf};
   return data;
  }
  async function get(path){const response=await fetch(path,{cache:'no-store',credentials:'same-origin'});if(!response.ok)throw Error('内容暂时无法读取，请稍后重试。');return response.json();}
@@ -22,7 +27,7 @@ window.ContentStore=(()=>{
   if(!config)config=await get('./site-config.json');
   const base=await get('./content.json');
   const data=config.api?adapt(base,await get('./api/content')):base;
-  ['notebookPages','tracks','travelPins','photos','books'].forEach(k=>{if(!Array.isArray(data[k]))data[k]=[];});
+  ['projects','notebookPages','tracks','travelPins','photos','books'].forEach(k=>{if(!Array.isArray(data[k]))data[k]=[];});
   data.travelPins=data.travelPins.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1);
   return freeze(data);
  }

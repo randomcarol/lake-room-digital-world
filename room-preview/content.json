@@ -2,31 +2,79 @@
   "resume": {
     "name": "邓知蕾",
     "title": "北京大学 · 本科在读",
-    "email": "hello@example.com",
-    "bio": "在这里写一段个人简介:你是谁、在学什么、对什么感兴趣。改 content.json 里 resume 这一段就能更新这块屏幕。",
+    "email": "",
+    "bio": "正在把个人主页、AI 应用和可持续生长的 3D 世界连接成一个长期项目。关注真实问题、清晰的产品边界，以及从原型到可验证版本的完整过程。",
     "skills": [
-      "英语教育",
-      "写作",
-      "研究",
-      "摄影"
+      "AI 产品设计",
+      "Web Coding",
+      "交互原型",
+      "英语教育"
     ],
     "links": [
       {
         "label": "GitHub",
-        "url": ""
-      },
-      {
-        "label": "小红书",
-        "url": ""
-      },
-      {
-        "label": "邮箱",
-        "url": "mailto:hello@example.com"
+        "url": "https://github.com/randomcarol"
       }
     ],
     "pdf": "assets/resume/resume.pdf",
     "available": false
   },
+  "projects": [
+    {
+      "id": "lake-room",
+      "title": "Lake Room · 个人数字世界",
+      "category": "3D PERSONAL WORLD",
+      "status": "持续迭代",
+      "year": "2026",
+      "summary": "一个可管理内容、会随时间和季节变化的湖畔 3D 个人世界。",
+      "body": "用 Three.js 构建房间、湖岸、森林、远山、彩色小镇和动物系统；用 Python 内容服务管理简历、手账、音乐、地图、照片和书籍，并通过固定机位视觉证据与空间契约持续验收。",
+      "tags": ["Three.js", "WebGL", "Python", "World Building"],
+      "repoUrl": "https://github.com/randomcarol/lake-room-digital-world",
+      "demoUrl": "",
+      "accent": "#a85d3d"
+    },
+    {
+      "id": "ai-school",
+      "title": "AI International School",
+      "category": "LEARNING PRODUCT",
+      "status": "纵向 MVP",
+      "year": "2026",
+      "summary": "把同一组英语表达贯穿阅读、听力、提取、口语和写作迁移的学习产品。",
+      "body": "当前实现一条可完整走通的 B2 英语学习路径，并用 append-only 学习事件和六个独立词汇维度记录证据。现阶段不把规则式反馈包装成生成式 AI，也不虚构完整课程库或能力测评。",
+      "tags": ["Next.js", "TypeScript", "Learning Design", "Evidence"],
+      "repoUrl": "https://github.com/randomcarol/ai-international-school",
+      "demoUrl": "demos/school.html",
+      "demoLabel": "查看校园空间概念",
+      "accent": "#3f756f"
+    },
+    {
+      "id": "solo-choir",
+      "title": "Solo Choir Studio · 一个人的合唱团",
+      "category": "MUSIC CREATION",
+      "status": "可运行原型",
+      "year": "2026",
+      "summary": "从声音测评、移调练习到多声部录制与合唱回放的移动端创作流程。",
+      "body": "浏览器本地完成音高检测和多轨录制，登录后可使用 Supabase 保存项目与私人录音。当前和声与诊断是透明的确定性规则，不冒充生成式编曲或专业声乐评价。",
+      "tags": ["React", "Web Audio", "Pitch Detection", "Supabase"],
+      "repoUrl": "https://github.com/randomcarol/solo-choir-studio",
+      "demoUrl": "demos/concert.html",
+      "demoLabel": "查看音乐厅空间概念",
+      "accent": "#825f86"
+    },
+    {
+      "id": "commute-combo",
+      "title": "Commute Combo · 房补通勤组合搜索器",
+      "category": "DECISION TOOL",
+      "status": "验证型工具",
+      "year": "2026",
+      "summary": "比较门口、楼栋别名、地铁出入口与合法通勤组合，减少房补边界判断中的重复搜索。",
+      "body": "系统把地图返回路线与公司规则合规分开统计，并用 request_id 串联搜索、复核和匿名实验记录。项目明确保留人工地图复核，不把启发式候选搜索描述成无限穷举。",
+      "tags": ["Python", "Map API", "Decision Support", "Experiment"],
+      "repoUrl": "https://github.com/randomcarol/commute-combo",
+      "demoUrl": "",
+      "accent": "#b1833f"
+    }
+  ],
   "books": [
     {
       "title": "示例书 1",
