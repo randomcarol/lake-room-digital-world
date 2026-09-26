@@ -30,7 +30,8 @@
       "body": "用 Three.js 构建房间、湖岸、森林、远山、彩色小镇和动物系统；用 Python 内容服务管理简历、手账、音乐、地图、照片和书籍，并通过固定机位视觉证据与空间契约持续验收。",
       "tags": ["Three.js", "WebGL", "Python", "World Building"],
       "repoUrl": "https://github.com/randomcarol/lake-room-digital-world",
-      "demoUrl": "",
+      "demoUrl": "world-model/demo.html",
+      "demoLabel": "查看世界模拟实验室",
       "accent": "#a85d3d"
     },
     {

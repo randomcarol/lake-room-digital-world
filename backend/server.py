@@ -207,10 +207,11 @@ class Handler(BaseHTTPRequestHandler):
             return self.json(200,{'ok':True})
         if path.startswith('/api/'):raise APIError(404,'接口不存在')
         if method not in ('GET','HEAD'):raise APIError(405,'静态内容只读')
-        if path.startswith('/demos/'):
-            demo_root=(ROOT/'standalone-demos').resolve();target=(demo_root/path.removeprefix('/demos/')).resolve()
-            if not target.is_relative_to(demo_root) or not target.is_file():raise APIError(404,'页面不存在')
-            return self.send_file(target,mimetypes.guess_type(target)[0] or 'application/octet-stream')
+        for prefix,static_directory in (('/demos/','standalone-demos'),('/world-model/','world-model')):
+            if path.startswith(prefix):
+                static_root=(ROOT/static_directory).resolve();target=(static_root/path.removeprefix(prefix)).resolve()
+                if not target.is_relative_to(static_root) or not target.is_file():raise APIError(404,'页面不存在')
+                return self.send_file(target,mimetypes.guess_type(target)[0] or 'application/octet-stream')
         target=(ROOT/'room-preview'/path.lstrip('/')).resolve()
         if not target.is_relative_to((ROOT/'room-preview').resolve()):raise APIError(404,'页面不存在')
         if target.is_dir():target=target/'index.html'

@@ -1,0 +1,18 @@
+{
+  "schema": "lake-room-simulation",
+  "version": 1,
+  "season": "summer",
+  "timeOfDay": "morning",
+  "locations": [
+    {"id": "room-deck", "label": "房间露台", "neighbors": ["garden-path", "lake-shore"]},
+    {"id": "garden-path", "label": "花园小径", "neighbors": ["room-deck", "pine-edge"]},
+    {"id": "lake-shore", "label": "安静湖岸", "neighbors": ["room-deck", "village-pier"]},
+    {"id": "pine-edge", "label": "松林边缘", "neighbors": ["garden-path", "village-pier"]},
+    {"id": "village-pier", "label": "小镇码头", "neighbors": ["lake-shore", "pine-edge"]}
+  ],
+  "actors": [
+    {"id": "person-mira", "displayName": "米拉", "kind": "person", "species": "human", "speechMode": "human", "locationId": "village-pier", "needs": {"energy": 0.72, "social": 0.38, "curiosity": 0.58}, "traits": {"sociability": 0.74, "curiosity": 0.82}},
+    {"id": "rabbit-poppy", "displayName": "波比", "kind": "animal", "species": "rabbit", "speechMode": "nonverbal", "locationId": "garden-path", "needs": {"energy": 0.61, "social": 0.46, "curiosity": 0.31}, "traits": {"sociability": 0.42, "curiosity": 0.76}},
+    {"id": "fox-amber", "displayName": "琥珀", "kind": "animal", "species": "fox", "speechMode": "nonverbal", "locationId": "pine-edge", "needs": {"energy": 0.55, "social": 0.29, "curiosity": 0.66}, "traits": {"sociability": 0.35, "curiosity": 0.68}}
+  ]
+}

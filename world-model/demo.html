@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#183d3b">
+  <link rel="icon" href="data:,">
+  <title>Lake Room · 世界模拟实验室</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <a class="back-link" href="../">← 返回 Lake Room</a>
+      <div class="eyebrow">WORLD SIMULATION LAB · v1</div>
+      <h1>让世界先有规则，<br>再拥有想象力。</h1>
+      <p class="lead">观察人物和动物如何依据精力、社交与好奇心，在湖边世界里行动、相遇并留下事件。</p>
+      <div class="truth-label" data-testid="lab-status">
+        <span class="truth-dot" aria-hidden="true"></span>
+        规则模拟实验室，不是 AI 世界模型
+      </div>
+    </header>
+
+    <section class="control-panel" aria-label="模拟控制">
+      <label class="seed-field">
+        <span>世界种子</span>
+        <input id="seed" type="number" value="20260926" min="1" max="4294967295" inputmode="numeric">
+      </label>
+      <button id="reset" class="button secondary" type="button">重置世界</button>
+      <button id="step-one" class="button primary" type="button">推进 1 步</button>
+      <button id="step-ten" class="button primary" type="button">推进 10 步</button>
+    </section>
+
+    <section class="metrics" aria-label="世界状态">
+      <article><span>时间步</span><strong id="tick">0</strong></article>
+      <article><span>世界时间</span><strong id="world-time">早晨</strong></article>
+      <article><span>事件数量</span><strong id="event-count">0</strong></article>
+      <article><span>运行模式</span><strong>确定性规则</strong></article>
+    </section>
+
+    <section class="dashboard">
+      <div class="panel world-panel">
+        <div class="section-heading">
+          <div>
+            <p class="kicker">LIVE WORLD</p>
+            <h2>湖边世界</h2>
+          </div>
+          <p>同一个种子会重演同一段世界历史。</p>
+        </div>
+        <div id="world-map" class="world-map" aria-label="世界地点图"></div>
+      </div>
+
+      <div class="panel actors-panel">
+        <div class="section-heading compact">
+          <div>
+            <p class="kicker">ACTORS</p>
+            <h2>居民状态</h2>
+          </div>
+        </div>
+        <div id="actor-grid" class="actor-grid" data-testid="actor-grid"></div>
+      </div>
+    </section>
+
+    <section class="panel timeline-panel">
+      <div class="section-heading">
+        <div>
+          <p class="kicker">APPEND-ONLY EVENTS</p>
+          <h2>世界事件流</h2>
+        </div>
+        <p>动作、语言和故事节点按发生顺序留下，不静默改写历史。</p>
+      </div>
+      <ol id="event-list" class="event-list" data-testid="event-list">
+        <li class="empty-state">推进世界后，第一批事件会出现在这里。</li>
+      </ol>
+    </section>
+
+    <section class="explanation">
+      <article>
+        <span>01</span>
+        <h3>这一版是什么</h3>
+        <p>一个带种子的确定性多角色模拟器。角色只读取允许的观察，执行有限动作，并留下可检查的事件。</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>为什么先这样做</h3>
+        <p>它建立状态、边界与评估基线。以后换成模型策略，也能知道变化来自模型，而不是随机错误。</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>下一步如何接 AI</h3>
+        <p>模型只能提出动作建议；模拟内核检查位置、对象和权限后才执行。动物保留非语言行为，不被拟人化成聊天机器人。</p>
+      </article>
+    </section>
+
+    <footer>Lake Room · 一个正在学习如何生长的个人数字世界</footer>
+  </main>
+  <script src="simulation.js"></script>
+  <script src="demo.js"></script>
+</body>
+</html>

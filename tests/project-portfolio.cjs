@@ -11,8 +11,11 @@ for(const project of content.projects){
  assert.match(project.repoUrl,/^https:\/\/github\.com\/randomcarol\//);
  assert.ok(project.summary&&project.body&&project.tags.length,project.id+' needs truthful portfolio copy');
  if(project.demoUrl){
-  assert.match(project.demoUrl,/^demos\/[a-z-]+\.html$/);
-  assert.ok(fs.existsSync(path.join(root,'standalone-demos',project.demoUrl.slice('demos/'.length))),project.demoUrl);
+  const routes={demos:'standalone-demos','world-model':'world-model'};
+  const [prefix,...parts]=project.demoUrl.split('/');
+  assert.ok(routes[prefix],project.demoUrl+' uses an unsupported static route');
+  assert.match(parts.join('/'),/^[a-z-]+\.html$/);
+  assert.ok(fs.existsSync(path.join(root,routes[prefix],...parts)),project.demoUrl);
  }
 }
 
@@ -24,4 +27,4 @@ assert.match(store,/data\.projects=/);
 assert.match(experiences,/project-card/);
 assert.match(experiences,/project-detail/);
 assert.match(schema,/monitor:\['type','category','status','year','tags','demoUrl','demoLabel','accent'\]/);
-console.log('PASS four verified projects, monitor adapter, project desktop and standalone demo links');
+console.log('PASS four verified projects, monitor adapter, project desktop and demo links');

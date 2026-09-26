@@ -20,7 +20,8 @@ const {spawn}=require('node:child_process');
   assert.equal(await page.locator('.project-actions a',{hasText:'GitHub'}).getAttribute('href'),'https://github.com/randomcarol/ai-international-school');
   assert.match(await page.locator('.project-actions a',{hasText:'校园空间概念'}).getAttribute('href'),/\/demos\/school\.html$/);
   assert.equal((await page.request.get('http://127.0.0.1:8934/demos/school.html')).status(),200);await page.screenshot({path:'/tmp/lake-room-projects-desktop.png'});
+  await page.locator('.desktop-pane-toolbar button').click();await page.locator('.project-card',{hasText:'Lake Room'}).click();assert.match(await page.locator('.project-actions a',{hasText:'世界模拟实验室'}).getAttribute('href'),/\/world-model\/demo\.html$/);assert.equal((await page.request.get('http://127.0.0.1:8934/world-model/demo.html')).status(),200);
   await page.locator('.desktop-pane-toolbar button').click();await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.project-card').count(),4);await page.locator('.project-card',{hasText:'Solo Choir Studio'}).click();await page.screenshot({path:'/tmp/lake-room-projects-mobile.png'});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  assert.deepEqual(errors,[]);console.log('PASS desktop/mobile project portfolio, verified GitHub links and standalone demo route');
+  assert.deepEqual(errors,[]);console.log('PASS desktop/mobile project portfolio, verified GitHub links and project demo routes');
  }finally{if(browser)await browser.close();server.kill('SIGTERM');fs.rmSync(dataDir,{recursive:true,force:true});}
 })().catch(error=>{console.error(error);process.exit(1);});
