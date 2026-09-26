@@ -30,4 +30,6 @@
 
 `python3 tests/test_backend.py`；Node `--check` 检查 JS。Playwright 脚本 tests/admin-browser.cjs 与 tests/tahoe-browser.cjs 使用本机 Chrome，管理测试用隔离临时数据库，不修改个人内容。环境证据由 tests/environment-qa.cjs（固定机位截图、Metal 性能）与 tests/environment-contract.cjs（真实三角面、路径、阴影及交互）生成；独立空间测试为 tests/world-surface.cjs。
 
-生产未部署新后端；旧 deploy-room.sh 仅发布静态预览。完整部署参考 backend/ 下的 systemd、Nginx 和环境变量模板。
+访客端已部署在 [腾讯云房间](http://101.33.230.97/room/)，当前公开 HTTP 入口可用。Owner 管理会话必须等待腾讯云安全组开放 443 后再通过 HTTPS 使用；不要在 HTTP 页面输入管理密码。完整部署参考 backend/ 下的 systemd、Nginx 和环境变量模板。
+
+版本发布遵循“原子提交 → 本地验证 → 语义化版本标签 → 推送 GitHub → 检查云端 CI”的固定流程，见 [发布工作流](docs/RELEASE-WORKFLOW.md)。
