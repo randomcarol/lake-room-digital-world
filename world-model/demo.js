@@ -20,6 +20,7 @@
     rest: '休息', explore: '探索', forage: '觅食', socialize: '交流', observe: '观察',
   };
   const timeLabels = { morning: '早晨', day: '白天', dusk: '黄昏', night: '夜晚' };
+  const seasonLabels = { spring: '春', summer: '夏', autumn: '秋', winter: '冬' };
   const eventLabels = {
     'actor.acted': '行动',
     'actor.spoke': '语言',
@@ -39,10 +40,14 @@
     worldMap: document.querySelector('#world-map'),
     actorGrid: document.querySelector('#actor-grid'),
     eventList: document.querySelector('#event-list'),
+    observationStatus: document.querySelector('#observation-status'),
+    refreshObservation: document.querySelector('#refresh-observation'),
   };
 
+  let baseScenario;
   let scenario;
   let engine;
+  let observationResult = { status: 'missing', snapshot: null };
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>'"]/g, (character) => ({
@@ -149,6 +154,45 @@
     render();
   }
 
+  function readObservation() {
+    try {
+      return window.RoomObservation.read();
+    } catch {
+      return { status: 'unavailable', snapshot: null };
+    }
+  }
+
+  function renderObservation(result, changed = false) {
+    const labels = {
+      missing: '未发现房间快照 · 使用实验场景',
+      stale: '房间快照已过期 · 使用实验场景',
+      invalid: '房间快照格式异常 · 使用实验场景',
+      unavailable: '浏览器存储不可用 · 使用实验场景',
+    };
+    elements.observationStatus.dataset.status = result.status;
+    if (result.status === 'fresh') {
+      const snapshot = result.snapshot;
+      elements.observationStatus.textContent = changed
+        ? 'Lake Room 有新状态 · 点击重新读取'
+        : `已读取 Lake Room · ${seasonLabels[snapshot.season]} · ${timeLabels[snapshot.timeOfDay]}`;
+      return;
+    }
+    elements.observationStatus.textContent = labels[result.status] || labels.invalid;
+  }
+
+  function applyObservation() {
+    observationResult = readObservation();
+    scenario = observationResult.status === 'fresh'
+      ? window.RoomObservation.applyToScenario(baseScenario, observationResult.snapshot)
+      : structuredClone(baseScenario);
+    renderObservation(observationResult);
+  }
+
+  function reloadObservation() {
+    applyObservation();
+    reset();
+  }
+
   function advance(count) {
     engine.step(count);
     render();
@@ -157,16 +201,25 @@
   async function start() {
     const response = await fetch('scenario.json', { cache: 'no-store' });
     if (!response.ok) throw new Error('无法读取世界场景');
-    scenario = await response.json();
+    baseScenario = await response.json();
+    applyObservation();
     elements.reset.addEventListener('click', reset);
     elements.stepOne.addEventListener('click', () => advance(1));
     elements.stepTen.addEventListener('click', () => advance(10));
+    elements.refreshObservation.addEventListener('click', reloadObservation);
+    window.addEventListener('storage', (event) => {
+      if (event.key !== window.RoomObservation.STORAGE_KEY) return;
+      const latest = readObservation();
+      renderObservation(latest, latest.status === 'fresh');
+    });
     reset();
     window.__WORLD_LAB__ = {
       reset,
       advance,
       snapshot: () => engine.getSnapshot(),
       events: () => engine.getEvents(),
+      observation: () => structuredClone(observationResult),
+      reloadObservation,
     };
   }
 

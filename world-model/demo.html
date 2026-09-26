@@ -31,6 +31,15 @@
       <button id="step-ten" class="button primary" type="button">推进 10 步</button>
     </section>
 
+    <section class="observation-panel" aria-label="房间观察状态">
+      <div>
+        <span class="observation-kicker">READ-ONLY ROOM OBSERVATION</span>
+        <strong id="observation-status" data-testid="observation-status">正在读取 Lake Room 状态…</strong>
+        <small>只读取季节、时间和公开地点；实验室不能修改 3D 房间。</small>
+      </div>
+      <button id="refresh-observation" class="button secondary" type="button">重新读取房间状态</button>
+    </section>
+
     <section class="metrics" aria-label="世界状态">
       <article><span>时间步</span><strong id="tick">0</strong></article>
       <article><span>世界时间</span><strong id="world-time">早晨</strong></article>
@@ -94,6 +103,7 @@
 
     <footer>Lake Room · 一个正在学习如何生长的个人数字世界</footer>
   </main>
+  <script src="room-observation.js"></script>
   <script src="simulation.js"></script>
   <script src="demo.js"></script>
 </body>

@@ -28,3 +28,4 @@ jobs:
           node tests/build-mode-contract.cjs
           node tests/project-portfolio.cjs
           node tests/world-simulation.cjs
+          node tests/world-observation.cjs

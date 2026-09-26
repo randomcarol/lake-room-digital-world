@@ -39,9 +39,9 @@ window.Interactions = (()=>{
   },{signal});
   const dayButton=document.getElementById('day-night'),timeSelect=document.getElementById('world-time');
   function syncWorldUI(){document.body.dataset.theme=app.environment.isNight?'night':'day';dayButton.textContent=app.environment.isNight?'☾ Night':'☀ Day';dayButton.setAttribute('aria-pressed',String(app.environment.isNight));timeSelect.value=app.environment.state.mode;}
-  dayButton.addEventListener('click',()=>{app.environment.setNight(!app.environment.isNight);syncWorldUI();},{signal});
-  timeSelect.addEventListener('change',()=>{app.environment.setMode(timeSelect.value);syncWorldUI();},{signal});
-  document.getElementById('world-season').addEventListener('change',e=>app.environment.setSeason(e.target.value),{signal});
+  dayButton.addEventListener('click',()=>{app.environment.setNight(!app.environment.isNight);syncWorldUI();app.worldObservation?.publish();},{signal});
+  timeSelect.addEventListener('change',()=>{app.environment.setMode(timeSelect.value);syncWorldUI();app.worldObservation?.publish();},{signal});
+  document.getElementById('world-season').addEventListener('change',e=>{app.environment.setSeason(e.target.value);app.worldObservation?.publish();},{signal});
   document.getElementById('world-quality').addEventListener('change',e=>app.environment.setQuality(e.target.value),{signal});
   document.getElementById('world-volume').addEventListener('input',e=>app.environment.setVolume(Number(e.target.value)).catch(()=>{e.target.value=0;}),{signal});
   const uiTimer=setInterval(syncWorldUI,10000);syncWorldUI();
@@ -88,7 +88,7 @@ window.Interactions = (()=>{
   const aliases={resume:'monitor',music:'turntable',photos:'photoWall',notebook:'notebook',map:'map',books:'books'};
   const requested=aliases[location.hash.slice(1).split(':')[0]];if(requested)activate(requested);
   window.__ROOM_INTERACTIONS__={controller,activate,refreshContent,get content(){return content;}};
-  window.addEventListener('pagehide',()=>{clearTimeout(animalTimer);clearInterval(contentTimer);pinGeometry.dispose();pinMaterial.dispose();clearInterval(uiTimer);cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.dispose();},{once:true});
+  window.addEventListener('pagehide',()=>{clearTimeout(animalTimer);clearInterval(contentTimer);pinGeometry.dispose();pinMaterial.dispose();clearInterval(uiTimer);cleanup();off();controller.dispose();bubbles.forEach(b=>b.dispose());abort.abort();app.worldObservation?.stop();app.dispose();},{once:true});
  }
  return {init};
 })();

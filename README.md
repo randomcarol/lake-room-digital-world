@@ -2,7 +2,7 @@
 
 沿用原生 Three.js 房间，加入湖岸、松林、湖面、层叠远山、真实时间与四季配置、完整水平环绕，以及可持续管理内容的 Owner Studio。
 
-最新一轮在项目作品集基础上加入了独立的[世界模拟实验室](world-model/README.md)：人物与动物依据可复现规则行动、相遇并产生追加式事件；它明确不是 AI 世界模型，也尚未写入正式 3D 房间。学校和音乐厅空间 demo 仍保持独立。[动物修复与独立建筑验收](docs/ANIMAL-REPAIR-AND-INTEGRATION.md) · [三项目技术评审](docs/THREE-PROJECT-REVIEW.md) · [独立学校/音乐厅 demo](standalone-demos/README.md)。当前未合并三个项目源码。
+最新一轮为[世界模拟实验室](world-model/README.md)加入只读房间观察适配器：实验室可读取同一浏览器里 Lake Room 最近 5 分钟内的季节、时间和公开地点，快照过期或异常时自动回退；模拟器依然不能修改正式 3D 世界。学校和音乐厅空间 demo 仍保持独立。[动物修复与独立建筑验收](docs/ANIMAL-REPAIR-AND-INTEGRATION.md) · [三项目技术评审](docs/THREE-PROJECT-REVIEW.md) · [独立学校/音乐厅 demo](standalone-demos/README.md)。当前未合并三个项目源码。
 
 ## 启动
 
@@ -24,12 +24,13 @@
 - backend/server.py / schema.sql：真实 Owner 认证、SQLite、受保护媒体与内容 CRUD。
 - room-preview/admin/：登录、上传、编辑、排序、公开／私有。
 - world-model/：确定性多角色模拟内核、场景 schema、事件时间线和模型策略安全边界实验室。
+- world-model/room-observation.js：版本化的只读房间观察协议，只传递经过白名单裁剪的季节、时间和公开地点。
 
 [当前环境重构与实测验收](docs/ENVIRONMENT-REFACTOR.md) · [历史视觉参考与产品架构判断](docs/TAHOE-IMPLEMENTATION.md) · [未来产品方向](docs/future-ideas.md) · [当前 Owner 与权限说明](docs/OWNER-SETUP.md)。旧 docs/CONTENT-AND-SECURITY.md 记录前一次静态版审计，当前后端实现以上述说明为准。
 
 ## 验证
 
-`python3 tests/test_backend.py`；Node `--check` 检查 JS；`node tests/world-simulation.cjs` 验证世界模拟的确定性、状态边界和动物语言边界。Playwright 脚本 tests/admin-browser.cjs 与 tests/tahoe-browser.cjs 使用本机 Chrome，管理测试用隔离临时数据库，不修改个人内容。环境证据由 tests/environment-qa.cjs（固定机位截图、Metal 性能）与 tests/environment-contract.cjs（真实三角面、路径、阴影及交互）生成；独立空间测试为 tests/world-surface.cjs。
+`python3 tests/test_backend.py`；Node `--check` 检查 JS；`node tests/world-simulation.cjs` 验证世界模拟的确定性、状态边界和动物语言边界；`node tests/world-observation.cjs` 验证快照白名单、时效性和单向适配。Playwright 脚本 tests/admin-browser.cjs、tests/tahoe-browser.cjs 与 tests/world-simulation-browser.cjs 使用本机 Chrome，管理测试用隔离临时数据库，不修改个人内容。环境证据由 tests/environment-qa.cjs（固定机位截图、Metal 性能）与 tests/environment-contract.cjs（真实三角面、路径、阴影及交互）生成；独立空间测试为 tests/world-surface.cjs。
 
 访客端已部署在 [腾讯云房间](http://101.33.230.97/room/)，当前公开 HTTP 入口可用。Owner 管理会话必须等待腾讯云安全组开放 443 后再通过 HTTPS 使用；不要在 HTTP 页面输入管理密码。完整部署参考 backend/ 下的 systemd、Nginx 和环境变量模板。
 

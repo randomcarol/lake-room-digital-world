@@ -24,12 +24,14 @@ const { spawn } = require('node:child_process');
   });
 
   let browser;
+  let context;
   try {
     browser = await chromium.launch({
       executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       headless: true,
     });
-    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const page = await context.newPage();
     page.setDefaultTimeout(30_000);
     const errors = [];
     page.on('pageerror', (error) => errors.push(String(error)));
@@ -40,6 +42,7 @@ const { spawn } = require('node:child_process');
     await page.goto('http://127.0.0.1:8935/world-model/demo.html');
     await page.waitForFunction(() => window.__WORLD_LAB__?.snapshot().actors.length === 3);
     assert.match(await page.locator('[data-testid="lab-status"]').textContent(), /不是 AI 世界模型/);
+    assert.match(await page.locator('[data-testid="observation-status"]').textContent(), /未发现房间快照/);
     assert.equal(await page.locator('.actor-card').count(), 3);
     assert.equal(await page.locator('.place').count(), 5);
     assert.equal(await page.locator('#tick').textContent(), '0');
@@ -70,6 +73,49 @@ const { spawn } = require('node:child_process');
     assert.notDeepEqual(differentRun, firstRun.events);
     await page.screenshot({ path: path.join(artifactDir, 'desktop.png'), fullPage: true });
 
+    const roomPage = await context.newPage();
+    roomPage.setDefaultTimeout(60_000);
+    await roomPage.goto('http://127.0.0.1:8935/');
+    await roomPage.waitForFunction(() => window.__ROOM_APP__?.worldObservation);
+    await roomPage.evaluate(() => {
+      const season = document.querySelector('#world-season');
+      season.value = 'autumn';
+      season.dispatchEvent(new Event('change', { bubbles: true }));
+      const time = document.querySelector('#world-time');
+      time.value = 'dusk';
+      time.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await roomPage.waitForFunction(() => {
+      const raw = localStorage.getItem('lake-room:world-observation:v1');
+      if (!raw) return false;
+      const value = JSON.parse(raw);
+      return value.season === 'autumn' && value.timeOfDay === 'dusk';
+    });
+    const storedBeforeLab = await roomPage.evaluate(() => localStorage.getItem('lake-room:world-observation:v1'));
+    await roomPage.close();
+
+    await page.goto('http://127.0.0.1:8935/world-model/demo.html');
+    await page.waitForFunction(() => window.__WORLD_LAB__?.snapshot().season === 'autumn');
+    assert.equal((await page.evaluate(() => window.__WORLD_LAB__.snapshot())).timeOfDay, 'dusk');
+    assert.match(await page.locator('[data-testid="observation-status"]').textContent(), /已读取 Lake Room · 秋 · 黄昏/);
+    await page.locator('#step-ten').click();
+    assert.equal(
+      await page.evaluate(() => localStorage.getItem('lake-room:world-observation:v1')),
+      storedBeforeLab,
+      'the lab must never write back to the room observation key',
+    );
+
+    await page.evaluate(() => {
+      const key = window.RoomObservation.STORAGE_KEY;
+      const value = JSON.parse(localStorage.getItem(key));
+      value.observedAt = '2020-01-01T00:00:00.000Z';
+      localStorage.setItem(key, JSON.stringify(value));
+    });
+    await page.locator('#refresh-observation').click();
+    assert.match(await page.locator('[data-testid="observation-status"]').textContent(), /快照已过期/);
+    assert.equal((await page.evaluate(() => window.__WORLD_LAB__.snapshot())).season, 'summer');
+    assert.equal((await page.evaluate(() => window.__WORLD_LAB__.snapshot())).timeOfDay, 'morning');
+
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
     await page.waitForFunction(() => window.__WORLD_LAB__?.snapshot().actors.length === 3);
@@ -82,8 +128,9 @@ const { spawn } = require('node:child_process');
     await page.screenshot({ path: path.join(artifactDir, 'mobile.png'), fullPage: true });
 
     assert.deepEqual(errors, []);
-    console.log('PASS desktop/mobile world lab, deterministic reset and interactive event timeline');
+    console.log('PASS world lab, deterministic replay and read-only room observation adapter');
   } finally {
+    if (context) await context.close();
     if (browser) await browser.close();
     server.kill('SIGTERM');
     fs.rmSync(dataDir, { recursive: true, force: true });
