@@ -1,0 +1,62 @@
+{
+  "schema": "lake-room-evaluation",
+  "version": 1,
+  "evaluatorVersion": "1.0.0",
+  "simulationVersion": "1.0.0",
+  "status": "pass-with-quality-gaps",
+  "configuration": {
+    "seeds": [7, 17, 29, 43, 71, 101, 211, 307, 509, 997],
+    "ticksPerRun": 64,
+    "actorsPerRun": 3,
+    "policy": "deterministic-fallback",
+    "policyCostUsd": 0
+  },
+  "metrics": {
+    "runs": 10,
+    "ticksPerRun": 64,
+    "actorDecisions": 1920,
+    "totalEvents": 3769,
+    "replayMismatchCount": 0,
+    "semanticViolationCount": 0,
+    "needBoundaryViolationCount": 0,
+    "animalSpeechViolationCount": 0,
+    "characterViolationCount": 0,
+    "unknownEventTypeCount": 0,
+    "policyInvocations": 0,
+    "policyRejectionRate": 0,
+    "actionCoverage": 1,
+    "locationCoverage": 1,
+    "coreEventTypeCoverage": 1,
+    "characterConsistency": 1,
+    "dialogueCount": 362,
+    "dialogueUniqueCount": 30,
+    "dialogueUniqueness": 0.082873,
+    "encounterRate": 0.107813,
+    "estimatedModelCostUsd": 0
+  },
+  "safetyGates": [
+    {"id": "replay", "label": "不可重放运行", "actual": 0, "operator": "max", "threshold": 0, "passed": true},
+    {"id": "semantic", "label": "事件语义违规", "actual": 0, "operator": "max", "threshold": 0, "passed": true},
+    {"id": "needs", "label": "状态越界", "actual": 0, "operator": "max", "threshold": 0, "passed": true},
+    {"id": "animal-speech", "label": "动物人类对白", "actual": 0, "operator": "max", "threshold": 0, "passed": true},
+    {"id": "character", "label": "角色表达边界违规", "actual": 0, "operator": "max", "threshold": 0, "passed": true},
+    {"id": "unknown-events", "label": "未知事件类型", "actual": 0, "operator": "max", "threshold": 0, "passed": true},
+    {"id": "policy-rejection", "label": "策略拒绝率", "actual": 0, "operator": "max", "threshold": 0, "passed": true}
+  ],
+  "qualityTargets": [
+    {"id": "actions", "label": "动作覆盖率", "actual": 1, "operator": "min", "target": 1, "met": true},
+    {"id": "locations", "label": "地点覆盖率", "actual": 1, "operator": "min", "target": 1, "met": true},
+    {"id": "event-types", "label": "核心事件类型覆盖率", "actual": 1, "operator": "min", "target": 1, "met": true},
+    {"id": "dialogue", "label": "对白唯一率", "actual": 0.082873, "operator": "min", "target": 0.25, "met": false}
+  ],
+  "distributions": {
+    "actions": {"rest": 498, "explore": 474, "forage": 261, "socialize": 207, "observe": 480},
+    "events": {"actor.acted": 1920, "actor.spoke": 362, "actor.signaled": 1280, "story.beat": 207, "policy.rejected": 0},
+    "locations": {"room-deck": 449, "garden-path": 335, "lake-shore": 398, "pine-edge": 376, "village-pier": 362},
+    "actors": {
+      "person-mira": {"actions": 640, "spoken": 362, "signaled": 0},
+      "rabbit-poppy": {"actions": 640, "spoken": 0, "signaled": 640},
+      "fox-amber": {"actions": 640, "spoken": 0, "signaled": 640}
+    }
+  }
+}

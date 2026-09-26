@@ -29,3 +29,4 @@ jobs:
           node tests/project-portfolio.cjs
           node tests/world-simulation.cjs
           node tests/world-observation.cjs
+          node tests/world-evaluation.cjs

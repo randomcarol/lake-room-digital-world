@@ -127,8 +127,28 @@ const { spawn } = require('node:child_process');
     );
     await page.screenshot({ path: path.join(artifactDir, 'mobile.png'), fullPage: true });
 
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('http://127.0.0.1:8935/world-model/evaluation.html');
+    await page.waitForFunction(() => window.__WORLD_EVALUATION__?.metrics?.totalEvents === 3769);
+    assert.match(await page.locator('[data-testid="evaluation-status"]').textContent(), /安全门槛通过 · 仍有质量缺口/);
+    assert.equal(await page.locator('[data-testid="safety-gates"] .score').count(), 7);
+    assert.equal(await page.locator('[data-testid="quality-targets"] .score').count(), 4);
+    assert.equal(await page.locator('[data-testid="quality-targets"] .miss').count(), 1);
+    assert.match(await page.locator('[data-testid="evaluation-finding"]').textContent(), /对白唯一率只有 8.3%/);
+    await page.screenshot({ path: path.join(artifactDir, 'evaluation-desktop.png'), fullPage: true });
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.reload();
+    await page.waitForFunction(() => window.__WORLD_EVALUATION__?.metrics?.totalEvents === 3769);
+    assert.equal(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      true,
+      'mobile evaluation report must not overflow horizontally',
+    );
+    await page.screenshot({ path: path.join(artifactDir, 'evaluation-mobile.png'), fullPage: true });
+
     assert.deepEqual(errors, []);
-    console.log('PASS world lab, deterministic replay and read-only room observation adapter');
+    console.log('PASS world lab, room observation adapter and responsive offline evaluation report');
   } finally {
     if (context) await context.close();
     if (browser) await browser.close();

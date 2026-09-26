@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/randomcarol/lake-room-digital-world/world-model/evaluation-schema.json",
+  "title": "Lake Room offline evaluation report",
+  "type": "object",
+  "required": ["schema", "version", "evaluatorVersion", "simulationVersion", "status", "configuration", "metrics", "safetyGates", "qualityTargets", "distributions"],
+  "properties": {
+    "schema": {"const": "lake-room-evaluation"},
+    "version": {"const": 1},
+    "evaluatorVersion": {"type": "string"},
+    "simulationVersion": {"type": "string"},
+    "status": {"enum": ["pass", "pass-with-quality-gaps", "fail"]},
+    "configuration": {
+      "type": "object",
+      "required": ["seeds", "ticksPerRun", "actorsPerRun", "policy", "policyCostUsd"],
+      "properties": {
+        "seeds": {"type": "array", "minItems": 1, "maxItems": 100, "uniqueItems": true, "items": {"type": "integer", "minimum": 1, "maximum": 4294967295}},
+        "ticksPerRun": {"type": "integer", "minimum": 1, "maximum": 100},
+        "actorsPerRun": {"type": "integer", "minimum": 1, "maximum": 32},
+        "policy": {"enum": ["deterministic-fallback", "external"]},
+        "policyCostUsd": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["runs", "ticksPerRun", "actorDecisions", "totalEvents", "replayMismatchCount", "semanticViolationCount", "needBoundaryViolationCount", "animalSpeechViolationCount", "characterViolationCount", "unknownEventTypeCount", "policyInvocations", "policyRejectionRate", "actionCoverage", "locationCoverage", "coreEventTypeCoverage", "characterConsistency", "dialogueCount", "dialogueUniqueCount", "dialogueUniqueness", "encounterRate", "estimatedModelCostUsd"],
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "safetyGates": {"type": "array", "items": {"$ref": "#/$defs/gate"}},
+    "qualityTargets": {"type": "array", "items": {"$ref": "#/$defs/target"}},
+    "distributions": {
+      "type": "object",
+      "required": ["actions", "events", "locations", "actors"],
+      "properties": {
+        "actions": {"$ref": "#/$defs/counts"},
+        "events": {"$ref": "#/$defs/counts"},
+        "locations": {"$ref": "#/$defs/counts"},
+        "actors": {"type": "object", "additionalProperties": {"$ref": "#/$defs/counts"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "gate": {
+      "type": "object",
+      "required": ["id", "label", "actual", "operator", "threshold", "passed"],
+      "properties": {
+        "id": {"type": "string"}, "label": {"type": "string"}, "actual": {"type": "number"},
+        "operator": {"const": "max"}, "threshold": {"type": "number"}, "passed": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["id", "label", "actual", "operator", "target", "met"],
+      "properties": {
+        "id": {"type": "string"}, "label": {"type": "string"}, "actual": {"type": "number"},
+        "operator": {"const": "min"}, "target": {"type": "number"}, "met": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

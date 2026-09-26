@@ -72,6 +72,8 @@ class ContentSecurityTest(unittest.TestCase):
   self.assertEqual(self.req('/demos/%2e%2e/backend/server.py')[0],404)
   self.assertEqual(self.req('/world-model/demo.html')[0],200)
   self.assertEqual(self.req('/world-model/scenario.json')[0],200)
+  self.assertEqual(self.req('/world-model/evaluation.html')[0],200)
+  self.assertEqual(self.req('/world-model/evaluation-baseline.json')[0],200)
   self.assertEqual(self.req('/world-model/%2e%2e/backend/server.py')[0],404)
   self.assertEqual(self.req('/.room-data/content.sqlite')[0],404)
   self.assertEqual(self.req('/content.json','POST',{})[0],405)
