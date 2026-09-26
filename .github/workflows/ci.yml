@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Backend tests
+        run: python3 tests/test_backend.py
+      - name: Static checks
+        run: python3 tests/static-check.py
+      - name: JavaScript syntax checks
+        run: find room-preview -name '*.js' -print0 | xargs -0 -n1 node --check
